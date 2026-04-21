@@ -23,48 +23,43 @@ This baseline grain is a transparency-oriented MVP choice. It reduces sparse UPC
 When UPC-level observations are aggregated to the brand-size-store-week level, let $g$ denote a brand-size cell and $u \in g$ denote UPCs assigned to that cell. Quantities are summed:
 
 $$
-Q_{gst}=\sum_{u\in g} MOVE_{ust}.
+Q_{gst} = \sum_{u \in g} MOVE_{ust}.
 $$
 
 Dollar sales are computed from DFF bundle prices and bundle quantities before aggregation:
 
 $$
-Sales_{gst}=\sum_{u\in g}\frac{PRICE_{ust}\times MOVE_{ust}}{QTY_{ust}}.
+Sales_{gst} = \sum_{u \in g} \frac{PRICE_{ust} \times MOVE_{ust}}{QTY_{ust}}.
 $$
 
 The aggregated effective price is the revenue-per-unit price, equivalently a unit-sales-weighted effective price:
 
 $$
-P^{eff}_{gst}=\frac{Sales_{gst}}{Q_{gst}}.
+P^{eff}_{gst} = \frac{Sales_{gst}}{Q_{gst}}.
 $$
 
 The aggregated unit-cost proxy is quantity-weighted:
 
 $$
-c_{gst}=
-\frac{\sum_{u\in g} c_{ust} MOVE_{ust}}
-{\sum_{u\in g} MOVE_{ust}}.
+c_{gst} = \frac{\sum_{u \in g} c_{ust} MOVE_{ust}}{\sum_{u \in g} MOVE_{ust}}.
 $$
 
 The baseline promotion indicator is
 
 $$
-Promo^{any}_{gst}=\mathbf{1}\left\{\sum_{u\in g} Promo_{ust}>0\right\},
+Promo^{any}_{gst} = I[\sum_{u \in g} Promo_{ust} > 0].
 $$
 
 with the quantity-weighted promotion share retained as a diagnostic:
 
 $$
-Promo^{share}_{gst}
-=
-\frac{\sum_{u\in g} Promo_{ust}MOVE_{ust}}
-{\sum_{u\in g} MOVE_{ust}}.
+Promo^{share}_{gst} = \frac{\sum_{u \in g} Promo_{ust} MOVE_{ust}}{\sum_{u \in g} MOVE_{ust}}.
 $$
 
 Let $i$ index the product unit, where $i$ is either a brand-size unit in the baseline panel or a UPC in the robustness panel; let $s$ index stores and $t$ index weeks. The main outcome is units sold, $Q_{ist}$. Effective unit price is $P^{eff}_{ist}$, computed from the DFF bundle price divided by bundle quantity. Promotion status is $Promo_{ist}$, based on the cleaned sale-code field. Unit cost $c_{ist}$ is proxied from DFF's gross margin as
 
 $$
-c_{ist}=P^{eff}_{ist}\left(1-\frac{PROFIT_{ist}}{100}\right).
+c_{ist} = P^{eff}_{ist} (1 - \frac{PROFIT_{ist}}{100}).
 $$
 
 This cost proxy is useful for decision simulation but should not be interpreted as a perfect marginal cost measure, because DFF's wholesale-cost accounting is based on average acquisition cost rather than a contemporaneous replacement cost.
@@ -76,20 +71,7 @@ The baseline log-demand specification requires positive observed sales. Observat
 The baseline econometric model is a log-log demand equation with product-store and week fixed effects:
 
 $$
-\log(Q_{ist}) =
-\alpha_{is}
-+
-\gamma_t
-+
-\beta_{own}\log(P^{eff}_{ist})
-+
-\beta_{cross}\log(P^{comp}_{ist})
-+
-\theta Promo_{ist}
-+
-X'_{ist}\delta
-+
-\epsilon_{ist}.
+\log(Q_{ist}) = \alpha_{is} + \gamma_t + \beta_{own}\log(P^{eff}_{ist}) + \beta_{cross}\log(P^{comp}_{ist}) + \theta Promo_{ist} + X'_{ist}\delta + \epsilon_{ist}.
 $$
 
 The product-store fixed effect $\alpha_{is}$ absorbs persistent differences in baseline demand across product-store pairs, including stable local demographics, store assortment, shelf placement, and product popularity. Week fixed effects $\gamma_t$ absorb aggregate seasonality and common demand shocks. The optional control vector $X_{ist}$ is left empty in the MVP specification, but the design allows later inclusion of holiday indicators, brand-specific seasonality, or store-specific trends.
@@ -105,19 +87,19 @@ The formulas in this methodology combine three types of objects: data-accounting
 First, the effective unit price and unit-cost proxy are data-accounting transformations based on the Dominick's Finer Foods documentation. Because DFF sometimes records bundle prices, the effective unit price is computed as
 
 $$
-P^{eff}_{ist}=\frac{PRICE_{ist}}{QTY_{ist}}.
+P^{eff}_{ist} = \frac{PRICE_{ist}}{QTY_{ist}}.
 $$
 
 Dollar sales are correspondingly computed as
 
 $$
-Sales_{ist}=\frac{PRICE_{ist}\times MOVE_{ist}}{QTY_{ist}}.
+Sales_{ist} = \frac{PRICE_{ist} \times MOVE_{ist}}{QTY_{ist}}.
 $$
 
 The unit-cost proxy is derived from the DFF gross-margin variable:
 
 $$
-c_{ist}=P^{eff}_{ist}\left(1-\frac{PROFIT_{ist}}{100}\right).
+c_{ist} = P^{eff}_{ist} (1 - \frac{PROFIT_{ist}}{100}).
 $$
 
 This is not an observed marginal cost. It is an accounting proxy based on DFF's gross-margin definition. Since the DFF documentation states that the wholesale-cost measure corresponds to average acquisition cost rather than replacement cost, this proxy is used only for scenario-based decision simulation.
@@ -131,44 +113,25 @@ Fourth, the smearing correction and the corresponding level prediction follow Du
 Finally, the anchored counterfactual demand function is a project-specific implementation derived algebraically from the estimated log-log demand equation:
 
 $$
-\widehat Q(p',m',p^{comp\prime})
-=
-\bar Q_{cell}
-\exp\left[
-\hat\beta_{own}\Delta \log p
-+
-\hat\beta_{cross}\Delta \log p^{comp}
-+
-\hat\theta \Delta m
-\right].
+\widehat Q(p',m',p^{comp\prime}) = \bar Q_{cell} \exp(\hat\beta_{own}\Delta \log p + \hat\beta_{cross}\Delta \log p^{comp} + \hat\theta \Delta m).
 $$
 
 In the MVP optimizer, competitor prices are held fixed unless the user explicitly runs a competitor-price scenario, so $\Delta \log p^{comp}=0$ by default. To avoid confusion with the Duan smearing factor $\widehat S$, realized sold quantity is denoted $\widehat Q^{sold}$:
 
 $$
-\widehat Q^{sold}(p',m',p^{comp\prime})
-=
-\min\{
-\widehat Q(p',m',p^{comp\prime}),Inventory
-\}.
+\widehat Q^{sold}(p',m',p^{comp\prime}) = \min(\widehat Q(p',m',p^{comp\prime}), Inventory).
 $$
 
 Revenue and profit are then computed as
 
 $$
-Revenue(p',m',p^{comp\prime})
-=
-p'\widehat Q^{sold}(p',m',p^{comp\prime}),
+Revenue(p',m',p^{comp\prime}) = p'\widehat Q^{sold}(p',m',p^{comp\prime}).
 $$
 
 and
 
 $$
-Profit(p',m',p^{comp\prime})
-=
-(p'-c)\widehat Q^{sold}(p',m',p^{comp\prime})
--
-Fm'.
+Profit(p',m',p^{comp\prime}) = (p'-c)\widehat Q^{sold}(p',m',p^{comp\prime}) - Fm'.
 $$
 
 These are accounting and decision-objective formulas, not new econometric estimators. The constrained optimizer applies standard pricing-optimization logic to this estimated demand system, while price bounds, margin constraints, inventory constraints, and promotion fixed costs are project-specific operational guardrails.
@@ -178,9 +141,7 @@ These are accounting and decision-objective formulas, not new econometric estima
 For each focal product $i$, the competitor price index is constructed from other brands in the same store-week:
 
 $$
-P^{comp}_{ist}
-=
-\sum_{b\neq B(i)} w^{base}_{bs} P^{oz}_{bst},
+P^{comp}_{ist} = \sum_{b \ne B(i)} w^{base}_{bs} P^{oz}_{bst}.
 $$
 
 where $B(i)$ is the focal brand, $P^{oz}_{bst}$ is the price per ounce for competitor brand $b$ in store $s$ and week $t$, and $w^{base}_{bs}$ is a baseline or lagged sales-share weight. Current-week sales shares are not used as weights because they would mechanically reflect current demand shocks. If baseline weights are not available, the MVP can use equal weights across observed competitor brands.
@@ -204,13 +165,13 @@ The sign pattern is economically coherent: own-price elasticity is negative, com
 When the model predicts log quantity directly, retransformation to levels requires care. Applying $\exp(\cdot)$ to a fitted log outcome can produce biased level predictions because of Jensen's inequality. Following Duan (1983), the project computes a smearing factor
 
 $$
-\widehat S=\frac{1}{N}\sum_{n=1}^{N}\exp(\widehat\epsilon_n),
+\widehat S = \frac{1}{N}\sum_{n=1}^{N}\exp(\widehat\epsilon_n).
 $$
 
 and uses
 
 $$
-\widehat Q=\widehat S\exp(\widehat\eta)
+\widehat Q = \widehat S\exp(\widehat\eta).
 $$
 
 when converting model-level log predictions into level quantities. The estimated smearing factor is approximately 1.14 in the baseline brand-size model and approximately 1.17 in the UPC robustness model.
@@ -218,16 +179,7 @@ when converting model-level log predictions into level quantities. The estimated
 For the counterfactual optimizer, however, the implemented demand function is cell anchored. It begins from the cell's observed baseline mean quantity and applies only the relative demand response implied by the elasticity estimates:
 
 $$
-\widehat Q(p',m',p^{comp\prime})
-=
-\bar Q_{cell}
-\exp\left[
-\hat\beta_{own}\Delta\log p
-+
-\hat\beta_{cross}\Delta\log p^{comp}
-+
-\hat\theta\Delta m
-\right].
+\widehat Q(p',m',p^{comp\prime}) = \bar Q_{cell}\exp(\hat\beta_{own}\Delta\log p + \hat\beta_{cross}\Delta\log p^{comp} + \hat\theta\Delta m).
 $$
 
 In the MVP optimizer, competitor prices are held fixed unless the user explicitly runs a competitor-price scenario; equivalently, $\Delta \log P^{comp}=0$ in the default case. Because the anchor is already a level quantity, the optimizer does not multiply by the smearing factor again. Doing so would double-count the level correction and inflate counterfactual quantities. The calibration ratio of the current counterfactual implementation is approximately 1.06, which is acceptable for the MVP.
@@ -237,23 +189,17 @@ In the MVP optimizer, competitor prices are held fixed unless the user explicitl
 For a candidate effective price $p'$, promotion status $m'$, and competitor price $p^{comp}$, the model first computes counterfactual demand and then applies the inventory cap to realized sold units:
 
 $$
-Q^{sold}(p',m',p^{comp})
-=
-\min\{\widehat Q(p',m',p^{comp}),Inventory\}.
+Q^{sold}(p',m',p^{comp}) = \min(\widehat Q(p',m',p^{comp}), Inventory).
 $$
 
 Revenue and profit use the same capped quantity:
 
 $$
-Revenue(p',m',p^{comp})
-=
-p'Q^{sold}(p',m',p^{comp}),
+Revenue(p',m',p^{comp}) = p'Q^{sold}(p',m',p^{comp}).
 $$
 
 $$
-Profit(p',m',p^{comp})
-=
-(p'-c)Q^{sold}(p',m',p^{comp})-Fm',
+Profit(p',m',p^{comp}) = (p'-c)Q^{sold}(p',m',p^{comp}) - Fm'.
 $$
 
 where $c$ is unit cost, $Inventory$ is a scenario input, and $F$ is an optional fixed cost of running a promotion. The use of $Inventory$ as a scenario input reflects the fact that the DFF movement data do not observe inventory directly.
@@ -261,16 +207,13 @@ where $c$ is unit cost, $Inventory$ is a scenario input, and $F$ is an optional 
 When the app reports absolute candidate profit, the promotion fixed cost enters as
 
 $$
-Profit(p',m')=(p'-c)Q^{sold}(p',m')-Fm'.
+Profit(p',m') = (p'-c)Q^{sold}(p',m') - Fm'.
 $$
 
 When the app reports profit lift relative to the observed baseline $(p_0,m_0)$, the fixed cost is differenced:
 
 $$
-\Delta Profit =
-\left[(p'-c)Q^{sold}(p',m')-Fm'\right]
--
-\left[(p_0-c)Q^{sold}(p_0,m_0)-Fm_0\right].
+\Delta Profit = [(p'-c)Q^{sold}(p',m') - Fm'] - [(p_0-c)Q^{sold}(p_0,m_0) - Fm_0].
 $$
 
 Thus, the fixed cost affects the incremental recommendation only when the candidate and baseline promotion states differ.
@@ -282,21 +225,37 @@ The feasible action set is restricted by price bounds, a minimum margin conditio
 The Streamlit app exposes a unified *scenario overlay* on top of the frozen demand model. The overlay is **business shocks applied to model outputs**, not a re-fit of the model. Five inert defaults (`demand_shock = cost_shock = competitor_price_shock = promo_fixed_cost = 0`, `inventory_cap = None`) reproduce the offline counterfactual exactly. The overlay equations are
 
 $$
-\begin{aligned}
-Q^{model} &= predict\_q(p,m;\widehat\beta,\Delta\log p^{comp}),\\
-\Delta\log p^{comp} &= \log(1+\delta_{comp}),\\
-Q^{scenario} &= Q^{model}(1+\delta_q),\\
-Q^{sold} &= \min\{Q^{scenario}, Inventory\},\\
-c^{eff} &= c(1+\delta_c),\\
-Revenue &= pQ^{sold},\\
-Profit &= (p-c^{eff})Q^{sold}-Fm.
-\end{aligned}
+Q^{model} = predict\_q(p,m;\widehat\beta,\Delta\log p^{comp}).
+$$
+
+$$
+\Delta\log p^{comp} = \log(1+\delta_{comp}).
+$$
+
+$$
+Q^{scenario} = Q^{model}(1+\delta_q).
+$$
+
+$$
+Q^{sold} = \min(Q^{scenario}, Inventory).
+$$
+
+$$
+c^{eff} = c(1+\delta_c).
+$$
+
+$$
+Revenue = pQ^{sold}.
+$$
+
+$$
+Profit = (p-c^{eff})Q^{sold} - Fm.
 $$
 
 The multiplicative shocks must satisfy
 
 $$
-\delta_q>-1,\qquad \delta_c>-1,\qquad \delta_{comp}>-1,
+\delta_q > -1,\qquad \delta_c > -1,\qquad \delta_{comp} > -1.
 $$
 
 so that demand, cost, and competitor prices remain non-negative and the logarithm in $\Delta\log p^{comp}$ is well-defined.
@@ -306,9 +265,7 @@ The margin floor uses `c_eff` (so cost shocks tighten the lower price guardrail)
 This overlay is intentionally simple: it is meant to support what-if stress tests of cost / demand / competitor / capacity, not to replace IV identification, dynamic stockpiling, or explicit competitor best-response — those are itemized as roadmap notebooks in §11. Risk flags fire when any shock leaves a sane range:
 
 $$
-|\delta_q|>0.20,\quad |\delta_c|>0.25,\quad
-|\delta_{comp}|>0.15,\quad \text{or}\quad
-\bar Q < \bar Q^{base}_{cell}.
+|\delta_q| > 0.20,\quad |\delta_c| > 0.25,\quad |\delta_{comp}| > 0.15,\quad \text{or}\quad \bar Q < \bar Q^{base}_{cell}.
 $$
 
 These flags warn the user that the inputs lie outside the observational support of the model.
@@ -322,7 +279,7 @@ The supported objectives are revenue maximization, profit maximization, and prof
 The most important optimizer finding is a diagnostic warning rather than evidence of a successful automatic recommendation rule: 98.5 percent of eligible cells recommend a price at the upper guardrail. For an interior single-product optimum with constant marginal cost and $\varepsilon<-1$, constant-elasticity demand $Q=A p^{\varepsilon}$ implies the Lerner condition
 
 $$
-\frac{p-c}{p}=-\frac{1}{\varepsilon}.
+\frac{p-c}{p} = -\frac{1}{\varepsilon}.
 $$
 
 With an elasticity around $-1.73$, this implies an unconstrained margin of roughly $58\%$, which explains why the optimizer frequently pushes prices above the historical support and into the upper bound. These cases should be interpreted as candidate "raise-and-test" opportunities, not direct deployment recommendations.
@@ -370,16 +327,7 @@ The MVP already compares the brand-size model against a UPC-level robustness mod
 As an additional robustness check, the project estimates specifications with store-week fixed effects:
 
 $$
-\log(Q_{ist}) =
-\alpha_{is}
-+
-\lambda_{st}
-+
-\beta_{own}\log(P^{eff}_{ist})
-+
-\theta Promo_{ist}
-+
-\epsilon_{ist}.
+\log(Q_{ist}) = \alpha_{is} + \lambda_{st} + \beta_{own}\log(P^{eff}_{ist}) + \theta Promo_{ist} + \epsilon_{ist}.
 $$
 
 The store-week fixed effect $\lambda_{st}$ absorbs local demand shocks, store-level campaigns, and week-specific inventory or traffic conditions. This is important because DFF prices and promotions are manager choices, and the sale-code variable is not a clean randomized treatment. The DFF documentation also notes that sale coding is imperfect: if the sale code is not set, there still may have been a promotion that week. The store-week-FE specification sacrifices some cross-price variation but provides a stricter check on whether the own-price elasticity is driven by local store-week confounding. The competitor-price index is excluded from the store-week-FE robustness specification because it is mechanically absorbed by $\lambda_{st}$: the competitor index is constant within a (store, week). This specification is reported as M0b in §10.1; $\hat\beta_{own}$ moves from $-1.728$ (week FE) to $-1.805$ (store$\times$week FE), a 4.4% change that bounds the contribution of unobserved local demand shocks.
