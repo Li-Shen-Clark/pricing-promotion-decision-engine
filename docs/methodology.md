@@ -306,10 +306,10 @@ Four specifications are estimated on a common sample of approximately 2.59 milli
 The Hausman instrument is the leave-one-out other-store log price:
 
 $$
-Z^H_{bkst} = \operatorname{mean}_{s' \ne s}\log(P_{bks't}).
+Z^H_{bkst} = \frac{1}{n_{bkt}-1}\sum_{s' \ne s}\log(P_{bks't}).
 $$
 
-The cost instrument is the analogous leave-one-out other-store log unit cost. We explicitly do **not** use the own-cell `log c_ist` as an instrument because DFF derives `c_ist = P_ist * (1 - PROFIT_ist / 100)`, so the own-cell cost is mechanically linked to the own-cell price and would violate the IV exclusion restriction. The leave-one-out variant breaks the within-cell mechanical link.
+Here `n_bkt` is the number of stores with an observed price for the same brand-size cell in the same week. The cost instrument is the analogous leave-one-out other-store log unit cost. We explicitly do **not** use the own-cell `log c_ist` as an instrument because DFF derives `c_ist = P_ist * (1 - PROFIT_ist / 100)`, so the own-cell cost is mechanically linked to the own-cell price and would violate the IV exclusion restriction. The leave-one-out variant breaks the within-cell mechanical link.
 
 A four-condition decision rule is used:
 
