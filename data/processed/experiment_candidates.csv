@@ -1,0 +1,11 @@
+brand_final,size_oz_rounded,STORE,current_price,candidate_price,promo_status,baseline_q,baseline_profit,opt_q,opt_profit,profit_lift_abs,profit_lift_pct,profit_std_wk,n_weeks,flag_extrapolation,flag_large_q_change,flag_high_price_jump,flag_low_baseline_volume,n_flags,risk_flag,recommended_test_type,planned_duration_weeks,planned_stores_per_arm,mde_dollars_50pct,n_storeweeks_per_arm_at_50pct_MDE_80pct_power,n_weeks_per_store,underpowered
+Kellogg's,15.0,102,3.025,4.301,1,392.336,186.674,284.31,497.983,311.309,166.766,142.23,357,True,False,True,False,2,high,single_store_flight,8,1,155.654,13.107,13.1,True
+General Mills,20.0,126,4.018,5.164,1,179.158,104.653,173.365,299.822,195.169,186.491,43.459,354,True,False,False,False,1,medium,cluster_rct,6,5,97.584,3.113,0.6,False
+General Mills,12.0,102,2.95,3.912,1,199.096,94.75,177.736,255.477,160.727,169.633,67.441,354,True,False,True,False,2,high,single_store_flight,8,1,80.364,11.055,11.1,True
+Kellogg's,20.0,80,3.541,5.105,1,144.229,75.338,108.489,226.271,150.933,200.342,52.746,363,True,False,True,False,2,high,single_store_flight,8,1,75.466,7.668,7.7,False
+General Mills,14.0,126,3.254,4.315,1,156.468,85.05,142.406,228.524,143.474,168.693,84.797,357,True,False,True,False,2,high,single_store_flight,8,1,71.737,21.933,21.9,True
+Kellogg's,18.0,74,3.148,5.233,1,132.914,67.95,80.643,209.365,141.415,208.115,105.756,361,True,False,True,False,2,high,single_store_flight,8,1,70.708,35.117,35.1,True
+General Mills,18.0,126,3.657,5.2,1,121.452,69.864,98.659,208.986,139.122,199.132,41.238,354,True,False,True,False,2,high,single_store_flight,8,1,69.561,5.517,5.5,False
+Kellogg's,12.0,18,2.498,3.77,1,156.744,57.581,113.636,186.356,128.775,223.64,62.299,356,True,False,True,False,2,high,single_store_flight,8,1,64.388,14.696,14.7,True
+General Mills,15.0,126,3.118,4.11,1,142.014,72.311,129.161,193.895,121.584,168.14,152.979,355,True,False,True,False,2,high,single_store_flight,8,1,60.792,99.405,99.4,True
+Post,16.0,126,2.853,4.054,1,140.274,67.054,108.667,182.475,115.421,172.131,51.868,358,True,False,True,False,2,high,single_store_flight,8,1,57.71,12.68,12.7,True

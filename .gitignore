@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# LaTeX build artefacts (keep .tex + .pdf, drop the rest)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Local virtualenv / env
+.venv/
+venv/
+.env
+.python-version
+
+# Streamlit secrets (NEVER commit; .streamlit/config.toml IS tracked)
+.streamlit/secrets.toml
+
+# Raw DFF data is not redistributed in the GitHub demo repo.
+# Keep only rawData/README.md with source / download instructions.
+rawData/*
+!rawData/README.md
+
+# Keep only lightweight app artifacts in data/processed.
+# Large reconstruction / modeling panels should be regenerated locally.
+data/processed/*
+!data/processed/README.md
+!data/processed/cell_baselines.parquet
+!data/processed/top_recommendations.csv
+!data/processed/top_recommendations_diverse.csv
+!data/processed/all_recommendations.csv
+!data/processed/experiment_candidates.csv
+!data/processed/model_coefficients.csv
+!data/processed/sensitivity_grid.csv
+!data/processed/brand_mapping.csv
+!data/processed/cannibalization_model_coefficients.csv
+!data/processed/iv_sensitivity_coefficients.csv
+!data/processed/iv_first_stage_diagnostics.csv

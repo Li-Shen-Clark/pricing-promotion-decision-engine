@@ -1,0 +1,24 @@
+# Streamlit runtime config for the Pricing & Promotion Decision Engine.
+# Tracked in git so local + deployed runs render identically.
+
+[theme]
+base                  = "light"
+primaryColor          = "#2c5fa8"
+backgroundColor       = "#ffffff"
+secondaryBackgroundColor = "#f4f6fa"
+textColor             = "#1f2933"
+font                  = "sans serif"
+
+[server]
+# Page 6 (Upload & Score) accepts a CSV. The validator caps row count separately,
+# so this is a hard slug-side guardrail, not the user-facing limit.
+maxUploadSize         = 25
+headless              = true
+runOnSave             = false
+
+[browser]
+gatherUsageStats      = false
+
+[client]
+showErrorDetails      = true
+toolbarMode           = "minimal"

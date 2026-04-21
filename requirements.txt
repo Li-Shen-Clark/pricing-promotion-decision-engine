@@ -1,0 +1,8 @@
+streamlit>=1.30
+pandas>=2.0
+pyarrow>=14
+plotly>=5.15
+numpy>=1.24
+scipy>=1.10
+linearmodels>=6.0
+matplotlib>=3.7

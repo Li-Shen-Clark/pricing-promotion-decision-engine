@@ -1,0 +1,4 @@
+model,n_obs,R2_within,beta_own_price,se_own_price,beta_cross_price,se_cross_price,beta_promo,se_promo,promo_uplift_%,smearing
+baseline_own_only,2585593,0.747,-1.7464,0.0198,,,0.4326,0.0037,54.12,
+baseline_with_cross,2585593,0.7479,-1.7276,0.0197,0.6449,0.0168,0.4269,0.0037,53.25,1.139462927311897
+robustness_upc,4553237,0.6222,-1.8999,0.0121,0.5007,0.0118,0.5094,0.0032,66.44,1.1708345860832798
