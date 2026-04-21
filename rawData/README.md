@@ -2,7 +2,7 @@
 
 本文件只说明 `rawData/` 目录中的原始数据、字段定义、manual 摘要和读取规则。整个 Pricing & Promotion Decision Engine 项目的业务问题、方法、运行方式和路线图见根目录 [`README.md`](../README.md)。
 
-本文件夹存放 **Dominick's Finer Foods (DFF)** 零售面板的 Cereals 品类数据，用于 Pricing & Promotion Decision Engine 项目。所有字段定义来自官方 manual（`dominicks_manual.pdf`），本文件只是摘录与加工说明。
+GitHub demo repo 中只保留本 README，不重新分发原始 DFF CSV/PDF 文件。若要从 raw data 复现 notebooks，请按下方来源说明自行下载 **Dominick's Finer Foods (DFF)** Cereals 品类数据，并放入本目录。所有字段定义来自官方 manual（`dominicks_manual.pdf`），本文件只是摘录与加工说明。
 
 ---
 

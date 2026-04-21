@@ -8,7 +8,7 @@ The methodology deliberately separates formula provenance: DFF price, quantity, 
 
 ## Project Status
 
-Current stage: Streamlit MVP and experiment-design workflow completed. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, and an interactive local app.
+Current stage: portfolio-ready Streamlit MVP. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, cannibalization robustness, IV sensitivity checks, tests, deployment notes, and an interactive local app.
 
 - Raw data dictionary: [`rawData/README.md`](rawData/README.md)
 - Cleaning notebook: [`notebooks/01_data_cleaning.ipynb`](notebooks/01_data_cleaning.ipynb)
@@ -20,13 +20,15 @@ Current stage: Streamlit MVP and experiment-design workflow completed. The proje
 - Demand summary: [`reports/demand_model_summary.md`](reports/demand_model_summary.md)
 - Counterfactual summary: [`reports/counterfactual_summary.md`](reports/counterfactual_summary.md)
 - A/B validation plan: [`reports/ab_test_plan.md`](reports/ab_test_plan.md)
+- Cannibalization robustness: [`reports/cannibalization_robustness_summary.md`](reports/cannibalization_robustness_summary.md)
+- IV sensitivity: [`reports/iv_sensitivity_summary.md`](reports/iv_sensitivity_summary.md)
+- End-to-end case study: [`reports/case_study.md`](reports/case_study.md)
 - Methodology: [`docs/methodology.md`](docs/methodology.md), [`docs/methodology.tex`](docs/methodology.tex)
-- Processed panel: [`data/processed/sku_store_week_panel.parquet`](data/processed/sku_store_week_panel.parquet)
-- Brand-size panel: [`data/processed/brand_size_store_week_panel.parquet`](data/processed/brand_size_store_week_panel.parquet)
+- Lightweight app artifacts: [`data/processed/`](data/processed/)
 - Streamlit app: [`app.py`](app.py)
 - Full project plan: [`pricing_promotion_decision_engine_plan.pdf`](pricing_promotion_decision_engine_plan.pdf)
 
-Next stages are cannibalization robustness, packaging/deployment polish, and optional causal-IV upgrades.
+Roadmap items left outside the MVP are competitor-response sensitivity and dynamic promotion / stockpiling extensions.
 
 ## Business Problem
 
@@ -54,6 +56,8 @@ Raw files currently used:
 
 Core fields include `UPC`, `STORE`, `WEEK`, `MOVE`, `PRICE`, `QTY`, `SALE`, `PROFIT`, and `OK`. See [`rawData/README.md`](rawData/README.md) for the data dictionary, field rules, `SALE` code notes, `PROFIT` interpretation, and validation assertions.
 
+**GitHub demo note.** The raw DFF CSV/PDF files and large generated parquet panels are not redistributed in this repository. The app runs from lightweight processed artifacts committed under `data/processed/`; users who want to rerun the full cleaning and modeling notebooks should download the DFF files separately following [`rawData/README.md`](rawData/README.md).
+
 ## Data Cleaning Snapshot
 
 The first cleaning pass produced:
@@ -66,7 +70,7 @@ The first cleaning pass produced:
 - Median UPC-store coverage is 78 weeks, which supports SKU-store fixed effects
 - Zero-movement rows are all zero-price rows; a small number of additional zero-price rows have positive movement and are excluded as invalid price records
 - UPC metadata join miss rate: 0.00%
-- Cleaned panel saved to `data/processed/sku_store_week_panel.parquet`
+- Cleaned panel saved locally as `data/processed/sku_store_week_panel.parquet` in the full development workspace; this large reconstruction panel is documented but not included in the lightweight GitHub demo repo.
 
 Full diagnostics are in [`reports/data_cleaning_summary.md`](reports/data_cleaning_summary.md).
 
@@ -112,7 +116,7 @@ Formula provenance matters for interpretation. Effective price and dollar sales 
 
 When the app reports absolute candidate profit, the promo fixed cost enters as `profit = (price - cost) * sold_units - F * promo`. When it reports profit lift against the observed baseline, the same fixed cost is subtracted from both candidate and baseline profits, so the fixed cost only changes incremental lift when the candidate and baseline promotion states differ.
 
-The main fixed-effects specification uses product-store and week fixed effects. A stricter robustness check should estimate a store-week fixed-effects version to absorb local store demand shocks, campaigns, traffic, and inventory conditions; the competitor-price index may be excluded from that check when it is mechanically absorbed or unstable.
+The main fixed-effects specification uses product-store and week fixed effects. The project also estimates a stricter store-week fixed-effects robustness version and Hausman-style other-store IV sensitivity check; the preferred OLS own-price elasticity is robust within 3% under these diagnostics, with the same-chain IV caveat documented in [`reports/iv_sensitivity_summary.md`](reports/iv_sensitivity_summary.md).
 
 For the full demand model, counterfactual simulation logic, profit objective, optimization design, and identification caveats, see [`docs/methodology.md`](docs/methodology.md). A LaTeX version is available at [`docs/methodology.tex`](docs/methodology.tex).
 
@@ -135,18 +139,19 @@ pricing/
 |
 |-- rawData/
 |   |-- README.md
-|   |-- dominicks_manual.pdf
-|   |-- wcer.csv
-|   |-- upccer.csv
 |
 |-- data/
 |   |-- processed/
-|   |   |-- sku_store_week_panel.parquet
-|   |   |-- brand_size_store_week_panel.parquet
-|   |   |-- demand_modeling_dataset.parquet
+|   |   |-- cell_baselines.parquet
 |   |   |-- model_coefficients.csv
 |   |   |-- top_recommendations.csv
+|   |   |-- top_recommendations_diverse.csv
+|   |   |-- all_recommendations.csv
 |   |   |-- experiment_candidates.csv
+|   |   |-- sensitivity_grid.csv
+|   |   |-- cannibalization_model_coefficients.csv
+|   |   |-- iv_sensitivity_coefficients.csv
+|   |   |-- iv_first_stage_diagnostics.csv
 |
 |-- notebooks/
 |   |-- 01_data_cleaning.ipynb
@@ -154,6 +159,8 @@ pricing/
 |   |-- 03_demand_estimation.ipynb
 |   |-- 04_counterfactual.ipynb
 |   |-- 05_ab_testing_design.ipynb
+|   |-- 07_cannibalization_robustness.ipynb
+|   |-- 08_iv_sensitivity.ipynb
 |
 |-- pages/
 |   |-- 1_Demand_Model.py
@@ -169,6 +176,9 @@ pricing/
 |   |-- demand_model_summary.md
 |   |-- counterfactual_summary.md
 |   |-- ab_test_plan.md
+|   |-- cannibalization_robustness_summary.md
+|   |-- iv_sensitivity_summary.md
+|   |-- case_study.md
 |   |-- figures/
 |
 |-- src/
@@ -196,7 +206,11 @@ jupyter lab notebooks/02_eda.ipynb
 jupyter lab notebooks/03_demand_estimation.ipynb
 jupyter lab notebooks/04_counterfactual.ipynb
 jupyter lab notebooks/05_ab_testing_design.ipynb
+jupyter lab notebooks/07_cannibalization_robustness.ipynb
+jupyter lab notebooks/08_iv_sensitivity.ipynb
 ```
+
+The raw DFF files required by `01_data_cleaning.ipynb` are not committed to this GitHub demo repo; download them according to [`rawData/README.md`](rawData/README.md). The Streamlit app itself does not require the raw files.
 
 To launch the local Streamlit MVP:
 
@@ -217,7 +231,6 @@ streamlit run app.py
 
 ## Next Steps
 
-1. Add `07_cannibalization_robustness.ipynb` to test same-brand cross-size substitution before treating upper-guardrail optimizer output as robust.
-2. Add focused tests for `src/data.py`, `src/features.py`, `src/scenario.py`, `src/optimization.py`, and `src/upload.py`.
-3. Package the Streamlit app for sharing and write a short case-study page tying data, model, optimizer, and experiment design together.
-4. Optionally add `08_causal_iv.ipynb` with Hausman-style other-store price instruments and cost-shock instruments.
+1. Publish the Streamlit app and add the deployed URL to this README.
+2. Record a 60-90 second GIF or video showing Executive Summary → Optimizer → Experiment Design → Limitations.
+3. Optional roadmap: add competitor-response sensitivity and dynamic promotion / stockpiling diagnostics.
