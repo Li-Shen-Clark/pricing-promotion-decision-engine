@@ -29,7 +29,6 @@ Current stage: portfolio-ready Streamlit MVP. The project now has cleaned panels
 - Methodology: [`docs/methodology.md`](docs/methodology.md), [`docs/methodology.tex`](docs/methodology.tex)
 - Lightweight app artifacts: [`data/processed/`](data/processed/)
 - Streamlit app: [`app.py`](app.py)
-- Full project plan: [`pricing_promotion_decision_engine_plan.pdf`](pricing_promotion_decision_engine_plan.pdf)
 
 Roadmap items left outside the MVP are competitor-response sensitivity and dynamic promotion / stockpiling extensions.
 
