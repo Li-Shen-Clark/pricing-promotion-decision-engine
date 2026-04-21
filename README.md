@@ -1,5 +1,8 @@
 # Pricing & Promotion Decision Engine
 
+**Live app:** https://pricing-promotion-decision-engine.streamlit.app/  
+**GitHub repo:** https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine
+
 An applied decision engine for retail pricing and promotion strategy. The project uses Dominick's Finer Foods cereal scanner data to estimate demand response, simulate counterfactual prices and promotions, and generate constrained raise-and-test pricing candidates under cost, inventory, margin, and experimentation constraints.
 
 This is not a new econometric estimator. It is a transparent decision-support product that translates classic scanner-data demand estimation, cereal product differentiation research, pricing optimization, and A/B testing logic into a reproducible project.
