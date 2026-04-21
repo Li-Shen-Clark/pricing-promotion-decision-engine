@@ -93,6 +93,21 @@ The project is positioned as an applied decision product rather than a structura
 - Pricing optimization: revenue management and price optimization literature motivate combining demand, cost, inventory, and constraints in one decision problem; the MVP grid search is an implementation choice, not a new optimization method.
 - Experimentation: observational price and promotion variation is not final causal evidence, so candidate actions need randomized tests or credible rollout designs.
 
+## References
+
+For detailed formula provenance, interpretation, and citation context, see [`docs/methodology.md`](docs/methodology.md). Key references:
+
+- UChicago Booth Kilts Center for Marketing. n.d. "Dominick's Finer Foods Database." Accessed April 2026. [Link](https://www.chicagobooth.edu/research/kilts/research-data/dominicks).
+- Berry, Steven, James Levinsohn, and Ariel Pakes. 1995. "Automobile Prices in Market Equilibrium." *Econometrica* 63(4): 841-890. DOI: [10.2307/2171802](https://doi.org/10.2307/2171802).
+- Nevo, Aviv. 2001. "Measuring Market Power in the Ready-to-Eat Cereal Industry." *Econometrica* 69(2): 307-342. DOI: [10.1111/1468-0262.00194](https://doi.org/10.1111/1468-0262.00194).
+- Duan, Naihua. 1983. "Smearing Estimate: A Nonparametric Retransformation Method." *Journal of the American Statistical Association* 78(383): 605-610. DOI: [10.1080/01621459.1983.10478017](https://doi.org/10.1080/01621459.1983.10478017).
+- Hendel, Igal, and Aviv Nevo. 2006. "Sales and Consumer Inventory." *RAND Journal of Economics* 37(3): 543-561. DOI: [10.1111/j.1756-2171.2006.tb00030.x](https://doi.org/10.1111/j.1756-2171.2006.tb00030.x).
+- Talluri, Kalyan T., and Garrett J. van Ryzin. 2004. *The Theory and Practice of Revenue Management*. Springer. DOI: [10.1007/b139000](https://doi.org/10.1007/b139000).
+- Phillips, Robert L. 2005. *Pricing and Revenue Optimization*. Stanford Business Books. DOI: [10.1515/9780804781640](https://doi.org/10.1515/9780804781640).
+- Angrist, Joshua D., and Jorn-Steffen Pischke. 2009. *Mostly Harmless Econometrics: An Empiricist's Companion*. Princeton University Press. DOI: [10.1515/9781400829828](https://doi.org/10.1515/9781400829828).
+- Imbens, Guido W., and Donald B. Rubin. 2015. *Causal Inference for Statistics, Social, and Biomedical Sciences*. Cambridge University Press. DOI: [10.1017/CBO9781139025751](https://doi.org/10.1017/CBO9781139025751).
+- Kohavi, Ron, Diane Tang, and Ya Xu. 2020. *Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing*. Cambridge University Press. DOI: [10.1017/9781108653985](https://doi.org/10.1017/9781108653985).
+
 ## Method
 
 The baseline demand model is a transparent fixed-effects model:
