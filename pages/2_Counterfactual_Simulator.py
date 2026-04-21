@@ -17,14 +17,46 @@ from src.scenario import (
     Scenario, BASELINE,
     apply_demand_overlay, effective_cost, compute_profit, scenario_warnings,
 )
+from src.theme import (
+    apply_page_theme, page_intro, sidebar_brand, section_header,
+)
 
 st.set_page_config(page_title='Counterfactual Simulator', page_icon='🎚', layout='wide')
+apply_page_theme()
 
-st.title('Counterfactual Simulator')
-st.caption(
-    'Pick a cell. Move the candidate price. The chart shows expected demand and '
-    'profit **under the frozen demand model**, holding competitor prices fixed by default. '
-    'Use this to understand the shape of the response, not to set live prices.'
+sidebar_brand(
+    name='Pricing Engine',
+    tag="Decision support · Dominick's cereals",
+    badges=[
+        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
+        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
+        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
+    ],
+    workflow=[
+        (1, 'Demand Model',             False),
+        (2, 'Counterfactual Simulator', True),
+        (3, 'Profit Optimizer',         False),
+        (4, 'Experiment Design',        False),
+        (5, 'Limitations',              False),
+        (6, 'Upload & Score',           False),
+    ],
+)
+
+page_intro(
+    icon='🎚',
+    kicker='Workflow · Step 2 · What-if explorer',
+    title='Counterfactual Simulator',
+    tagline=(
+        'Pick a cell, move the candidate price, and read the shape of the model '
+        'response. Scenario overlays on the sidebar stress-test demand, cost, and '
+        'competitor shocks without re-fitting the model.'
+    ),
+    chips=[
+        'Frozen model inference',
+        'Sensitivity sliders',
+        'Scenario overlays',
+        'Curves + edge-flag warnings',
+    ],
 )
 
 
@@ -54,7 +86,7 @@ row = cells.loc[
 ].iloc[0].to_dict()
 
 # ---- Cell baseline ----
-st.subheader('Cell baseline (observed)')
+section_header('Cell baseline (observed)', caption='Means over the observed history of this brand-size-store cell.')
 b1, b2, b3, b4, b5 = st.columns(5)
 b1.metric('Mean price', f"${row['mean_p']:.2f}")
 b2.metric('Mean cost (AAC)', f"${row['mean_cost']:.2f}")
@@ -133,7 +165,7 @@ scenario = Scenario(
 cost_eff = float(effective_cost(row['mean_cost'], scenario))
 
 # ---- Candidate sliders ----
-st.subheader('Candidate price & promo')
+section_header('Candidate price & promo', caption='Move the slider to set the counterfactual price point.')
 
 # Price grid uses *effective* cost so the margin floor moves with the cost shock.
 _grid = make_price_grid(row['p_min'], row['p_max'], cost_eff)
@@ -166,7 +198,7 @@ candidate_profit = float(compute_profit(
 ))
 
 # ---- Outputs ----
-st.subheader('Expected outcomes (under model)')
+section_header('Expected outcomes (under model)', caption='Frozen-model predictions; scenario overlay applied if sliders are off baseline.')
 o1, o2, o3, o4 = st.columns(4)
 o1.metric('Predicted units / week', f'{candidate_q:.1f}',
           delta=f"{candidate_q - row['mean_q']:+.1f} vs baseline")
@@ -192,7 +224,7 @@ curve_promo_match = evaluate_curve(
     scenario=scenario,
 )
 
-st.subheader('Demand & profit curves')
+section_header('Demand & profit curves', caption='Dashed markers show observed baseline vs chosen candidate.')
 c1, c2 = st.columns(2)
 c1.plotly_chart(
     quantity_price_curve(curve_promo_match,

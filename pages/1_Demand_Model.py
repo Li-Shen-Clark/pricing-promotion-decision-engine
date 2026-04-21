@@ -9,17 +9,74 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.simulation import load_coefficients, read_markdown, REPORTS
+from src.simulation import load_coefficients, read_markdown, REPORTS, MAIN_COEFS
 from src.plots import coefficients_bar
+from src.theme import (
+    apply_page_theme, page_intro, insight_row, Insight,
+    sidebar_brand, section_header,
+)
 
 st.set_page_config(page_title='Demand Model', page_icon='📐', layout='wide')
+apply_page_theme()
 
-st.title('Demand Model — frozen for MVP')
-st.caption(
-    'Transparent log-log demand with brand-size-store + week fixed effects '
-    '(linearmodels AbsorbingLS). No IV, no dynamic stockpiling, no seasonal '
-    'interactions. Used for **decision support, not production-grade forecasting**.'
+sidebar_brand(
+    name='Pricing Engine',
+    tag="Decision support · Dominick's cereals",
+    badges=[
+        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
+        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
+        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
+    ],
+    workflow=[
+        (1, 'Demand Model',             True),
+        (2, 'Counterfactual Simulator', False),
+        (3, 'Profit Optimizer',         False),
+        (4, 'Experiment Design',        False),
+        (5, 'Limitations',              False),
+        (6, 'Upload & Score',           False),
+    ],
 )
+
+page_intro(
+    icon='📐',
+    kicker='Workflow · Step 1 · Frozen model',
+    title='Demand Model',
+    tagline=(
+        'Inspect the frozen log-log elasticities and the robustness evidence '
+        'that justifies using them as the basis for every downstream simulation.'
+    ),
+    chips=[
+        'β_own / β_cross / θ_promo',
+        'Holdout diagnostic',
+        'Variant comparison',
+        'IV-sensitivity tested',
+    ],
+)
+
+insight_row([
+    Insight(
+        label='Frozen for MVP',
+        headline='One model, read end-to-end',
+        detail=('baseline_with_cross: log-log demand with brand-size-store + week FE. '
+                'Every simulation, optimizer run, and experiment uses these coefficients.'),
+        tone='brand',
+    ),
+    Insight(
+        label='Identification',
+        headline='IV-tested within 3–4%',
+        detail=('β_own moves from −1.73 (OLS) to −1.78 (IV) under Hausman and over-ID IV. '
+                'Same sign, first-stage F ≫ 10, CI ratio 1.08 — Robust OLS.'),
+        tone='ok',
+    ),
+    Insight(
+        label='Scope',
+        headline='Decision support, not forecasting',
+        detail=('No dynamic stockpiling or seasonal interactions. Point forecasts should '
+                'be read alongside the sensitivity grid, and every recommendation is '
+                'validated downstream via A/B test.'),
+        tone='note',
+    ),
+])
 
 
 @st.cache_data
@@ -29,7 +86,10 @@ def _load() -> pd.DataFrame:
 coef = _load()
 
 # ---- Coefficients table ----
-st.subheader('Estimated coefficients')
+section_header(
+    'Estimated coefficients',
+    caption='Variants differ in controls; baseline_with_cross is frozen for downstream use.',
+)
 display = coef.rename(columns={
     'model':           'Model variant',
     'n_obs':           'n obs',
@@ -57,32 +117,37 @@ st.dataframe(display.style.format({
 }, na_rep='—'), width='stretch', hide_index=True)
 
 st.caption(
-    'θ_promo is a conditional sale-code coefficient in log points. The percentage column '
-    'uses exp(θ)-1; it should be read as a conditional model association, not a clean causal '
-    'promotion effect.'
+    'θ_promo is a conditional sale-code coefficient in log points; the percentage column '
+    'uses exp(θ)-1 and should be read as a conditional model association, not a clean '
+    'causal promotion effect.'
 )
 
 # ---- Coefficient bar chart ----
-st.subheader('Own / cross / promo coefficients across model variants')
+section_header('Own / cross / promo coefficients across model variants')
 st.plotly_chart(coefficients_bar(coef))
 
 # ---- Holdout snapshot ----
-st.subheader('Holdout fit (last 20 weeks of panel)')
+section_header(
+    'Holdout fit',
+    caption='Last 20 weeks of the panel held out; reported to size the sensitivity band, '
+            'not to claim forecasting accuracy.',
+)
 c1, c2, c3 = st.columns(3)
 c1.metric('Train rows', '2,423,718')
 c2.metric('Median APE', '42.3%')
 c3.metric('RMSE (units)', '55.0')
 st.caption(
-    '**Read with care.** Median APE of 42% is elevated because the MVP uses a '
-    'transparent FE demand model **without IV, dynamic stockpiling, or generalizable '
-    'seasonal interactions**. Results feed counterfactual decision support, '
-    'not production-grade forecasting. Any point forecast should be read alongside '
-    'the sensitivity grid in the Counterfactual Simulator page.'
+    'Median APE of ~42% is expected for a transparent FE demand model without stockpiling '
+    'or seasonal interactions. Point forecasts feed counterfactual decision support and '
+    'are always paired with the sensitivity grid in the Counterfactual Simulator — they '
+    'are not intended as production-grade sales forecasts.'
 )
 
 # ---- Frozen block from demand_model_summary.md ----
-st.markdown('---')
-st.subheader('Frozen model summary (from `reports/demand_model_summary.md`)')
+section_header(
+    'Frozen model summary',
+    caption='Source: `reports/demand_model_summary.md` — the one-pager used in the case study.',
+)
 md = read_markdown(REPORTS / 'demand_model_summary.md')
 # show only the FROZEN block at the top
 if '---' in md:

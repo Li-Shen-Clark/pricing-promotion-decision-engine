@@ -16,14 +16,46 @@ from src.optimization import (
 )
 from src.plots import profit_price_curve, top_recommendations_bar
 from src.scenario import Scenario, BASELINE, scenario_warnings
+from src.theme import (
+    apply_page_theme, page_intro, sidebar_brand, section_header,
+)
 
 st.set_page_config(page_title='Profit Optimizer', page_icon='⚙️', layout='wide')
+apply_page_theme()
 
-st.title('Profit Optimizer')
-st.caption(
-    'Browse the **5,896 eligible brand-size-store cells** ranked by '
-    'expected profit lift under the frozen model. Every row is a '
-    '**raise-and-test candidate**, not a deployment instruction.'
+sidebar_brand(
+    name='Pricing Engine',
+    tag="Decision support · Dominick's cereals",
+    badges=[
+        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
+        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
+        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
+    ],
+    workflow=[
+        (1, 'Demand Model',             False),
+        (2, 'Counterfactual Simulator', False),
+        (3, 'Profit Optimizer',         True),
+        (4, 'Experiment Design',        False),
+        (5, 'Limitations',              False),
+        (6, 'Upload & Score',           False),
+    ],
+)
+
+page_intro(
+    icon='⚙️',
+    kicker='Workflow · Step 3 · Candidate ranking',
+    title='Profit Optimizer',
+    tagline=(
+        'Browse the 5,896 eligible brand-size-store cells ranked by expected weekly '
+        'profit lift. Every row is a raise-and-test candidate, not a deployment '
+        'instruction.'
+    ),
+    chips=[
+        '5,896 eligible cells',
+        'Filter + drill-down',
+        'Scenario-aware re-optimization',
+        'Candidate curves',
+    ],
 )
 
 
@@ -120,7 +152,8 @@ if hide_ceiling:
     mask &= ~cells['opt_hits_upper'].astype(bool)
 view = cells.loc[mask].copy()
 
-st.markdown(f'### Filtered view: **{len(view):,}** of {len(cells):,} eligible cells')
+section_header(f'Filtered view · {len(view):,} of {len(cells):,} eligible cells',
+               caption='Sort, filter, and toggle ceiling-binding cells from the sidebar.')
 
 # ---- Top-N bar chart ----
 top = view.sort_values('profit_lift_abs', ascending=False).head(top_n)
@@ -130,7 +163,8 @@ if len(top) > 0:
     )
 
 # ---- Table ----
-st.markdown('### Candidate table')
+section_header('Candidate table',
+               caption='Top 500 rows of the filtered view, sorted by expected weekly profit lift.')
 display_cols = {
     'brand_final':       'Brand',
     'size_oz_rounded':   'Size (oz)',
@@ -159,11 +193,9 @@ st.dataframe(view_disp.style.format({
     'Δ profit (%)':                    '{:.0f}%',
     'Q ratio (cand/baseline)':         '{:.2f}×',
 }), width='stretch', hide_index=True)
-st.caption('Showing top 500 rows of the filtered view, sorted by expected weekly profit lift under model.')
-
 # ---- Drill-down ----
-st.markdown('---')
-st.markdown('### Inspect a single candidate')
+section_header('Inspect a single candidate',
+               caption='Pick a row to see its profit-vs-price curve and active risk flags.')
 if len(view) == 0:
     st.info('No cells match the current filters.')
 else:

@@ -9,17 +9,76 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.simulation import load_experiment_candidates, n_per_arm, read_markdown, REPORTS
+from src.simulation import load_experiment_candidates, n_per_arm, read_markdown, REPORTS, MAIN_COEFS
 from src.plots import sample_size_curve
+from src.theme import (
+    apply_page_theme, page_intro, insight_row, Insight,
+    sidebar_brand, section_header,
+)
 
 st.set_page_config(page_title='Experiment Design', page_icon='🧪', layout='wide')
+apply_page_theme()
 
-st.title('Experiment Design')
-st.caption(
-    'Every candidate from the optimizer needs validation. This page sizes the test '
-    'and assigns a risk-tiered design (single-store flight / cluster RCT / standard A/B). '
-    'Randomization unit: store (or store-cluster), matching offline retail price policy.'
+sidebar_brand(
+    name='Pricing Engine',
+    tag="Decision support · Dominick's cereals",
+    badges=[
+        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
+        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
+        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
+    ],
+    workflow=[
+        (1, 'Demand Model',             False),
+        (2, 'Counterfactual Simulator', False),
+        (3, 'Profit Optimizer',         False),
+        (4, 'Experiment Design',        True),
+        (5, 'Limitations',              False),
+        (6, 'Upload & Score',           False),
+    ],
 )
+
+page_intro(
+    icon='🧪',
+    kicker='Workflow · Step 4 · Validation gate',
+    title='Experiment Design',
+    tagline=(
+        'Every optimizer candidate flows through a risk-tiered test plan. Randomization '
+        'unit is the store (or store-cluster), matching offline retail price policy.'
+    ),
+    chips=[
+        'Top-10 test plan',
+        'Store-level RCT',
+        '80% power sizing',
+        'Underpowered flag',
+    ],
+)
+
+insight_row([
+    Insight(
+        label='Step A · Candidate',
+        headline='Optimizer output feeds the plan',
+        detail=('The top-10 table below is the offline baseline candidate set. '
+                'Re-running the optimizer under a scenario overlay produces a new set '
+                'that plugs into the same sizing template.'),
+        tone='brand',
+    ),
+    Insight(
+        label='Step B · Test design',
+        headline='Risk tier picks the test type',
+        detail=('Risk flag (high / medium / low) maps to single-store flight, cluster RCT, '
+                'or standard A/B. Store is the randomization unit to match how prices are '
+                'actually set in the chain.'),
+        tone='note',
+    ),
+    Insight(
+        label='Step C · Power check',
+        headline='Size the test to detect a real lift',
+        detail=('Two-sample t-test with store-week as the unit. The calculator flags '
+                'candidates whose required duration exceeds the planned weeks so they can '
+                'be re-designed or deprioritised.'),
+        tone='ok',
+    ),
+])
 
 
 @st.cache_data
@@ -29,16 +88,12 @@ def _load() -> pd.DataFrame:
 
 cand = _load()
 
-st.info(
-    '**Scenario note.** This test plan is the offline BASELINE list (no demand / cost / '
-    'competitor / inventory shocks applied). If you ran the **Profit Optimizer** under a '
-    'non-baseline scenario and want to test the resulting candidates, treat this page as '
-    'a sizing template — the σ and δ inputs in the calculator below are what flow into '
-    'the formula, regardless of which candidate generated them.'
-)
-
 # ---- Top-10 test plan table ----
-st.subheader('Test plan for top-10 portfolio candidates')
+section_header(
+    'Test plan · Top-10 portfolio candidates',
+    caption='Offline baseline list (no scenario shocks). Under a custom scenario, use the '
+            'calculator below as a sizing template with the σ and δ of your candidates.',
+)
 
 display_cols = {
     'brand_final':                                       'Brand',
@@ -77,12 +132,10 @@ if n_under:
     )
 
 # ---- Sample size widget ----
-st.markdown('---')
-st.subheader('Sample size calculator')
-st.caption(
-    'Two-sample equal-variance t-test with store-week as the unit. '
-    'For panel designs with within-store correlation, multiply n by the design effect '
-    '`1 + (m-1)·ICC` where m = weeks per store.'
+section_header(
+    'Sample size calculator',
+    caption='Two-sample equal-variance t-test with store-week as the unit. For panel designs '
+            'with within-store correlation, multiply n by the design effect `1 + (m-1)·ICC`.',
 )
 
 w1, w2, w3, w4 = st.columns(4)
@@ -107,20 +160,22 @@ weeks_at_5_stores = n / 5 if n != float('inf') else float('inf')
 r3.metric('Weeks if 5 stores per arm',
           '∞' if weeks_at_5_stores == float('inf') else f'{weeks_at_5_stores:,.1f}')
 
-st.subheader('Sample size curve (log scale)')
+section_header('Sample size curve (log scale)',
+               caption='Required store-weeks per arm vs detectable effect size.')
 st.plotly_chart(
     sample_size_curve(sigma=float(sigma),
                       baseline_profit=float(round(cand['baseline_profit'].median(), 0))),
 )
 
 # ---- A/B test plan markdown ----
-st.markdown('---')
-with st.expander('📋 Full A/B test plan (`reports/ab_test_plan.md`)', expanded=False):
+section_header('Reference · Full test plan',
+               caption="Source doc `reports/ab_test_plan.md` — what a PM would read before kicking off the test.")
+with st.expander('Open full A/B test plan', expanded=False):
     st.markdown(read_markdown(REPORTS / 'ab_test_plan.md'))
 
-st.info(
-    '**Online translation note.** In a SaaS or e-commerce setting the randomization '
-    'unit shifts from `store` to `user / session`. The same design pattern applies: '
-    'define a primary economic metric, compute σ from historical user-week spend, '
-    'and size the test the same way.'
+st.caption(
+    '**Online translation.** In a SaaS or e-commerce setting the randomization unit '
+    'shifts from store to user / session. The same pattern applies: define a primary '
+    'economic metric, compute σ from historical user-week spend, and size the test '
+    'with the same formula.'
 )

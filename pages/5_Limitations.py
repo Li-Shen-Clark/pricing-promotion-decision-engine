@@ -8,26 +8,78 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.simulation import read_markdown, REPORTS
-
-st.set_page_config(page_title='Limitations', page_icon='🚧', layout='wide')
-
-st.title('Limitations & Roadmap')
-
-st.error(
-    '**Final positioning.** Optimizer output is a list of **candidate actions for '
-    'experimentation, not production deployment.** No price change ships without an A/B test.'
+from src.simulation import read_markdown, REPORTS, MAIN_COEFS
+from src.theme import (
+    apply_page_theme, page_intro, insight_row, Insight,
+    sidebar_brand, section_header,
 )
 
-st.warning(
-    '**Upper-guardrail diagnostic.** 98.5% of eligible cells bind at the upper price '
-    'guardrail. This is not evidence that the optimizer is production-ready; it is a '
-    'diagnostic consequence of constant-elasticity demand plus the AAC-derived cost proxy. '
-    'With ε≈-1.73, the implied unconstrained Lerner margin is about 58%, so these rows are '
-    '**raise-and-test candidates**, not automatic price changes.'
+st.set_page_config(page_title='Limitations', page_icon='🧭', layout='wide')
+apply_page_theme()
+
+sidebar_brand(
+    name='Pricing Engine',
+    tag="Decision support · Dominick's cereals",
+    badges=[
+        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
+        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
+        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
+    ],
+    workflow=[
+        (1, 'Demand Model',             False),
+        (2, 'Counterfactual Simulator', False),
+        (3, 'Profit Optimizer',         False),
+        (4, 'Experiment Design',        False),
+        (5, 'Limitations',              True),
+        (6, 'Upload & Score',           False),
+    ],
 )
 
-st.markdown('### Six things this MVP does NOT do')
+page_intro(
+    icon='🧭',
+    kicker='Deployment boundary',
+    title='Limitations & Roadmap',
+    tagline=(
+        'What this MVP is designed to do — and what it deliberately does not claim. '
+        'Everything below is product scope talking to a future user, not an apology.'
+    ),
+    chips=[
+        'Scope: decision support',
+        'Validation: A/B required',
+        'Robustness: IV-tested',
+        'Roadmap to causal',
+    ],
+)
+
+insight_row([
+    Insight(
+        label='Scope',
+        headline='Candidate actions, not deployments',
+        detail=('Optimizer output is a ranked list of raise-and-test candidates. '
+                'No price change ships without a controlled experiment on the '
+                'Experiment Design page.'),
+        tone='brand',
+    ),
+    Insight(
+        label='Guardrail diagnostic',
+        headline='98.5% cells bind at the upper guardrail',
+        detail=('Constant-elasticity demand with ε≈-1.73 and AAC cost proxy imply '
+                'Lerner margin ≈ 58%; the upper bound is where the model wants to go. '
+                'Read rows as raise-and-test candidates.'),
+        tone='warn',
+    ),
+    Insight(
+        label='Identification',
+        headline='Robust OLS — IV moves β_own 3–4%',
+        detail=('Hausman + over-ID IV + store-week FE all preserve sign and sit within '
+                '3–4% of OLS. Same-chain caveat flagged; true causal needs multi-chain, '
+                'multi-metro data.'),
+        tone='ok',
+    ),
+])
+
+section_header('Six things this MVP does NOT do',
+               caption='Each item is a deliberate scope choice, not an unknown failure mode.')
 st.markdown(
     """
 1. **Causal identification.** The demand model uses brand-size-store and week fixed effects
@@ -72,7 +124,8 @@ st.markdown(
 """
 )
 
-st.markdown('### Roadmap')
+section_header('Roadmap',
+               caption='Shipped ✅ means the notebook exists and its findings feed the app.')
 st.markdown(
     """
 | Notebook | Adds | Why |
@@ -85,8 +138,8 @@ st.markdown(
 """
 )
 
-st.markdown('---')
-st.subheader('Source documents')
+section_header('Source documents',
+               caption='The reports below are what a reviewer would read to check the claims above.')
 tabs = st.tabs(['Case study (top candidate end-to-end)',
                 'Counterfactual summary', 'Demand model summary',
                 'A/B test plan', 'Cannibalization diagnostic',

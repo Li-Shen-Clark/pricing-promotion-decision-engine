@@ -23,24 +23,77 @@ from src.upload import (
     validate, score, template_csv,
     REQUIRED_COLUMNS, OPTIONAL_COLUMNS, MAX_ROWS,
 )
-
-st.set_page_config(page_title='Upload & Score', page_icon='📤', layout='wide')
-
-st.title('Upload & Score')
-
-st.error(
-    '**Scope: scoring only.** Uploaded data are scored using the pre-estimated '
-    "Dominick's cereal demand model "
-    f"(β_own = {MAIN_COEFS['beta_own']:+.2f}, β_cross = {MAIN_COEFS['beta_cross']:+.2f}, "
-    f"θ_promo = {MAIN_COEFS['theta_promo']:+.2f}). "
-    'Full re-estimation on user-specific historical data is **outside the MVP scope** '
-    '(would require panel design, identification strategy, and held-out validation). '
-    'Predictions assume the cereal-category elasticity transfers to the uploaded '
-    'product context — sanity-check the magnitudes before acting on them.'
+from src.theme import (
+    apply_page_theme, page_intro, insight_row, Insight,
+    sidebar_brand, section_header,
 )
 
+st.set_page_config(page_title='Upload & Score', page_icon='📤', layout='wide')
+apply_page_theme()
+
+sidebar_brand(
+    name='Pricing Engine',
+    tag="Decision support · Dominick's cereals",
+    badges=[
+        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
+        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
+        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
+    ],
+    workflow=[
+        (1, 'Demand Model',             False),
+        (2, 'Counterfactual Simulator', False),
+        (3, 'Profit Optimizer',         False),
+        (4, 'Experiment Design',        False),
+        (5, 'Limitations',              False),
+        (6, 'Upload & Score',           True),
+    ],
+)
+
+page_intro(
+    icon='📤',
+    kicker='Workflow · Step 6 · Bring-your-own data',
+    title='Upload & Score',
+    tagline=(
+        'Score a CSV of product rows against the frozen cereal-category coefficients. '
+        'No re-estimation — this is a transferability probe, not a new model fit.'
+    ),
+    chips=[
+        'CSV template + validator',
+        f'Frozen β_own {MAIN_COEFS["beta_own"]:+.2f}',
+        'Scenario overlay',
+        'Per-row + aggregate output',
+    ],
+)
+
+insight_row([
+    Insight(
+        label='Scope',
+        headline='Scoring only — no re-estimation',
+        detail=('Rows are scored against the frozen Dominick\'s cereal coefficients. '
+                'Full re-estimation on user panels needs its own identification strategy '
+                'and held-out validation — that is a follow-up, not this MVP.'),
+        tone='brand',
+    ),
+    Insight(
+        label='Transfer assumption',
+        headline='Cereal elasticity → your rows',
+        detail=('Predictions assume cereal-category elasticity applies to the uploaded '
+                'product context. If category, channel, or buyer behaviour differ, read '
+                'the magnitudes as directional only.'),
+        tone='note',
+    ),
+    Insight(
+        label='Action under stress',
+        headline='Scenario overlay separates action from shock',
+        detail=('Sidebar sliders apply demand / cost / competitor / inventory shocks. '
+                'Profit lift is measured against "do-nothing under the same scenario", '
+                'so the reported Δ isolates the action you chose.'),
+        tone='ok',
+    ),
+])
+
 # ---- Template download ----
-st.subheader('Step 1 — Download the CSV template (optional)')
+section_header('Step 1 · Download the CSV template', caption='Optional, but the fastest way to get the schema right the first time.')
 st.caption(
     'Required columns: ' + ', '.join(f'`{c}`' for c in REQUIRED_COLUMNS) + '. '
     'Optional columns: ' + ', '.join(f'`{c}`' for c in OPTIONAL_COLUMNS) + '. '
@@ -54,7 +107,7 @@ st.download_button(
 )
 
 # ---- Upload ----
-st.subheader('Step 2 — Upload your CSV')
+section_header('Step 2 · Upload your CSV')
 upload = st.file_uploader('Pick a CSV file', type=['csv'])
 
 if upload is None:
@@ -69,7 +122,7 @@ except Exception as exc:
     st.stop()
 
 # ---- Validate FIRST ----
-st.subheader('Step 3 — Validation report')
+section_header('Step 3 · Validation report')
 report = validate(raw)
 
 c1, c2, c3 = st.columns(3)
@@ -144,7 +197,8 @@ scenario = Scenario(
 )
 
 # ---- Counterfactual action ----
-st.subheader('Step 4 — Counterfactual action')
+section_header('Step 4 · Counterfactual action',
+               caption='One uniform action applied to every row, layered on top of the sidebar scenario overlay.')
 st.caption(
     'Pick a uniform action to apply to every uploaded row. The action is layered '
     'on top of the scenario shocks above. Use the price multiplier for portfolio-wide '
@@ -178,7 +232,8 @@ if sc_flags:
     st.warning('**Scenario warnings.**\n' + '\n'.join(f'- {f}' for f in sc_flags))
 
 # ---- Aggregate KPIs ----
-st.subheader('Step 5 — Portfolio outcomes (under model + scenario + action)')
+section_header('Step 5 · Portfolio outcomes',
+               caption='Under the frozen model + scenario overlay + chosen action.')
 agg_q_obs    = float(df['quantity'].sum())
 agg_rev_obs  = float((df['quantity'] * df['price']).sum())
 agg_pi_obs   = float((df['quantity'] * (df['price'] - df['unit_cost'])).sum())
@@ -206,7 +261,7 @@ st.caption(
 )
 
 # ---- Per-row table ----
-st.subheader('Per-row predictions')
+section_header('Per-row predictions')
 display_cols = ['product_id', 'store_id', 'quantity', 'price', 'unit_cost',
                 'promo', 'competitor_price',
                 'cand_price', 'cand_promo', 'cand_q', 'cand_revenue',
@@ -237,9 +292,9 @@ st.download_button(
     mime='text/csv',
 )
 
-st.warning(
+st.caption(
     '**Reminder.** These predictions assume the frozen Dominick\'s cereal elasticities '
-    'apply to the uploaded product. If your category, channel, or buyer behaviour '
+    'transfer to the uploaded product. If your category, channel, or buyer behaviour '
     'differs materially from late-90s grocery cereal, treat the magnitudes as '
     'directional only. Re-estimation on user-specific panels is the natural next step '
     'beyond this MVP.'

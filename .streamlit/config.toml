@@ -2,12 +2,13 @@
 # Tracked in git so local + deployed runs render identically.
 
 [theme]
-base                  = "light"
-primaryColor          = "#2c5fa8"
-backgroundColor       = "#ffffff"
+base                     = "light"
+primaryColor             = "#2c5fa8"
+backgroundColor          = "#ffffff"
 secondaryBackgroundColor = "#f4f6fa"
-textColor             = "#1f2933"
-font                  = "sans serif"
+textColor                = "#1f2933"
+font                     = "sans serif"
+# Headline + body type stays sans; keep Plotly + st.metric coherent via src/theme.py.
 
 [server]
 # Page 6 (Upload & Score) accepts a CSV. The validator caps row count separately,
