@@ -202,14 +202,23 @@ st.plotly_chart(fig)
 
 st.markdown('---')
 st.caption(
-    "Data: Dominick's Finer Foods Cereals (1989–1996, 4.65M store-week observations). "
-    'Pipeline: `01_data_cleaning` → `02_eda` → `03_demand_estimation` → '
-    '`04_counterfactual` → `05_ab_testing_design` → `07_cannibalization_robustness` → '
-    '`08_iv_sensitivity`. '
-    f'Reports: `{(REPORTS / "demand_model_summary.md").relative_to(PROJECT_ROOT)}`, '
-    f'`{(REPORTS / "counterfactual_summary.md").relative_to(PROJECT_ROOT)}`, '
-    f'`{(REPORTS / "ab_test_plan.md").relative_to(PROJECT_ROOT)}`, '
-    f'`{(REPORTS / "cannibalization_robustness_summary.md").relative_to(PROJECT_ROOT)}`, '
-    f'`{(REPORTS / "iv_sensitivity_summary.md").relative_to(PROJECT_ROOT)}`, '
-    f'`{(REPORTS / "case_study.md").relative_to(PROJECT_ROOT)}`.'
+    "Data: Dominick's Finer Foods Cereals, 1989–1996. "
+    'The full cleaning, modeling, counterfactual, validation, and robustness '
+    'audit trail is documented in the repo.'
 )
+
+with st.expander('Technical audit trail', expanded=False):
+    st.markdown(
+        f"""
+        **Pipeline.** `01_data_cleaning` → `02_eda` → `03_demand_estimation` →
+        `04_counterfactual` → `05_ab_testing_design` →
+        `07_cannibalization_robustness` → `08_iv_sensitivity`.
+
+        **Reports.** `{(REPORTS / "demand_model_summary.md").relative_to(PROJECT_ROOT)}`,
+        `{(REPORTS / "counterfactual_summary.md").relative_to(PROJECT_ROOT)}`,
+        `{(REPORTS / "ab_test_plan.md").relative_to(PROJECT_ROOT)}`,
+        `{(REPORTS / "cannibalization_robustness_summary.md").relative_to(PROJECT_ROOT)}`,
+        `{(REPORTS / "iv_sensitivity_summary.md").relative_to(PROJECT_ROOT)}`,
+        `{(REPORTS / "case_study.md").relative_to(PROJECT_ROOT)}`.
+        """
+    )
