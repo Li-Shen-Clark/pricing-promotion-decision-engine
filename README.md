@@ -39,7 +39,6 @@ Current stage: Streamlit MVP and experiment-design workflow completed. The proje
 - Processed panel: [`data/processed/sku_store_week_panel.parquet`](data/processed/sku_store_week_panel.parquet)
 - Brand-size panel: [`data/processed/brand_size_store_week_panel.parquet`](data/processed/brand_size_store_week_panel.parquet)
 - Streamlit app: [`app.py`](app.py)
-- Full project plan: [`pricing_promotion_decision_engine_plan.pdf`](pricing_promotion_decision_engine_plan.pdf)
 
 Next stages are cannibalization robustness, packaging/deployment polish, and optional causal-IV upgrades.
 
