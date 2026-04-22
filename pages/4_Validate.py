@@ -25,6 +25,7 @@ sidebar_brand(
 )
 
 page_intro(
+    icon='',
     kicker='Step 03 · How do I confirm it works in real stores?',
     title='Validate · Plan an A/B test',
     tagline=(

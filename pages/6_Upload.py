@@ -37,6 +37,7 @@ sidebar_brand(
 )
 
 page_intro(
+    icon='',
     kicker='Can I try this on my own data?',
     title='Upload & Score',
     tagline=(

@@ -31,6 +31,7 @@ sidebar_brand(
 )
 
 page_intro(
+    icon='',
     kicker='Step 02 · What happens if I change the price?',
     title='What-If Simulator',
     tagline=(

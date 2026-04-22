@@ -23,6 +23,7 @@ sidebar_brand(
 )
 
 page_intro(
+    icon='',
     kicker='When should I NOT trust this?',
     title='Trust & Boundaries',
     tagline=(

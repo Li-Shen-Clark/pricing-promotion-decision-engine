@@ -30,6 +30,7 @@ sidebar_brand(
 )
 
 page_intro(
+    icon='',
     kicker='Step 02 · Which products are worth testing first?',
     title='Optimize · Find candidates',
     tagline=(
