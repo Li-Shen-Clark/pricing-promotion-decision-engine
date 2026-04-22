@@ -104,7 +104,7 @@ e2.metric('2. Candidate to test', '$4.30',    help='Optimizer-suggested test pri
 e2.caption('Large price move; use only as a test candidate. +42% above historical band.')
 e3.metric('3. Model-estimated lift', '+$311 / wk', help='Model-implied weekly profit lift')
 e3.caption('+166.8% over baseline. Likely overstated near the price ceiling — read as test motivation, not a forecast.')
-e4.metric('4. To validate', 'Needs a controlled store test', help='Recommended test design')
+e4.metric('4. To validate', 'Store test', help='Recommended test design')
 e4.caption('Planned test is too short to reliably detect this lift; extend duration or '
            'only commit if the test catches a much larger effect.')
 
