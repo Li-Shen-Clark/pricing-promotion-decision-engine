@@ -59,7 +59,7 @@ insight_row([
         headline='Scoring only — your data does not refit the model',
         detail=('Your rows are scored using the cereal-category price sensitivity '
                 'estimated elsewhere in this app. Estimating a new model on your '
-                'data needs its own identification design — a follow-up, not this MVP.'),
+                'data needs its own identification design — a follow-up, not this demo.'),
         tone='brand',
     ),
     Insight(
@@ -191,12 +191,13 @@ scenario = Scenario(
 )
 
 # ---- Counterfactual action ----
-section_header('Step 4 · Counterfactual action',
-               caption='One uniform action applied to every row, layered on top of the sidebar scenario overlay.')
-st.caption(
-    'Pick a uniform action to apply to every uploaded row. The action is layered '
-    'on top of the scenario shocks above. Use the price multiplier for portfolio-wide '
-    '"raise prices by X%" stress tests.'
+section_header('Step 4 · Apply a portfolio-wide action',
+               caption='One uniform action applied to every uploaded row.')
+st.info(
+    '**This page does not optimize each uploaded product separately.** It scores '
+    'one portfolio-wide price-and-promo action — for example, "raise every price '
+    'by 5%" — using the demo model. Per-product candidate prices are produced '
+    'on the **Candidate Finder** page, but only for the demo cereal panel.'
 )
 a1, a2 = st.columns([2, 1])
 price_change_pct = a1.slider(
@@ -291,5 +292,5 @@ st.caption(
     'transfer to the uploaded product. If your category, channel, or buyer behaviour '
     'differs materially from late-90s grocery cereal, treat the magnitudes as '
     'directional only. Re-estimation on user-specific panels is the natural next step '
-    'beyond this MVP.'
+    'beyond this demo.'
 )

@@ -79,27 +79,34 @@ cand = _load()
 # ---- Top-10 test plan table ----
 section_header(
     'Test plan · Top-10 portfolio candidates',
-    caption='Offline baseline list (no scenario shocks). Under a custom scenario, use the '
-            'calculator below as a sizing template with the σ and δ of your candidates.',
+    caption='Default test plan for the top-10 candidates. Toggle "Show technical columns" '
+            'to add weekly noise, baseline profit, store counts, and required sample size.',
 )
 
-display_cols = {
+val_show_technical = st.toggle('Show technical columns', value=False, key='val_tech',
+                               help='Adds noise floor, baseline profit, stores per group, '
+                                    'and the required store-weeks per group.')
+
+decision_cols = {
     'brand_final':                                       'Brand',
     'size_oz_rounded':                                   'Size (oz)',
     'STORE':                                             'Store',
     'current_price':                                     'Current price',
     'candidate_price':                                   'Test price',
-    'promo_status':                                      'Promo',
-    'baseline_profit':                                   'Baseline profit ($/wk)',
     'profit_lift_abs':                                   'Expected lift ($/wk)',
-    'profit_std_wk':                                     'Weekly profit noise ($)',
     'risk_flag':                                         'Risk',
     'recommended_test_type':                             'Test type',
     'planned_duration_weeks':                            'Planned weeks',
-    'planned_stores_per_arm':                            'Stores per group',
-    'n_storeweeks_per_arm_at_50pct_MDE_80pct_power':     'Required store-weeks per group',
     'underpowered':                                      'Too short to detect?',
 }
+technical_cols = {
+    'promo_status':                                      'Promo',
+    'baseline_profit':                                   'Baseline profit ($/wk)',
+    'profit_std_wk':                                     'Weekly profit noise ($)',
+    'planned_stores_per_arm':                            'Stores per group',
+    'n_storeweeks_per_arm_at_50pct_MDE_80pct_power':     'Required store-weeks per group',
+}
+display_cols = {**decision_cols, **technical_cols} if val_show_technical else decision_cols
 view = cand.rename(columns=display_cols)[list(display_cols.values())]
 st.dataframe(view.style.format({
     'Size (oz)':                            '{:.2f}',
@@ -114,9 +121,11 @@ st.dataframe(view.style.format({
 n_under = int(cand['underpowered'].sum())
 if n_under:
     st.warning(
-        f'⚠ **{n_under}/{len(cand)} candidates are underpowered** at the planned design '
-        '(required weeks > planned duration). Either extend the test, accept a larger '
-        'MDE, or use a paired-control design that reduces variance.'
+        f'⚠ **{n_under} of {len(cand)} candidates are flagged "too short to detect."** '
+        'The planned test duration is shorter than the model says is needed to '
+        'reliably catch the expected lift. Either extend the test, only commit if '
+        'the test catches a much larger effect, or use a paired-store design that '
+        'cancels store-to-store noise.'
     )
 
 # ---- Sample size widget ----

@@ -27,7 +27,7 @@ page_intro(
     kicker='When should I NOT trust this?',
     title='Trust & Boundaries',
     tagline=(
-        'What this MVP is designed to do — and what it deliberately does not claim.'
+        'What this demo is designed to do — and what it deliberately does not claim.'
     ),
     chips=[
         'Decision support, not deployment',
@@ -65,7 +65,7 @@ insight_row([
     ),
 ])
 
-section_header('Six things this MVP does NOT do',
+section_header('Six things this demo does NOT do',
                caption='Each row is a deliberate scope choice, not an unknown failure mode. '
                        'Open the expander below for the technical detail behind each row.')
 
@@ -112,7 +112,7 @@ with st.expander('Technical detail — what each row means in model language', e
    portfolio lifts is +2.5% (max +4.0%)** — well below the 10–15% band that would warrant
    rebuilding the optimizer with a joint objective. The per-cell optimizer is kept.
 
-5. **Inventory feasibility.** Large predicted Q lifts assume restock capacity. The MVP flags
+5. **Inventory feasibility.** Large predicted Q lifts assume restock capacity. The demo flags
    `q_lift_ratio` per product-store but does not enforce a stockout constraint. Production
    needs a live inventory feed and a real stop-test guardrail (the 40% units-drop heuristic in
    `ab_test_plan.md` is a placeholder).
@@ -124,17 +124,31 @@ with st.expander('Technical detail — what each row means in model language', e
     )
 
 section_header('Roadmap',
-               caption='Shipped ✅ means the notebook exists and its findings feed the app.')
+               caption='Where the project would go next to remove the remaining business gaps.')
 st.markdown(
     """
+| Gap to close | Status | Why it matters |
+|---|---|---|
+| **Cross-size cannibalization** within a brand | ✅ Measured · ≤4% spillover, optimizer kept | Confirms the per-product candidate list is not double-counting demand. |
+| **Causal identification** of the price effect | ✅ Robustness-tested · ≤4.5% drift | Confirms the headline price-sensitivity number is not an artefact of one specification. |
+| **Competitor reaction** to a price change | 🔜 Next | Lets the test plan account for likely rival countermoves rather than holding rival prices fixed. |
+| **Stockpiling / inventory pull-forward** | 🔜 Later | Sharpens short-horizon forecasts so the test is sized against post-pull-forward demand. |
+| **Live cost-of-goods feed** (replace accounting proxy) | Production | Turns the demo profit numbers into accounting-grade business cases. |
+| **Live inventory feed** (real stop-test guardrail) | Production | Stops a successful price test that drains stock faster than the chain can restock. |
+"""
+)
+
+with st.expander('Roadmap — notebook view (for technical reviewers)', expanded=False):
+    st.markdown(
+        """
 | Notebook | Adds | Why |
 |---|---|---|
-| `07_cannibalization_robustness.ipynb` ✅ | Same-brand cross-size diagnostic + ex-post spillover adjustment | **Done** — β_same significant but small; top-10 lifts move <5%, optimizer stays per-cell |
-| `08_iv_sensitivity.ipynb` ✅ | Hausman-style other-store IV + store-week FE robustness | **Done** — OLS β_own robust within 3% (|Δβ|/|β_OLS| = 3.0%, F≫10, same sign, CI ratio 1.08); same-chain caveat flagged |
+| `07_cannibalization_robustness.ipynb` ✅ | Same-brand cross-size diagnostic + ex-post spillover adjustment | **Done** — β_same significant but small; top-10 lifts move <5%, optimizer stays per-product |
+| `08_iv_sensitivity.ipynb` ✅ | Hausman-style other-store IV + store-week FE robustness | **Done** — OLS β_own robust within 3% (\\|Δβ\\|/\\|β_OLS\\| = 3.0%, F≫10, same sign, CI ratio 1.08); same-chain caveat flagged |
 | `09_competitor_response.ipynb` | Best-response model for rival prices | Closes the simultaneity gap |
 | `10_dynamic_demand.ipynb` | Stockpiling / lead-lag promo effects | Better short-horizon predictions |
 """
-)
+    )
 
 section_header('Source documents',
                caption='The reports below are what a reviewer would read to check the claims above.')

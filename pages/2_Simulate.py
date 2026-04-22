@@ -192,9 +192,10 @@ candidate_price = s1.slider(
     min_value=round(p_lo, 2), max_value=round(p_hi, 2),
     value=float(round(min(max(row['mean_p'], p_lo), p_hi), 2)),
     step=0.05,
-    help=f'Bounded by [0.85·p_min, 1.15·p_max] with margin floor {MARGIN_FLOOR_RATIO}×cost_eff. '
-         f'Margin floor here = ${cost_eff * MARGIN_FLOOR_RATIO:.2f} '
-         f'(raw cost ${row["mean_cost"]:.2f}, effective ${cost_eff:.2f}).',
+    help=(f'The candidate price stays within a cautious range around the prices '
+          f'this product has actually traded at, and must stay above the margin '
+          f'floor (${cost_eff * MARGIN_FLOOR_RATIO:.2f} = unit cost ${cost_eff:.2f} '
+          f'× {MARGIN_FLOOR_RATIO}).'),
 )
 candidate_promo = s2.toggle('Promo on?', value=bool(round(row['mean_promo'])))
 

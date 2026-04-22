@@ -83,16 +83,16 @@ _warnings_placeholder = st.empty()
 # ---- Sidebar: scenario overlay ----
 st.sidebar.markdown('### Scenario controls')
 st.sidebar.caption(
-    'Defaults are inert — leave at zero / off to see the frozen offline candidates. '
-    'Any non-zero shock triggers a live re-optimization across all eligible cells.'
+    'Optional — leave all shocks at 0 to see the default ranking. '
+    'Any non-zero shock re-ranks all 5,896 product-store combinations live.'
 )
 demand_shock_pct = st.sidebar.slider(
     'Demand shock (%)', min_value=-30, max_value=30, value=0, step=5,
-    help='Multiplicative on predicted Q.',
+    help='Shifts predicted units up or down by a flat percentage.',
 )
 cost_shock_pct = st.sidebar.slider(
     'Cost shock (%)', min_value=-25, max_value=40, value=0, step=5,
-    help='Multiplicative on AAC unit cost. Moves the margin floor too.',
+    help='Shifts the estimated unit cost — and therefore the minimum acceptable margin.',
 )
 comp_shock_pct = st.sidebar.slider(
     'Competitor price shock (%)', min_value=-25, max_value=25, value=0, step=5,

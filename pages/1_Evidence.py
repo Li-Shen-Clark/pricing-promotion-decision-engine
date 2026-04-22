@@ -122,80 +122,83 @@ def _load() -> pd.DataFrame:
 coef = _load()
 
 st.markdown('---')
-st.caption('Below: the underlying coefficient tables, fit diagnostics, and report doc. '
-           'For technical reviewers.')
-
-# ---- Coefficients table ----
-section_header(
-    'Estimated coefficients',
-    caption='Variants differ in controls; baseline_with_cross is frozen for downstream use.',
-)
-display = coef.rename(columns={
-    'model':           'Model variant',
-    'n_obs':           'n obs',
-    'R2_within':       'R² within',
-    'beta_own_price':  'β_own',
-    'se_own_price':    'SE_own',
-    'beta_cross_price':'β_cross',
-    'se_cross_price':  'SE_cross',
-    'beta_promo':      'θ_promo',
-    'se_promo':        'SE_promo',
-    'promo_uplift_%':  'Implied promo diff (%)',
-    'smearing':        'Smearing S',
-})
-st.dataframe(display.style.format({
-    'n obs':            '{:,}',
-    'R² within':        '{:.3f}',
-    'β_own':            '{:.3f}',
-    'SE_own':           '{:.4f}',
-    'β_cross':          '{:.3f}',
-    'SE_cross':         '{:.4f}',
-    'θ_promo':          '{:.3f}',
-    'SE_promo':         '{:.4f}',
-    'Implied promo diff (%)': '{:.1f}',
-    'Smearing S':       '{:.3f}',
-}, na_rep='—'), width='stretch', hide_index=True)
-
-st.caption(
-    'θ_promo is a conditional sale-code coefficient in log points; the percentage column '
-    'uses exp(θ)-1 and should be read as a conditional model association, not a clean '
-    'causal promotion effect.'
+show_tech_evidence = st.toggle(
+    'Show technical reviewer view',
+    value=False,
+    help='Coefficient tables, R²/SE/Smearing diagnostics, holdout fit, '
+         'and the frozen model summary doc.',
 )
 
-# ---- Coefficient bar chart ----
-section_header('Own / cross / promo coefficients across model variants')
-st.plotly_chart(coefficients_bar(coef))
+if show_tech_evidence:
+    # ---- Coefficients table ----
+    section_header(
+        'Estimated coefficients',
+        caption='Variants differ in controls; baseline_with_cross is frozen for downstream use.',
+    )
+    display = coef.rename(columns={
+        'model':           'Model variant',
+        'n_obs':           'n obs',
+        'R2_within':       'R² within',
+        'beta_own_price':  'β_own',
+        'se_own_price':    'SE_own',
+        'beta_cross_price':'β_cross',
+        'se_cross_price':  'SE_cross',
+        'beta_promo':      'θ_promo',
+        'se_promo':        'SE_promo',
+        'promo_uplift_%':  'Implied promo diff (%)',
+        'smearing':        'Smearing S',
+    })
+    st.dataframe(display.style.format({
+        'n obs':            '{:,}',
+        'R² within':        '{:.3f}',
+        'β_own':            '{:.3f}',
+        'SE_own':           '{:.4f}',
+        'β_cross':          '{:.3f}',
+        'SE_cross':         '{:.4f}',
+        'θ_promo':          '{:.3f}',
+        'SE_promo':         '{:.4f}',
+        'Implied promo diff (%)': '{:.1f}',
+        'Smearing S':       '{:.3f}',
+    }, na_rep='—'), width='stretch', hide_index=True)
 
-# ---- Holdout snapshot ----
-section_header(
-    'Holdout fit',
-    caption='Last 20 weeks of the panel held out; reported to size the sensitivity band, '
-            'not to claim forecasting accuracy.',
-)
-c1, c2, c3 = st.columns(3)
-c1.metric('Train rows', '2,423,718')
-c2.metric('Median APE', '42.3%')
-c3.metric('RMSE (units)', '55.0')
-st.caption(
-    'Median APE of ~42% is expected for a transparent FE demand model without stockpiling '
-    'or seasonal interactions. Point forecasts feed counterfactual decision support and '
-    'are always paired with the sensitivity grid in the **What-If Simulator** — they '
-    'are not intended as production-grade sales forecasts.'
-)
+    st.caption(
+        'θ_promo is a conditional sale-code coefficient in log points; the percentage column '
+        'uses exp(θ)-1 and should be read as a conditional model association, not a clean '
+        'causal promotion effect.'
+    )
 
-# ---- Frozen block from demand_model_summary.md ----
-section_header(
-    'Frozen model summary',
-    caption='Source: `reports/demand_model_summary.md` — the one-pager used in the case study.',
-)
-md = read_markdown(REPORTS / 'demand_model_summary.md')
-# show only the FROZEN block at the top
-if '---' in md:
-    frozen_block = md.split('---', 2)
-    # frozen_block[0] = title, [1] = frozen content, [2] = rest
-    st.markdown('---'.join(frozen_block[:2]))
-else:
-    st.markdown(md[:4000])
+    # ---- Coefficient bar chart ----
+    section_header('Own / cross / promo coefficients across model variants')
+    st.plotly_chart(coefficients_bar(coef))
 
-with st.expander('Full demand model summary'):
-    st.markdown(md)
+    # ---- Holdout snapshot ----
+    section_header(
+        'Holdout fit',
+        caption='Last 20 weeks of the panel held out; reported to size the sensitivity band, '
+                'not to claim forecasting accuracy.',
+    )
+    c1, c2, c3 = st.columns(3)
+    c1.metric('Train rows', '2,423,718')
+    c2.metric('Median APE', '42.3%')
+    c3.metric('RMSE (units)', '55.0')
+    st.caption(
+        'Median APE of ~42% is expected for a transparent FE demand model without stockpiling '
+        'or seasonal interactions. Point forecasts feed counterfactual decision support and '
+        'are always paired with the sensitivity grid in the **What-If Simulator** — they '
+        'are not intended as production-grade sales forecasts.'
+    )
+
+    # ---- Frozen block from demand_model_summary.md ----
+    section_header(
+        'Frozen model summary',
+        caption='Source: `reports/demand_model_summary.md` — the one-pager used in the case study.',
+    )
+    md = read_markdown(REPORTS / 'demand_model_summary.md')
+    if '---' in md:
+        frozen_block = md.split('---', 2)
+        st.markdown('---'.join(frozen_block[:2]))
+    else:
+        st.markdown(md[:4000])
+
+    with st.expander('Full demand model summary'):
+        st.markdown(md)

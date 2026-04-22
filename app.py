@@ -51,7 +51,9 @@ page_intro(
 # ---- What you can do here ----
 section_header(
     'What you can do here',
-    caption='Four steps. The sidebar on the left walks you through them in order.',
+    caption='Core workflow: Evidence → Simulate → Candidate Finder → Test Planner. '
+            'Boundaries and Upload are optional — read Boundaries to see what the demo '
+            'will not claim; use Upload to score your own data.',
 )
 insight_row([
     Insight(
@@ -109,8 +111,9 @@ e2.metric('2. Model says', '$4.30',           help='Optimizer candidate price')
 e2.caption('+42% — flagged as extrapolation beyond historical band.')
 e3.metric('3. Expected',   '+$311 / wk',      help='Model-implied weekly profit lift')
 e3.caption('+166.8% over baseline. Likely overstated near the price ceiling — read as test motivation.')
-e4.metric('4. To validate', 'High-risk cluster RCT', help='Recommended test design')
-e4.caption('Flagged underpowered at planned duration — extend or accept larger MDE.')
+e4.metric('4. To validate', 'Needs a controlled store test', help='Recommended test design')
+e4.caption('Planned test is too short to reliably detect this lift; extend duration or '
+           'only commit if the test catches a much larger effect.')
 
 st.markdown(
     'This single row reproduces the entire pipeline: the demand model fits the '
@@ -158,38 +161,44 @@ with st.expander('Model-implied lift across the full panel — diagnostic only, 
 # ---- Top-10 table ----
 section_header(
     'Top-10 candidate actions',
-    caption='One row per brand-size portfolio slot, sorted by expected weekly profit lift. '
-            'Each row is a raise-and-test candidate, not a deployment instruction. '
-            '"Hits price ceiling?" flags candidates where the model wants a price '
-            'beyond the historical band — read those with extra skepticism.',
+    caption='Sorted by expected weekly profit lift. Each row is something to test, '
+            'not something to deploy. "At price ceiling?" flags candidates where the '
+            'recommended price would push beyond what this product has historically sold for.',
 )
 
-display_cols = {
+home_show_technical = st.toggle('Show technical columns', value=False, key='home_tech',
+                                help='Adds promo flag, baseline/candidate quantities, '
+                                     'baseline/candidate profit, and percent lift.')
+
+decision_cols = {
     'brand_final':           'Brand',
     'size_oz_rounded':       'Size (oz)',
     'STORE':                 'Store',
     'mean_p':                'Current price ($)',
-    'opt_price':             'Candidate price ($)',
-    'opt_promo':             'Promo (model)',
-    'baseline_q':            'Baseline q (units/wk)',
-    'opt_q':                 'Candidate q (units/wk, model)',
-    'baseline_profit':       'Baseline profit ($/wk)',
-    'opt_profit':            'Candidate profit ($/wk, model)',
-    'profit_lift_abs':       'Δ profit ($/wk, model)',
-    'profit_lift_pct':       'Δ profit (%)',
-    'opt_hits_upper':        'Hits price ceiling?',
+    'opt_price':             'Test price ($)',
+    'profit_lift_abs':       'Expected lift ($/wk)',
+    'opt_hits_upper':        'At price ceiling?',
 }
+technical_cols = {
+    'opt_promo':             'Promo (model)',
+    'baseline_q':            'Baseline units/wk',
+    'opt_q':                 'Test units/wk',
+    'baseline_profit':       'Baseline profit ($/wk)',
+    'opt_profit':            'Test profit ($/wk)',
+    'profit_lift_pct':       'Lift (%)',
+}
+display_cols = {**decision_cols, **technical_cols} if home_show_technical else decision_cols
 top_view = top_df.rename(columns=display_cols)[list(display_cols.values())]
 st.dataframe(top_view.style.format({
     'Size (oz)':                       '{:.2f}',
     'Current price ($)':               '{:.2f}',
-    'Candidate price ($)':             '{:.2f}',
-    'Baseline q (units/wk)':           '{:.1f}',
-    'Candidate q (units/wk, model)':   '{:.1f}',
+    'Test price ($)':                  '{:.2f}',
+    'Expected lift ($/wk)':            '${:.0f}',
+    'Baseline units/wk':               '{:.1f}',
+    'Test units/wk':                   '{:.1f}',
     'Baseline profit ($/wk)':          '${:.0f}',
-    'Candidate profit ($/wk, model)':  '${:.0f}',
-    'Δ profit ($/wk, model)':          '${:.0f}',
-    'Δ profit (%)':                    '{:.0f}%',
+    'Test profit ($/wk)':              '${:.0f}',
+    'Lift (%)':                        '{:.0f}%',
 }), width='stretch', hide_index=True)
 
 section_header('Top-10 expected weekly profit lift (model upper-bound)')
