@@ -139,15 +139,18 @@ def _css() -> str:
       /* --- Page intro (lighter, less framed) --- */
       .pe-intro {{
           display: flex; gap: 1rem; align-items: flex-start;
-          padding: 0.4rem 0 1.1rem 0;
+          padding: 0.75rem 0 1.1rem 0;
           margin-bottom: 1.2rem;
           border-bottom: 1px solid var(--border);
+          overflow: visible;
       }}
       .pe-intro .body {{ flex: 1; }}
       .pe-intro .kicker {{
-          font-size: 0.76rem; font-weight: 600; letter-spacing: 0.02em;
+          display: block; max-width: 100%;
+          font-size: 0.74rem; font-weight: 600; letter-spacing: 0;
           color: var(--brand); text-transform: none; margin-bottom: 0.25rem;
-          line-height: 1.35; white-space: normal; overflow-wrap: anywhere;
+          line-height: 1.55; white-space: normal; overflow-wrap: normal;
+          overflow: visible;
       }}
       .pe-intro .title {{
           font-size: 1.55rem; font-weight: 700; color: var(--text);

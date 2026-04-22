@@ -35,7 +35,7 @@ sidebar_brand(
 # ---- Hero ----
 page_intro(
     icon='',
-    kicker='Pricing & Promotion Decision Engine',
+    kicker='Pricing decision support',
     title='Find pricing and promotion changes worth testing.',
     tagline=(
         'Pick a product at a store. Test a price or promo change. Get the '
