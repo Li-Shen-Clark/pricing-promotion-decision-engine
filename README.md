@@ -1,8 +1,23 @@
 # Pricing & Promotion Decision Engine
 
-An applied decision engine for retail pricing and promotion strategy. The project uses Dominick's Finer Foods cereal scanner data to estimate demand response, simulate counterfactual prices and promotions, and generate constrained raise-and-test pricing candidates under cost, inventory, margin, and experimentation constraints.
+> **Live demo →** https://pricing-promotion-decision-engine.streamlit.app/  
+> **Stack:** Python · Streamlit · `linearmodels` · `scipy` · `pandas` · `matplotlib` · `plotly`
 
-This is not a new econometric estimator. It is a transparent decision-support product that translates classic scanner-data demand estimation, cereal product differentiation research, pricing optimization, and A/B testing logic into a reproducible project.
+A deployed decision-support web app that turns 4.65M weekly retail scanner observations into a **ranked list of price and promotion changes worth A/B testing**. Demand model is IV-tested within 3% of OLS; every recommendation is paired with a powered, store-level test plan and a constraint diagnostic. Built on the Dominick's Finer Foods cereal panel.
+
+![Pricing Engine — what the model says, how robust it is, and how it would be tested](reports/figures/readme_hero.png)
+
+*The hero above is generated directly from the project's data artifacts — see [`scripts/build_readme_hero.py`](scripts/build_readme_hero.py).*
+
+## What this project is
+
+A reproducible decision-support pipeline, not a new econometric estimator. It translates classic scanner-data demand estimation, pricing optimization, and A/B test design into one product surface:
+
+- **Demand estimation** — log-log fixed-effects model on 2.59M brand-size-store-week observations.
+- **Counterfactual simulation** — model-implied units, revenue, profit at any candidate price, with optional demand / cost / competitor / inventory shocks.
+- **Profit optimization** — vectorized search across 5,896 product-store combinations, ranked by expected weekly lift.
+- **Experiment design** — risk-tiered, store-randomized A/B test plan with explicit power and underpowered-flag.
+- **Robustness** — Hausman + over-ID IV move β_own by ≤3.0%; store-week FE moves it 4.5% — same sign across all four → **Robust OLS**.
 
 The methodology deliberately separates formula provenance: DFF price, quantity, movement, and gross-margin fields are used for accounting transformations; the demand model is a standard reduced-form log-log fixed-effects approximation; Duan smearing is used for log-outcome retransformation; and the competitor-price index plus anchored counterfactual optimizer are project-specific implementation choices for decision support.
 
