@@ -41,8 +41,8 @@ PALETTE = {
 }
 
 GITHUB_URL = 'https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine'
-AUTHOR_NAME = 'Li-Shen Clark'
-AUTHOR_AFFILIATION = 'Independent portfolio project'
+AUTHOR_NAME = 'Li Shen, Clark University'
+AUTHOR_AFFILIATION = ''
 
 SIDEBAR_PAGES = [
     ('app.py', 'Overview'),
@@ -396,7 +396,7 @@ def sidebar_brand(*, name: str, tag: str,
             <div class="pe-sidebar-footer">
               <div>Built by</div>
               <div class="name">{_escape(AUTHOR_NAME)}</div>
-              <div>{_escape(AUTHOR_AFFILIATION)}</div>
+              {f'<div>{_escape(AUTHOR_AFFILIATION)}</div>' if AUTHOR_AFFILIATION else ''}
               <div style="margin-top:0.45rem;">
                 <a href="{GITHUB_URL}" target="_blank" rel="noopener noreferrer">
                   GitHub repository ↗
