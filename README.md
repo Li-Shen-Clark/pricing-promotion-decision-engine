@@ -1,8 +1,5 @@
 # Pricing & Promotion Decision Engine
 
-**Live app:** https://pricing-promotion-decision-engine.streamlit.app/  
-**GitHub repo:** https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine
-
 An applied decision engine for retail pricing and promotion strategy. The project uses Dominick's Finer Foods cereal scanner data to estimate demand response, simulate counterfactual prices and promotions, and generate constrained raise-and-test pricing candidates under cost, inventory, margin, and experimentation constraints.
 
 This is not a new econometric estimator. It is a transparent decision-support product that translates classic scanner-data demand estimation, cereal product differentiation research, pricing optimization, and A/B testing logic into a reproducible project.
@@ -11,7 +8,7 @@ The methodology deliberately separates formula provenance: DFF price, quantity, 
 
 ## Project Status
 
-Current stage: portfolio-ready Streamlit MVP. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, cannibalization robustness, IV sensitivity checks, tests, deployment notes, and an interactive local app.
+Current stage: Streamlit MVP and experiment-design workflow completed. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, and an interactive local app.
 
 - Raw data dictionary: [`rawData/README.md`](rawData/README.md)
 - Cleaning notebook: [`notebooks/01_data_cleaning.ipynb`](notebooks/01_data_cleaning.ipynb)
@@ -23,14 +20,13 @@ Current stage: portfolio-ready Streamlit MVP. The project now has cleaned panels
 - Demand summary: [`reports/demand_model_summary.md`](reports/demand_model_summary.md)
 - Counterfactual summary: [`reports/counterfactual_summary.md`](reports/counterfactual_summary.md)
 - A/B validation plan: [`reports/ab_test_plan.md`](reports/ab_test_plan.md)
-- Cannibalization robustness: [`reports/cannibalization_robustness_summary.md`](reports/cannibalization_robustness_summary.md)
-- IV sensitivity: [`reports/iv_sensitivity_summary.md`](reports/iv_sensitivity_summary.md)
-- End-to-end case study: [`reports/case_study.md`](reports/case_study.md)
 - Methodology: [`docs/methodology.md`](docs/methodology.md), [`docs/methodology.tex`](docs/methodology.tex)
-- Lightweight app artifacts: [`data/processed/`](data/processed/)
+- Processed panel: [`data/processed/sku_store_week_panel.parquet`](data/processed/sku_store_week_panel.parquet)
+- Brand-size panel: [`data/processed/brand_size_store_week_panel.parquet`](data/processed/brand_size_store_week_panel.parquet)
 - Streamlit app: [`app.py`](app.py)
+- Full project plan: [`pricing_promotion_decision_engine_plan.pdf`](pricing_promotion_decision_engine_plan.pdf)
 
-Roadmap items left outside the MVP are competitor-response sensitivity and dynamic promotion / stockpiling extensions.
+Next stages are cannibalization robustness, packaging/deployment polish, and optional causal-IV upgrades.
 
 ## Business Problem
 
@@ -58,8 +54,6 @@ Raw files currently used:
 
 Core fields include `UPC`, `STORE`, `WEEK`, `MOVE`, `PRICE`, `QTY`, `SALE`, `PROFIT`, and `OK`. See [`rawData/README.md`](rawData/README.md) for the data dictionary, field rules, `SALE` code notes, `PROFIT` interpretation, and validation assertions.
 
-**GitHub demo note.** The raw DFF CSV/PDF files and large generated parquet panels are not redistributed in this repository. The app runs from lightweight processed artifacts committed under `data/processed/`; users who want to rerun the full cleaning and modeling notebooks should download the DFF files separately following [`rawData/README.md`](rawData/README.md).
-
 ## Data Cleaning Snapshot
 
 The first cleaning pass produced:
@@ -72,7 +66,7 @@ The first cleaning pass produced:
 - Median UPC-store coverage is 78 weeks, which supports SKU-store fixed effects
 - Zero-movement rows are all zero-price rows; a small number of additional zero-price rows have positive movement and are excluded as invalid price records
 - UPC metadata join miss rate: 0.00%
-- Cleaned panel saved locally as `data/processed/sku_store_week_panel.parquet` in the full development workspace; this large reconstruction panel is documented but not included in the lightweight GitHub demo repo.
+- Cleaned panel saved to `data/processed/sku_store_week_panel.parquet`
 
 Full diagnostics are in [`reports/data_cleaning_summary.md`](reports/data_cleaning_summary.md).
 
@@ -91,21 +85,6 @@ The project is positioned as an applied decision product rather than a structura
 - Promotion behavior: Hendel and Nevo highlight that temporary sales may involve stockpiling, so a static weekly model should be interpreted carefully.
 - Pricing optimization: revenue management and price optimization literature motivate combining demand, cost, inventory, and constraints in one decision problem; the MVP grid search is an implementation choice, not a new optimization method.
 - Experimentation: observational price and promotion variation is not final causal evidence, so candidate actions need randomized tests or credible rollout designs.
-
-## References
-
-For detailed formula provenance, interpretation, and citation context, see [`docs/methodology.md`](docs/methodology.md). Key references:
-
-- UChicago Booth Kilts Center for Marketing. n.d. "Dominick's Finer Foods Database." Accessed April 2026. [Link](https://www.chicagobooth.edu/research/kilts/research-data/dominicks).
-- Berry, Steven, James Levinsohn, and Ariel Pakes. 1995. "Automobile Prices in Market Equilibrium." *Econometrica* 63(4): 841-890. DOI: [10.2307/2171802](https://doi.org/10.2307/2171802).
-- Nevo, Aviv. 2001. "Measuring Market Power in the Ready-to-Eat Cereal Industry." *Econometrica* 69(2): 307-342. DOI: [10.1111/1468-0262.00194](https://doi.org/10.1111/1468-0262.00194).
-- Duan, Naihua. 1983. "Smearing Estimate: A Nonparametric Retransformation Method." *Journal of the American Statistical Association* 78(383): 605-610. DOI: [10.1080/01621459.1983.10478017](https://doi.org/10.1080/01621459.1983.10478017).
-- Hendel, Igal, and Aviv Nevo. 2006. "Sales and Consumer Inventory." *RAND Journal of Economics* 37(3): 543-561. DOI: [10.1111/j.1756-2171.2006.tb00030.x](https://doi.org/10.1111/j.1756-2171.2006.tb00030.x).
-- Talluri, Kalyan T., and Garrett J. van Ryzin. 2004. *The Theory and Practice of Revenue Management*. Springer. DOI: [10.1007/b139000](https://doi.org/10.1007/b139000).
-- Phillips, Robert L. 2005. *Pricing and Revenue Optimization*. Stanford Business Books. DOI: [10.1515/9780804781640](https://doi.org/10.1515/9780804781640).
-- Angrist, Joshua D., and Jorn-Steffen Pischke. 2009. *Mostly Harmless Econometrics: An Empiricist's Companion*. Princeton University Press. DOI: [10.1515/9781400829828](https://doi.org/10.1515/9781400829828).
-- Imbens, Guido W., and Donald B. Rubin. 2015. *Causal Inference for Statistics, Social, and Biomedical Sciences*. Cambridge University Press. DOI: [10.1017/CBO9781139025751](https://doi.org/10.1017/CBO9781139025751).
-- Kohavi, Ron, Diane Tang, and Ya Xu. 2020. *Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing*. Cambridge University Press. DOI: [10.1017/9781108653985](https://doi.org/10.1017/9781108653985).
 
 ## Method
 
@@ -133,7 +112,7 @@ Formula provenance matters for interpretation. Effective price and dollar sales 
 
 When the app reports absolute candidate profit, the promo fixed cost enters as `profit = (price - cost) * sold_units - F * promo`. When it reports profit lift against the observed baseline, the same fixed cost is subtracted from both candidate and baseline profits, so the fixed cost only changes incremental lift when the candidate and baseline promotion states differ.
 
-The main fixed-effects specification uses product-store and week fixed effects. The project also estimates a stricter store-week fixed-effects robustness version and Hausman-style other-store IV sensitivity check; the preferred OLS own-price elasticity is robust within 3% under these diagnostics, with the same-chain IV caveat documented in [`reports/iv_sensitivity_summary.md`](reports/iv_sensitivity_summary.md).
+The main fixed-effects specification uses product-store and week fixed effects. A stricter robustness check should estimate a store-week fixed-effects version to absorb local store demand shocks, campaigns, traffic, and inventory conditions; the competitor-price index may be excluded from that check when it is mechanically absorbed or unstable.
 
 For the full demand model, counterfactual simulation logic, profit objective, optimization design, and identification caveats, see [`docs/methodology.md`](docs/methodology.md). A LaTeX version is available at [`docs/methodology.tex`](docs/methodology.tex).
 
@@ -145,6 +124,8 @@ pricing/
 |-- README.md
 |-- app.py
 |-- requirements.txt
+|-- pricing_promotion_decision_engine_plan.tex
+|-- pricing_promotion_decision_engine_plan.pdf
 |
 |-- docs/
 |   |-- app_wireframe.md
@@ -154,19 +135,18 @@ pricing/
 |
 |-- rawData/
 |   |-- README.md
+|   |-- dominicks_manual.pdf
+|   |-- wcer.csv
+|   |-- upccer.csv
 |
 |-- data/
 |   |-- processed/
-|   |   |-- cell_baselines.parquet
+|   |   |-- sku_store_week_panel.parquet
+|   |   |-- brand_size_store_week_panel.parquet
+|   |   |-- demand_modeling_dataset.parquet
 |   |   |-- model_coefficients.csv
 |   |   |-- top_recommendations.csv
-|   |   |-- top_recommendations_diverse.csv
-|   |   |-- all_recommendations.csv
 |   |   |-- experiment_candidates.csv
-|   |   |-- sensitivity_grid.csv
-|   |   |-- cannibalization_model_coefficients.csv
-|   |   |-- iv_sensitivity_coefficients.csv
-|   |   |-- iv_first_stage_diagnostics.csv
 |
 |-- notebooks/
 |   |-- 01_data_cleaning.ipynb
@@ -174,16 +154,14 @@ pricing/
 |   |-- 03_demand_estimation.ipynb
 |   |-- 04_counterfactual.ipynb
 |   |-- 05_ab_testing_design.ipynb
-|   |-- 07_cannibalization_robustness.ipynb
-|   |-- 08_iv_sensitivity.ipynb
 |
 |-- pages/
-|   |-- 1_Demand_Model.py
-|   |-- 2_Counterfactual_Simulator.py
-|   |-- 3_Profit_Optimizer.py
-|   |-- 4_Experiment_Design.py
-|   |-- 5_Limitations.py
-|   |-- 6_Upload_and_Score.py
+|   |-- 1_Evidence.py          # Model Evidence
+|   |-- 2_Simulate.py          # What-If Simulator
+|   |-- 3_Optimize.py          # Candidate Finder
+|   |-- 4_Validate.py          # Test Planner
+|   |-- 5_Boundaries.py        # Trust & Boundaries
+|   |-- 6_Upload.py            # Upload & Score
 |
 |-- reports/
 |   |-- data_cleaning_summary.md
@@ -191,9 +169,6 @@ pricing/
 |   |-- demand_model_summary.md
 |   |-- counterfactual_summary.md
 |   |-- ab_test_plan.md
-|   |-- cannibalization_robustness_summary.md
-|   |-- iv_sensitivity_summary.md
-|   |-- case_study.md
 |   |-- figures/
 |
 |-- src/
@@ -221,11 +196,7 @@ jupyter lab notebooks/02_eda.ipynb
 jupyter lab notebooks/03_demand_estimation.ipynb
 jupyter lab notebooks/04_counterfactual.ipynb
 jupyter lab notebooks/05_ab_testing_design.ipynb
-jupyter lab notebooks/07_cannibalization_robustness.ipynb
-jupyter lab notebooks/08_iv_sensitivity.ipynb
 ```
-
-The raw DFF files required by `01_data_cleaning.ipynb` are not committed to this GitHub demo repo; download them according to [`rawData/README.md`](rawData/README.md). The Streamlit app itself does not require the raw files.
 
 To launch the local Streamlit MVP:
 
@@ -246,6 +217,7 @@ streamlit run app.py
 
 ## Next Steps
 
-1. Publish the Streamlit app and add the deployed URL to this README.
-2. Record a 60-90 second GIF or video showing Executive Summary → Optimizer → Experiment Design → Limitations.
-3. Optional roadmap: add competitor-response sensitivity and dynamic promotion / stockpiling diagnostics.
+1. Add `07_cannibalization_robustness.ipynb` to test same-brand cross-size substitution before treating upper-guardrail optimizer output as robust.
+2. Add focused tests for `src/data.py`, `src/features.py`, `src/scenario.py`, `src/optimization.py`, and `src/upload.py`.
+3. Package the Streamlit app for sharing and write a short case-study page tying data, model, optimizer, and experiment design together.
+4. Optionally add `08_causal_iv.ipynb` with Hausman-style other-store price instruments and cost-shock instruments.

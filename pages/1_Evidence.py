@@ -1,4 +1,4 @@
-"""Page 1 — Demand Model: frozen coefficients + holdout fit + caveats."""
+"""Page 2 — Model Evidence: frozen coefficients + holdout fit + IV checks."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -16,7 +16,7 @@ from src.theme import (
     sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Demand Model', page_icon='📐', layout='wide')
+st.set_page_config(page_title='Model Evidence', page_icon='📐', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -28,53 +28,54 @@ sidebar_brand(
         ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
     ],
     workflow=[
-        (1, 'Demand Model',             True),
-        (2, 'Counterfactual Simulator', False),
-        (3, 'Profit Optimizer',         False),
-        (4, 'Experiment Design',        False),
-        (5, 'Limitations',              False),
-        (6, 'Upload & Score',           False),
+        (1, 'Overview',   False),
+        (2, 'Evidence',   True),
+        (3, 'Simulate',   False),
+        (4, 'Optimize',   False),
+        (5, 'Validate',   False),
+        (6, 'Boundaries', False),
+        (7, 'Upload',     False),
     ],
 )
 
 page_intro(
     icon='📐',
-    kicker='Workflow · Step 1 · Frozen model',
-    title='Demand Model',
+    kicker='Workflow · Step 2 · Can I trust this model?',
+    title='Model Evidence',
     tagline=(
-        'Inspect the frozen log-log elasticities and the robustness evidence '
-        'that justifies using them as the basis for every downstream simulation.'
+        'The estimated elasticities and the robustness evidence behind them. '
+        'These coefficients are frozen and reused everywhere downstream.'
     ),
     chips=[
         'β_own / β_cross / θ_promo',
         'Holdout diagnostic',
-        'Variant comparison',
+        'Coefficient variants',
         'IV-sensitivity tested',
     ],
 )
 
 insight_row([
     Insight(
-        label='Frozen for MVP',
-        headline='One model, read end-to-end',
-        detail=('baseline_with_cross: log-log demand with brand-size-store + week FE. '
-                'Every simulation, optimizer run, and experiment uses these coefficients.'),
+        label='Frozen',
+        headline='One model, used end-to-end',
+        detail=('Every simulation, optimizer run, and test plan calls these '
+                'same coefficients. No silent re-fits.'),
         tone='brand',
     ),
     Insight(
-        label='Identification',
-        headline='IV-tested: β_own shifts 3.0%',
-        detail=('β_own moves from −1.73 (OLS) to −1.78 (IV) under Hausman and over-ID IV. '
-                'Store-week FE gives −1.80, a 4.5% shift. Same sign, first-stage F ≫ 10, '
-                'CI ratio 1.08 — Robust OLS.'),
+        label='IV-tested',
+        headline='OLS and IV agree within 3.0%',
+        detail=('β_own moves from −1.73 (OLS) to −1.78 (IV); store-week FE '
+                'gives −1.80, a 4.5% shift. Same sign across all three. '
+                'First-stage F ≫ 10, CI ratio 1.08.'),
         tone='ok',
     ),
     Insight(
         label='Scope',
-        headline='Decision support, not forecasting',
-        detail=('No dynamic stockpiling or seasonal interactions. Point forecasts should '
-                'be read alongside the sensitivity grid, and every recommendation is '
-                'validated downstream via A/B test.'),
+        headline='Designed to rank actions, not forecast sales',
+        detail=('Point predictions should be read alongside the sensitivity '
+                'grid in the simulator. Every recommendation downstream goes '
+                'through a controlled A/B test.'),
         tone='note',
     ),
 ])
@@ -140,7 +141,7 @@ c3.metric('RMSE (units)', '55.0')
 st.caption(
     'Median APE of ~42% is expected for a transparent FE demand model without stockpiling '
     'or seasonal interactions. Point forecasts feed counterfactual decision support and '
-    'are always paired with the sensitivity grid in the Counterfactual Simulator — they '
+    'are always paired with the sensitivity grid in the **What-If Simulator** — they '
     'are not intended as production-grade sales forecasts.'
 )
 

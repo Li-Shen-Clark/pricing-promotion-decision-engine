@@ -77,7 +77,7 @@ The cannibalization correction is **directionally favourable and quantitatively 
 
 ## 5. The experiment design
 
-We do not deploy this price change. We test it. From [`experiment_candidates.csv`](../data/processed/experiment_candidates.csv) and the Experiment Design page:
+We do not deploy this price change. We test it. From [`experiment_candidates.csv`](../data/processed/experiment_candidates.csv) and the Test Planner page (`/Validate`):
 
 | Field | Value |
 |---|---|
@@ -94,13 +94,13 @@ We do not deploy this price change. We test it. From [`experiment_candidates.csv
 2. **Use a paired-control design** (a matched store as control), which lowers the effective σ via within-pair variance reduction.
 3. **Accept a larger MDE** — if the test is designed to detect "at least \$200 / wk", 8 weeks at one store is adequate. The trade-off is that a real \$160 / wk lift would be missed.
 
-The app surfaces this trilemma directly on Page 4; nothing about the candidate gets shipped without resolving it.
+The app surfaces this trilemma directly on the Test Planner page; nothing about the candidate gets shipped without resolving it.
 
 ---
 
 ## 6. Why we don't simply deploy
 
-Six concrete reasons, each one of which the app surfaces on Page 5 (Limitations):
+Six concrete reasons, each one of which the app surfaces on the Trust & Boundaries page (`/Boundaries`):
 
 1. **Extrapolation.** The candidate price \$4.30 is +13.6% above the historical max for this cell. The constant-elasticity functional form has no ceiling, but that doesn't mean real-world demand doesn't.
 2. **Cost proxy ≠ marginal cost.** AAC is an accounting average, not the true replacement cost. If the real marginal cost is even \$0.30 higher than AAC, the lift estimate falls by ~\$50 / wk.

@@ -1,4 +1,4 @@
-"""Page 6 — Upload & Score (06b).
+"""Page 7 — Upload & Score.
 
 User uploads a CSV → validate schema → standardize → score with the FROZEN
 Dominick's cereal coefficients → optional Scenario overlay → per-row + aggregate
@@ -40,18 +40,19 @@ sidebar_brand(
         ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
     ],
     workflow=[
-        (1, 'Demand Model',             False),
-        (2, 'Counterfactual Simulator', False),
-        (3, 'Profit Optimizer',         False),
-        (4, 'Experiment Design',        False),
-        (5, 'Limitations',              False),
-        (6, 'Upload & Score',           True),
+        (1, 'Overview',   False),
+        (2, 'Evidence',   False),
+        (3, 'Simulate',   False),
+        (4, 'Optimize',   False),
+        (5, 'Validate',   False),
+        (6, 'Boundaries', False),
+        (7, 'Upload',     True),
     ],
 )
 
 page_intro(
     icon='📤',
-    kicker='Workflow · Step 6 · Bring-your-own data',
+    kicker='Workflow · Step 7 · Can I try this on my own data?',
     title='Upload & Score',
     tagline=(
         'Score a CSV of product rows against the frozen cereal-category coefficients. '

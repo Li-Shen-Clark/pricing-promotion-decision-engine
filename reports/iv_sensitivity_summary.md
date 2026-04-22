@@ -5,7 +5,7 @@ This notebook tests whether the baseline OLS own-price elasticity is robust to H
 
 **Headline.** β_own moves from OLS -1.728 → store-week-FE OLS -1.805 → Hausman IV -1.781 → Hausman + cost IV -1.780. |Δβ(IV − OLS)| / |β_OLS| = 3.0%, first-stage F ≫ 10, same sign = True, CI width ratio 1.08.
 
-**Decision — Robust OLS.** IV β_own is within 15% of OLS, same sign, first-stage F well above 10, and the 95% CI is not explosively wide. The OLS headline estimate (β_own = −1.73) is the preferred working number for the MVP. Limitations page item 1 is softened from "planned" to "tested within this sample's identification limits".
+**Decision — Robust OLS.** IV β_own is within 15% of OLS, same sign, first-stage F well above 10, and the 95% CI is not explosively wide. The OLS headline estimate (β_own = −1.73) is the preferred working number for the MVP. Trust & Boundaries page item 1 is softened from "planned" to "tested within this sample's identification limits".
 
 ---
 

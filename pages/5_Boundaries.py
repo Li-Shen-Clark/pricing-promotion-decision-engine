@@ -1,4 +1,4 @@
-"""Page 5 — Limitations: what this MVP does NOT validate, and what comes next."""
+"""Page 6 — Trust & Boundaries: what this MVP does NOT validate, and what comes next."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -14,7 +14,7 @@ from src.theme import (
     sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Limitations', page_icon='🧭', layout='wide')
+st.set_page_config(page_title='Trust & Boundaries', page_icon='🧭', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -26,19 +26,20 @@ sidebar_brand(
         ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
     ],
     workflow=[
-        (1, 'Demand Model',             False),
-        (2, 'Counterfactual Simulator', False),
-        (3, 'Profit Optimizer',         False),
-        (4, 'Experiment Design',        False),
-        (5, 'Limitations',              True),
-        (6, 'Upload & Score',           False),
+        (1, 'Overview',   False),
+        (2, 'Evidence',   False),
+        (3, 'Simulate',   False),
+        (4, 'Optimize',   False),
+        (5, 'Validate',   False),
+        (6, 'Boundaries', True),
+        (7, 'Upload',     False),
     ],
 )
 
 page_intro(
     icon='🧭',
-    kicker='Deployment boundary',
-    title='Limitations & Roadmap',
+    kicker='Workflow · Step 6 · When should I NOT trust this?',
+    title='Trust & Boundaries',
     tagline=(
         'What this MVP is designed to do — and what it deliberately does not claim.'
     ),
@@ -55,8 +56,8 @@ insight_row([
         label='Scope',
         headline='Candidate actions, not deployments',
         detail=('Optimizer output is a ranked list of raise-and-test candidates. '
-                'No price change ships without a controlled experiment on the '
-                'Experiment Design page.'),
+                'No price change ships without a controlled experiment from the '
+                'Test Planner.'),
         tone='brand',
     ),
     Insight(

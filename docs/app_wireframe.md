@@ -15,7 +15,7 @@ Generated: 2026-04-20T23:56:13  ·  source: `notebooks/05_ab_testing_design.ipyn
 - Link buttons → other pages
 - Inputs: `top_recommendations_diverse.csv`, `cell_baselines.parquet`, `reports/counterfactual_summary.md` (rendered)
 
-## Page 2 — Demand Model
+## Page 2 — Model Evidence (`/Evidence`)
 **Audience**: data scientist peer.
 - Show frozen coefficients table from `model_coefficients.csv`
 - Holdout fit panel (RMSE, median APE) — be explicit it is a no-IV baseline
@@ -23,7 +23,7 @@ Generated: 2026-04-20T23:56:13  ·  source: `notebooks/05_ab_testing_design.ipyn
 - Markdown rendering of `reports/demand_model_summary.md` FROZEN block
 - Inputs: `model_coefficients.csv`, `demand_model_summary.md`, `figures/demand_*.png`
 
-## Page 3 — Counterfactual Simulator
+## Page 3 — What-If Simulator (`/Simulate`)
 **Audience**: pricing analyst exploring "what if".
 - Selectors: brand_final, size_oz_rounded, STORE → loads cell baseline
 - Slider: candidate price (bounded by `[0.85·p_min, 1.15·p_max]`, with margin floor 1.05·cost_eff)
@@ -33,7 +33,7 @@ Generated: 2026-04-20T23:56:13  ·  source: `notebooks/05_ab_testing_design.ipyn
 - **Scenario controls** (sidebar): demand shock (±30%), cost shock (-25 to +40%), competitor price shock (±25%), inventory cap, promo fixed cost. Defaults inert; non-zero values trigger live recomputation and risk-flag banners. See "Scenario overlay" module below.
 - Inputs: `cell_baselines.parquet`, `model_coefficients.csv`
 
-## Page 4 — Profit Optimizer
+## Page 4 — Candidate Finder (`/Optimize`)
 **Audience**: pricing analyst building a candidate list.
 - Filter widget: brand, size range, store, current_promo, min n_weeks
 - Table: filtered slice of `all_recommendations.csv` with sortable Δprofit and risk columns
@@ -42,7 +42,7 @@ Generated: 2026-04-20T23:56:13  ·  source: `notebooks/05_ab_testing_design.ipyn
 - **Scenario controls** (sidebar): same shocks as the simulator. Non-baseline values trigger a live vectorised re-optimization across all eligible cells (`optimize_all_cells`), so the candidate ranking, candidate prices, and lift columns all reflect the active scenario.
 - Inputs: `all_recommendations.csv`, `cell_baselines.parquet`
 
-## Page 5 — Experiment Design
+## Page 5 — Test Planner (`/Validate`)
 **Audience**: same analyst, now planning the test.
 - Render `experiment_candidates.csv` as interactive table; per-row expand shows: σ, MDE, required n_storeweeks, recommended test type, planned duration, flagged risks
 - Sample size widget: input σ + δ + α + power → output n per arm + n_storeweeks total + reuse the §6 curve
@@ -50,7 +50,7 @@ Generated: 2026-04-20T23:56:13  ·  source: `notebooks/05_ab_testing_design.ipyn
 - "Export experiment basket" button → CSV download with the test plan rows for ops handoff
 - Inputs: `experiment_candidates.csv`, `figures/ab_sample_size_curve.png`, `ab_test_plan.md`
 
-## Page 6 — Limitations
+## Page 6 — Trust & Boundaries (`/Boundaries`)
 **Audience**: anyone who is about to use the recommendations.
 - Render `reports/counterfactual_summary.md` "Limitations" section + 03 limitations list
 - Banner: "These are candidate actions for experimentation, not production deployment."
@@ -59,7 +59,7 @@ Generated: 2026-04-20T23:56:13  ·  source: `notebooks/05_ab_testing_design.ipyn
 - Roadmap callout: cannibalization (06), competitor response (07), causal IV (08)
 - Inputs: `counterfactual_summary.md`, `demand_model_summary.md`
 
-## Page 7 — Upload & Score (06b iteration)
+## Page 7 — Upload & Score (`/Upload`)
 **Audience**: prospective external user with their own pricing dataset.
 
 Flow: **template → upload → validate → score → scenario overlay → download**.

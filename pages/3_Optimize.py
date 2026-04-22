@@ -1,4 +1,4 @@
-"""Page 3 — Profit Optimizer: filter, sort, and inspect candidate cells."""
+"""Page 4 — Candidate Finder: filter, sort, and inspect candidate cells."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -17,10 +17,11 @@ from src.optimization import (
 from src.plots import profit_price_curve, top_recommendations_bar
 from src.scenario import Scenario, BASELINE, scenario_warnings
 from src.theme import (
-    apply_page_theme, page_intro, sidebar_brand, section_header,
+    apply_page_theme, page_intro, insight_row, Insight,
+    sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Profit Optimizer', page_icon='⚙️', layout='wide')
+st.set_page_config(page_title='Candidate Finder', page_icon='⚙️', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -32,31 +33,56 @@ sidebar_brand(
         ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
     ],
     workflow=[
-        (1, 'Demand Model',             False),
-        (2, 'Counterfactual Simulator', False),
-        (3, 'Profit Optimizer',         True),
-        (4, 'Experiment Design',        False),
-        (5, 'Limitations',              False),
-        (6, 'Upload & Score',           False),
+        (1, 'Overview',   False),
+        (2, 'Evidence',   False),
+        (3, 'Simulate',   False),
+        (4, 'Optimize',   True),
+        (5, 'Validate',   False),
+        (6, 'Boundaries', False),
+        (7, 'Upload',     False),
     ],
 )
 
 page_intro(
     icon='⚙️',
-    kicker='Workflow · Step 3 · Candidate ranking',
-    title='Profit Optimizer',
+    kicker='Workflow · Step 4 · Which products should I consider changing?',
+    title='Candidate Finder',
     tagline=(
-        'Browse the 5,896 eligible brand-size-store cells ranked by expected weekly '
-        'profit lift. Every row is a raise-and-test candidate, not a deployment '
-        'instruction.'
+        'Browse 5,896 brand-size-store cells ranked by expected weekly profit lift. '
+        'The top of the list is where the model wants to test next.'
     ),
     chips=[
-        '5,896 eligible cells',
+        '5,896 candidate cells',
         'Filter + drill-down',
-        'Scenario-aware re-optimization',
-        'Candidate curves',
+        'Scenario-aware re-ranking',
+        'Per-cell profit curve',
     ],
 )
+
+insight_row([
+    Insight(
+        label='1 · Ranked list',
+        headline='Sorted by model-implied weekly profit lift',
+        detail=('The leaderboard is the union of every cell\'s individual '
+                'optimization. Read the top as test prioritization.'),
+        tone='brand',
+    ),
+    Insight(
+        label='2 · Filter + inspect',
+        headline='Narrow by brand, size, or history',
+        detail=('Drill into any single row to see its profit-vs-price curve, '
+                'risk flags (price ceiling, large quantity shift), and recommended '
+                'promo state.'),
+        tone='brand',
+    ),
+    Insight(
+        label='3 · No row deploys without a test',
+        headline='Every candidate flows to the Test Planner',
+        detail=('The optimizer is a search heuristic. The A/B test on the next '
+                'page is what turns a candidate into a decision.'),
+        tone='note',
+    ),
+])
 
 
 @st.cache_data
@@ -246,7 +272,6 @@ else:
                                cost=cost_for_grid),
         )
 
-st.warning(
-    'These candidates require **controlled validation** before any price change. '
-    'See **Experiment Design** for the test plan and sample-size guidance.'
+st.caption(
+    'Continue to the **Test Planner** page to size the A/B test for this candidate.'
 )

@@ -1,4 +1,4 @@
-"""Page 2 — Counterfactual Simulator: cell selector + sliders + curves."""
+"""Page 3 — What-If Simulator: cell selector + sliders + curves."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -18,10 +18,11 @@ from src.scenario import (
     apply_demand_overlay, effective_cost, compute_profit, scenario_warnings,
 )
 from src.theme import (
-    apply_page_theme, page_intro, sidebar_brand, section_header,
+    apply_page_theme, page_intro, insight_row, Insight,
+    sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Counterfactual Simulator', page_icon='🎚', layout='wide')
+st.set_page_config(page_title='What-If Simulator', page_icon='🎚', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -33,31 +34,54 @@ sidebar_brand(
         ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
     ],
     workflow=[
-        (1, 'Demand Model',             False),
-        (2, 'Counterfactual Simulator', True),
-        (3, 'Profit Optimizer',         False),
-        (4, 'Experiment Design',        False),
-        (5, 'Limitations',              False),
-        (6, 'Upload & Score',           False),
+        (1, 'Overview',   False),
+        (2, 'Evidence',   False),
+        (3, 'Simulate',   True),
+        (4, 'Optimize',   False),
+        (5, 'Validate',   False),
+        (6, 'Boundaries', False),
+        (7, 'Upload',     False),
     ],
 )
 
 page_intro(
     icon='🎚',
-    kicker='Workflow · Step 2 · What-if explorer',
-    title='Counterfactual Simulator',
+    kicker='Workflow · Step 3 · What happens if I change the price?',
+    title='What-If Simulator',
     tagline=(
-        'Pick a cell, move the candidate price, and read the shape of the model '
-        'response. Scenario overlays on the sidebar stress-test demand, cost, and '
-        'competitor shocks without re-fitting the model.'
+        'Pick a product. Move the candidate price. See the demand and profit '
+        'response under the frozen model.'
     ),
     chips=[
-        'Frozen model inference',
+        'Cell-level what-if',
         'Sensitivity sliders',
-        'Scenario overlays',
-        'Curves + edge-flag warnings',
+        'Scenario overlays (optional)',
+        'Demand + profit curves',
     ],
 )
+
+insight_row([
+    Insight(
+        label='1 · Pick a cell',
+        headline='One brand-size at one store',
+        detail='Use the dropdowns below to select the product context.',
+        tone='brand',
+    ),
+    Insight(
+        label='2 · Move the price',
+        headline='Slide within the historical band',
+        detail=('The slider is bounded by the cell\'s observed price range with a '
+                'margin floor; numbers near the edges are extrapolations.'),
+        tone='brand',
+    ),
+    Insight(
+        label='3 · Read the curves',
+        headline='Demand and profit vs price',
+        detail=('Dashed markers show the observed baseline and your candidate. '
+                'Sidebar sliders stress-test elasticities and shock scenarios.'),
+        tone='brand',
+    ),
+])
 
 
 @st.cache_data
@@ -224,7 +248,13 @@ curve_promo_match = evaluate_curve(
     scenario=scenario,
 )
 
-section_header('Demand & profit curves', caption='Dashed markers show observed baseline vs chosen candidate.')
+section_header(
+    'Demand & profit curves',
+    caption='Dashed markers show observed baseline vs chosen candidate. '
+            'These are model-implied lifts (log-linear demand, competitor prices held fixed '
+            'unless overridden, AAC-derived cost). Numbers near the edges of the price grid '
+            'are extrapolations and should be read with extra skepticism.',
+)
 c1, c2 = st.columns(2)
 c1.plotly_chart(
     quantity_price_curve(curve_promo_match,
@@ -238,11 +268,3 @@ c2.plotly_chart(
                        cost=cost_eff),
 )
 
-st.warning(
-    '**Reminder.** These outcomes are **expected lifts under model assumptions** '
-    '(log-linear demand, competitor prices held fixed unless overridden, no own-brand '
-    'cannibalization, AAC-derived cost). Scenario shocks are applied as a post-hoc '
-    'business overlay, not by re-fitting the demand model — use them for what-if '
-    'stress tests, not as forecasts. Numbers near the edges of the price grid are '
-    'extrapolations and should be read with extra skepticism.'
-)

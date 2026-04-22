@@ -1,4 +1,4 @@
-"""Page 4 — Experiment Design: candidate test plan + sample size widget."""
+"""Page 5 — Test Planner: candidate test plan + sample size widget."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -16,7 +16,7 @@ from src.theme import (
     sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Experiment Design', page_icon='🧪', layout='wide')
+st.set_page_config(page_title='Test Planner', page_icon='🧪', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -28,22 +28,24 @@ sidebar_brand(
         ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
     ],
     workflow=[
-        (1, 'Demand Model',             False),
-        (2, 'Counterfactual Simulator', False),
-        (3, 'Profit Optimizer',         False),
-        (4, 'Experiment Design',        True),
-        (5, 'Limitations',              False),
-        (6, 'Upload & Score',           False),
+        (1, 'Overview',   False),
+        (2, 'Evidence',   False),
+        (3, 'Simulate',   False),
+        (4, 'Optimize',   False),
+        (5, 'Validate',   True),
+        (6, 'Boundaries', False),
+        (7, 'Upload',     False),
     ],
 )
 
 page_intro(
     icon='🧪',
-    kicker='Workflow · Step 4 · Validation gate',
-    title='Experiment Design',
+    kicker='Workflow · Step 5 · How would I confirm this works in real stores?',
+    title='Test Planner',
     tagline=(
-        'Every optimizer candidate flows through a risk-tiered test plan. Randomization '
-        'unit is the store (or store-cluster), matching offline retail price policy.'
+        'Every optimizer candidate needs a controlled experiment before deployment. '
+        'Randomization unit is the store (or store-cluster), matching how prices '
+        'are actually set in the chain.'
     ),
     chips=[
         'Top-10 test plan',
@@ -55,27 +57,27 @@ page_intro(
 
 insight_row([
     Insight(
-        label='Step A · Candidate',
-        headline='Optimizer output feeds the plan',
+        label='1 · Candidate',
+        headline='Comes from the Candidate Finder',
         detail=('The top-10 table below is the offline baseline candidate set. '
-                'Re-running the optimizer under a scenario overlay produces a new set '
-                'that plugs into the same sizing template.'),
+                'Re-running the optimizer under a scenario produces a new list that '
+                'plugs into the same sizing template.'),
         tone='brand',
     ),
     Insight(
-        label='Step B · Test design',
-        headline='Risk tier picks the test type',
-        detail=('Risk flag (high / medium / low) maps to single-store flight, cluster RCT, '
-                'or standard A/B. Store is the randomization unit to match how prices are '
-                'actually set in the chain.'),
+        label='2 · Test design',
+        headline='Risk tier chooses the test type',
+        detail=('High/medium/low risk maps to single-store flight, cluster RCT, '
+                'or standard A/B. Store is the randomization unit to match real '
+                'pricing operations.'),
         tone='note',
     ),
     Insight(
-        label='Step C · Power check',
+        label='3 · Power check',
         headline='Size the test to detect a real lift',
-        detail=('Two-sample t-test with store-week as the unit. The calculator flags '
-                'candidates whose required duration exceeds the planned weeks so they can '
-                'be re-designed or deprioritised.'),
+        detail=('Two-sample t-test with store-week as the unit. The calculator '
+                'flags candidates whose required duration exceeds planned weeks '
+                'so they can be re-designed or deprioritised.'),
         tone='ok',
     ),
 ])
@@ -134,23 +136,33 @@ if n_under:
 # ---- Sample size widget ----
 section_header(
     'Sample size calculator',
-    caption='Two-sample equal-variance t-test with store-week as the unit. For panel designs '
-            'with within-store correlation, multiply n by the design effect `1 + (m-1)·ICC`.',
+    caption='Two-sample equal-variance t-test with store-week as the unit. Defaults are the '
+            'median σ and a 50% MDE drawn from the top-10 table above — change them to size a '
+            'different candidate. For panels with within-store correlation, multiply n by '
+            '`1 + (m-1)·ICC`.',
 )
 
 w1, w2, w3, w4 = st.columns(4)
-sigma = w1.number_input('σ (weekly profit std, $)',
+sigma = w1.number_input('σ (weekly profit standard deviation, $)',
                         min_value=1.0, max_value=1000.0,
                         value=float(round(cand['profit_std_wk'].median(), 0)),
-                        step=1.0)
-delta = w2.number_input('δ (MDE, $/week)',
+                        step=1.0,
+                        help='How much weekly profit varies within a single cell — '
+                             'the noise floor the test has to cut through.')
+delta = w2.number_input('δ — minimum detectable effect ($/week)',
                         min_value=1.0, max_value=2000.0,
                         value=float(round(cand['baseline_profit'].median() * 0.5, 0)),
-                        step=1.0)
-alpha = w3.select_slider('α (two-sided)', options=[0.01, 0.05, 0.10], value=0.05,
-                         format_func=lambda v: f'{v:.2f}')
-power = w4.select_slider('Power (1−β)', options=[0.70, 0.80, 0.90, 0.95],
-                         value=0.80, format_func=lambda v: f'{v:.2f}')
+                        step=1.0,
+                        help='The smallest weekly profit lift the test has to be able to '
+                             'distinguish from noise.')
+alpha = w3.select_slider('α — false-positive rate (two-sided)',
+                         options=[0.01, 0.05, 0.10], value=0.05,
+                         format_func=lambda v: f'{v:.2f}',
+                         help='Probability of declaring a winner when there is no real lift.')
+power = w4.select_slider('Power (1−β) — true-positive rate',
+                         options=[0.70, 0.80, 0.90, 0.95],
+                         value=0.80, format_func=lambda v: f'{v:.2f}',
+                         help='Probability of detecting a real lift of at least δ.')
 
 n = n_per_arm(sigma, delta, alpha=alpha, power=power)
 r1, r2, r3 = st.columns(3)
