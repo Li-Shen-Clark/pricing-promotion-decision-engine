@@ -42,7 +42,7 @@ PALETTE = {
 
 GITHUB_URL = 'https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine'
 AUTHOR_NAME = 'Li Shen, Clark University'
-AUTHOR_AFFILIATION = ''
+AUTHOR_AFFILIATION = 'Junfu Zhang, Clark University'
 
 SIDEBAR_PAGES = [
     ('app.py', 'Overview'),
@@ -223,10 +223,12 @@ def _css() -> str:
           border-bottom: 1px solid var(--border); margin-bottom: 0.8rem;
       }}
       section[data-testid="stSidebar"] .pe-brand .name {{
-          font-size: 1.02rem; font-weight: 700; color: var(--text);
+          font-size: 1.28rem; font-weight: 750; color: var(--text);
+          line-height: 1.25;
       }}
       section[data-testid="stSidebar"] .pe-brand .tag {{
-          font-size: 0.78rem; color: var(--text-muted);
+          font-size: 0.98rem; color: var(--text-muted);
+          line-height: 1.45; margin-top: 0.2rem;
       }}
       section[data-testid="stSidebar"] .pe-badges {{
           display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem;
