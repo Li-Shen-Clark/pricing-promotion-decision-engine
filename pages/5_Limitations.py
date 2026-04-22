@@ -40,8 +40,7 @@ page_intro(
     kicker='Deployment boundary',
     title='Limitations & Roadmap',
     tagline=(
-        'What this MVP is designed to do — and what it deliberately does not claim. '
-        'Everything below is product scope talking to a future user, not an apology.'
+        'What this MVP is designed to do — and what it deliberately does not claim.'
     ),
     chips=[
         'Scope: decision support',
@@ -70,10 +69,10 @@ insight_row([
     ),
     Insight(
         label='Identification',
-        headline='Robust OLS — IV moves β_own 3–4%',
-        detail=('Hausman + over-ID IV + store-week FE all preserve sign and sit within '
-                '3–4% of OLS. Same-chain caveat flagged; true causal needs multi-chain, '
-                'multi-metro data.'),
+        headline='Robust OLS — IV moves β_own by 3.0%',
+        detail=('Hausman + over-ID IV preserve sign and move β_own by 3.0%; '
+                'store-week FE moves it by 4.5%. Same-chain caveat flagged; '
+                'true causal identification needs multi-chain, multi-metro data.'),
         tone='ok',
     ),
 ])
@@ -87,9 +86,10 @@ st.markdown(
    observational choices, not random treatment assignments. **Diagnosed in `08_iv_sensitivity.ipynb`**:
    Hausman-style leave-one-out other-store price IV (Z_H) + leave-one-out other-store cost
    IV (Z_C; own-cell cost is mechanically tied to own price via DFF's PROFIT field, so
-   cannot be used). On a common sample of 2.59M rows, β_own moves from OLS −1.728 →
-   store-week-FE OLS −1.805 → Hausman IV −1.781 → over-ID IV −1.780 — |Δβ(IV − OLS)| / |β_OLS|
-   = 3.0%, first-stage F ≫ 10, same sign, CI width ratio 1.08. All four decision-rule
+   cannot be used). On a common sample of 2.59M rows, β_own moves from OLS −1.728
+   to store-week-FE OLS −1.805, Hausman IV −1.781, and over-ID IV −1.780.
+   The IV-vs-OLS relative difference is 3.0%; the store-week-FE-vs-OLS difference is
+   4.5%. First-stage F ≫ 10, same sign, CI width ratio 1.08. All four decision-rule
    conditions clear → **Robust OLS**. **Same-chain caveat**: DFF is a single chain in a
    single metro, so Z_H still absorbs chain-wide promo calendars and Chicago-local demand
    shocks. The IV is a **sensitivity bound, not definitive causal identification** — true
@@ -101,8 +101,8 @@ st.markdown(
    promo targeting, vendor funding, inventory pressure, and stockpiling.
 
 3. **Competitor reaction.** Cross-price coefficient captures historical co-movement, not a
-   game-theoretic response. The simulator lets you shock rivals' prices ±15% as a what-if,
-   but it does not solve a Nash equilibrium. Planned for `08_competitor_response.ipynb`.
+   game-theoretic response. The simulator lets you shock rivals' prices ±25% as a what-if,
+   but it does not solve a Nash equilibrium. Planned for `09_competitor_response.ipynb`.
 
 4. **Within-brand cannibalization across package sizes.** Raising the 18oz price shifts
    some demand to the 12oz of the same brand. **Diagnosed in `07_cannibalization_robustness.ipynb`**:
@@ -130,7 +130,6 @@ st.markdown(
     """
 | Notebook | Adds | Why |
 |---|---|---|
-| `06_streamlit_mvp.app` (this) | App wrapper for the existing pipeline | Closes the MVP loop |
 | `07_cannibalization_robustness.ipynb` ✅ | Same-brand cross-size diagnostic + ex-post spillover adjustment | **Done** — β_same significant but small; top-10 lifts move <5%, optimizer stays per-cell |
 | `08_iv_sensitivity.ipynb` ✅ | Hausman-style other-store IV + store-week FE robustness | **Done** — OLS β_own robust within 3% (|Δβ|/|β_OLS| = 3.0%, F≫10, same sign, CI ratio 1.08); same-chain caveat flagged |
 | `09_competitor_response.ipynb` | Best-response model for rival prices | Closes the simultaneity gap |

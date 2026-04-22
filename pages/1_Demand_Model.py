@@ -63,9 +63,10 @@ insight_row([
     ),
     Insight(
         label='Identification',
-        headline='IV-tested within 3–4%',
+        headline='IV-tested: β_own shifts 3.0%',
         detail=('β_own moves from −1.73 (OLS) to −1.78 (IV) under Hausman and over-ID IV. '
-                'Same sign, first-stage F ≫ 10, CI ratio 1.08 — Robust OLS.'),
+                'Store-week FE gives −1.80, a 4.5% shift. Same sign, first-stage F ≫ 10, '
+                'CI ratio 1.08 — Robust OLS.'),
         tone='ok',
     ),
     Insight(

@@ -45,8 +45,7 @@ sidebar_brand(
     ],
 )
 st.sidebar.caption(
-    'Frozen `baseline_with_cross` model — FE OLS. IV-sensitivity-tested in '
-    'notebook 08 (Hausman + store-week FE move β_own by 3–4%, same sign).'
+    'Frozen `baseline_with_cross` FE OLS · IV-robust. See Demand Model.'
 )
 
 # ---- Header ----
@@ -70,20 +69,19 @@ page_intro(
 # ---- Three core findings ----
 insight_row([
     Insight(
-        label='Optimizer diagnostic',
-        headline='98.5% of cells bind at the upper price guardrail',
+        label='Raise-and-test signal',
+        headline='98.5% of eligible cells point to the upper price band',
         detail=('Constant-elasticity demand with ε ≈ -1.73 and an AAC cost proxy '
-                'implies an unconstrained Lerner margin ≈ 58%, so the upper bound is '
-                'where the model wants to go. Read these rows as raise-and-test '
-                'candidates, not automatic price changes.'),
-        tone='warn',
+                'make price increases the dominant model signal. Treat this as a '
+                'test-prioritization result, not an automatic deployment rule.'),
+        tone='brand',
     ),
     Insight(
         label='Identification',
-        headline='β_own robust within 3–4% under IV sensitivity',
-        detail=('OLS −1.73 → store-week FE −1.80 → Hausman IV −1.78 → over-ID IV '
-                '−1.78. Same sign, first-stage F ≫ 10, CI ratio 1.08 — all four '
-                'robustness conditions clear → Robust OLS. Same-chain caveat flagged.'),
+        headline='β_own passes IV and store-week FE sensitivity checks',
+        detail=('OLS −1.73 → Hausman IV −1.78, a 3.0% shift; store-week FE is '
+                '−1.80, a 4.5% shift. Same sign, first-stage F ≫ 10, CI ratio '
+                '1.08 — Robust OLS with same-chain caveat flagged.'),
         tone='ok',
     ),
     Insight(
@@ -112,7 +110,7 @@ cells_df, top_df, exp_df = _kpi_inputs()
 section_header('Portfolio snapshot', caption='Model-implied top-line figures across the eligible panel.')
 col1, col2, col3, col4 = st.columns(4)
 col1.metric('Eligible cells (brand-size-store)', f'{len(cells_df):,}')
-col2.metric('Expected weekly profit lift (model)',
+col2.metric('Expected weekly profit lift (model upper-bound)',
             f"${cells_df['profit_lift_abs'].sum():,.0f}")
 col3.metric('High-risk candidates (top-10)',
             int((exp_df['risk_flag'] == 'high').sum()))

@@ -255,7 +255,7 @@ k4.metric('Δ profit (%) vs do-nothing under scenario',
           'n/a' if np.isnan(agg_lift_pct) else f'{agg_lift_pct:+.1f}%')
 
 st.caption(
-    '“Observed” reflects the rows you uploaded. "Do-nothing under scenario" applies '
+    '"Observed" reflects the rows you uploaded. "Do-nothing under scenario" applies '
     'the same demand / cost / competitor / inventory shocks to your current price + '
     'promo, so the lift number isolates the *action* from the *shock*.'
 )
