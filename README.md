@@ -139,8 +139,6 @@ pricing/
 |-- README.md
 |-- app.py
 |-- requirements.txt
-|-- pricing_promotion_decision_engine_plan.tex
-|-- pricing_promotion_decision_engine_plan.pdf
 |
 |-- docs/
 |   |-- app_wireframe.md
