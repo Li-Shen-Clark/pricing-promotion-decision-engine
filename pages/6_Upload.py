@@ -37,7 +37,6 @@ sidebar_brand(
 )
 
 page_intro(
-    icon='📤',
     kicker='Can I try this on my own data?',
     title='Upload & Score',
     tagline=(
@@ -47,7 +46,7 @@ page_intro(
     ),
     chips=[
         'CSV template + validator',
-        'Reuses the frozen cereal price sensitivity',
+        'Uses the demo cereal model',
         'Optional stress-test scenarios',
         'Per-row + aggregate output',
     ],

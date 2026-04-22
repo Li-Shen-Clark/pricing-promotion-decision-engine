@@ -23,19 +23,19 @@ PALETTE = {
     'brand_soft':   '#3a78b8',
     'brand_deep':   '#1e4d82',
     'surface':      '#ffffff',
-    'surface_2':    '#f4f6fa',
-    'surface_card': '#f8f9fc',
-    'border':       '#e4e9f2',
+    'surface_2':    '#f7f8fb',
+    'surface_card': '#fbfcfd',
+    'border':       '#eef0f5',
     'text':         '#1f2933',
     'text_muted':   '#5b6b82',
     'ok_fg':        '#1e7e5a',
-    'ok_bg':        '#e8f4ef',
+    'ok_bg':        '#eef6f2',
     'warn_fg':      '#a36a0a',
-    'warn_bg':      '#fcf3e0',
+    'warn_bg':      '#fbf5e6',
     'alert_fg':     '#a63a3a',
     'alert_bg':     '#fbeaea',
     'note_fg':      '#3a78b8',
-    'note_bg':      '#eaf1fa',
+    'note_bg':      '#f0f4fa',
     'neutral_fg':   '#5b6b82',
     'neutral_bg':   '#f4f6fa',
 }
@@ -113,43 +113,38 @@ def _css() -> str:
       h1 {{ font-weight: 700; }}
       h2, h3 {{ font-weight: 600; }}
 
-      /* --- Page intro --- */
+      /* --- Page intro (lighter, less framed) --- */
       .pe-intro {{
-          display: flex; gap: 1.1rem; align-items: flex-start;
-          padding: 1.1rem 1.2rem 1.2rem 1.2rem;
-          background: var(--surface-card);
-          border: 1px solid var(--border);
-          border-radius: 14px;
-          margin-bottom: 1.4rem;
-      }}
-      .pe-intro .icon {{
-          font-size: 1.8rem; line-height: 1; padding-top: 0.15rem;
+          display: flex; gap: 1rem; align-items: flex-start;
+          padding: 0.4rem 0 1.1rem 0;
+          margin-bottom: 1.2rem;
+          border-bottom: 1px solid var(--border);
       }}
       .pe-intro .body {{ flex: 1; }}
       .pe-intro .kicker {{
           font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
-          color: var(--brand); text-transform: uppercase; margin-bottom: 0.2rem;
+          color: var(--brand); text-transform: uppercase; margin-bottom: 0.25rem;
       }}
       .pe-intro .title {{
-          font-size: 1.45rem; font-weight: 700; color: var(--text);
-          margin-bottom: 0.35rem; line-height: 1.25;
+          font-size: 1.55rem; font-weight: 700; color: var(--text);
+          margin-bottom: 0.35rem; line-height: 1.2;
       }}
       .pe-intro .tagline {{
-          color: var(--text-muted); font-size: 0.95rem; line-height: 1.45;
+          color: var(--text-muted); font-size: 0.96rem; line-height: 1.5;
           margin-bottom: 0.65rem;
       }}
       .pe-chips {{ display: flex; flex-wrap: wrap; gap: 0.4rem; }}
       .pe-chip {{
-          font-size: 0.8rem; color: var(--text);
-          background: var(--surface); border: 1px solid var(--border);
-          padding: 0.2rem 0.6rem; border-radius: 999px;
+          font-size: 0.78rem; color: var(--text-muted);
+          background: var(--surface-2); border: 1px solid var(--border);
+          padding: 0.18rem 0.55rem; border-radius: 8px;
       }}
 
       /* --- Insight cards (full-width row block) --- */
       .pe-insight {{
           display: flex; flex-direction: column; gap: 0.3rem;
-          padding: 0.95rem 1rem; border-radius: 12px;
-          border: 1px solid var(--border); border-left-width: 4px;
+          padding: 0.9rem 1rem; border-radius: 8px;
+          border: 1px solid var(--border); border-left-width: 3px;
           background: var(--surface-card); height: 100%;
       }}
       .pe-insight .label {{
@@ -181,8 +176,8 @@ def _css() -> str:
 
       /* --- Sidebar brand --- */
       section[data-testid="stSidebar"] .pe-brand {{
-          padding: 0.5rem 0 0.9rem 0;
-          border-bottom: 1px solid var(--border); margin-bottom: 0.9rem;
+          padding: 0.4rem 0 0.8rem 0;
+          border-bottom: 1px solid var(--border); margin-bottom: 0.8rem;
       }}
       section[data-testid="stSidebar"] .pe-brand .name {{
           font-size: 1.02rem; font-weight: 700; color: var(--text);
@@ -194,7 +189,7 @@ def _css() -> str:
           display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem;
       }}
       section[data-testid="stSidebar"] .pe-badge {{
-          display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px;
+          display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
           background: var(--surface-2); border: 1px solid var(--border);
           font-size: 0.78rem; color: var(--text);
       }}
@@ -204,7 +199,7 @@ def _css() -> str:
       section[data-testid="stSidebar"] .pe-nav .step {{ color: var(--brand); font-weight: 600; }}
 
       /* Make Streamlit's native alerts feel less shouty when we still use them */
-      [data-testid="stAlert"] {{ border-radius: 10px; }}
+      [data-testid="stAlert"] {{ border-radius: 8px; }}
 
       /* Metric tightening */
       [data-testid="stMetricValue"] {{ font-weight: 700; color: var(--text); }}
@@ -230,15 +225,19 @@ def _escape(text: str) -> str:
                 .replace('>', '&gt;'))
 
 
-def page_intro(*, icon: str, kicker: str, title: str, tagline: str,
-               chips: Optional[Iterable[str]] = None) -> None:
+def page_intro(*, kicker: str, title: str, tagline: str,
+               chips: Optional[Iterable[str]] = None,
+               icon: Optional[str] = None) -> None:
     """Render a consistent page header block.
 
-    kicker — small uppercase label (e.g. "Workflow · Step 3")
+    kicker — small uppercase label (e.g. "Step 03 · Test a change")
     title  — plain page title
     tagline — one-line positioning
     chips  — optional list of short "what you can do here" items
+    icon  — accepted for back-compat but no longer rendered. Hero emoji was
+            removed in v0.6 polish; the kicker line carries the step marker.
     """
+    del icon  # intentionally unused
     chip_html = ''
     if chips:
         chip_html = '<div class="pe-chips">' + ''.join(
@@ -247,7 +246,6 @@ def page_intro(*, icon: str, kicker: str, title: str, tagline: str,
     st.markdown(
         f"""
         <div class="pe-intro">
-          <div class="icon">{icon}</div>
           <div class="body">
             <div class="kicker">{_escape(kicker)}</div>
             <div class="title">{_escape(title)}</div>

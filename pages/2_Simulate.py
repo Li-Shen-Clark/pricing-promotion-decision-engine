@@ -31,8 +31,7 @@ sidebar_brand(
 )
 
 page_intro(
-    icon='🎚',
-    kicker='What happens if I change the price?',
+    kicker='Step 02 · What happens if I change the price?',
     title='What-If Simulator',
     tagline=(
         'Pick one product at one store. Move the candidate price. See the '
@@ -244,10 +243,10 @@ curve_promo_match = evaluate_curve(
 
 section_header(
     'Demand & profit curves',
-    caption='Dashed markers show observed baseline vs chosen candidate. '
-            'These are model-implied lifts (log-linear demand, competitor prices held fixed '
-            'unless overridden, AAC-derived cost). Numbers near the edges of the price grid '
-            'are extrapolations and should be read with extra skepticism.',
+    caption='Dashed markers show the observed baseline and your chosen candidate. '
+            'These curves come from the demo demand model: rival prices stay fixed '
+            'unless you use the sidebar shock, and cost uses the dataset\'s accounting '
+            'cost proxy. Numbers near the edges of the price band are extrapolations.',
 )
 c1, c2 = st.columns(2)
 c1.plotly_chart(

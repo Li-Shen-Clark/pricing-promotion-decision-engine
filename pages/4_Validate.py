@@ -25,8 +25,7 @@ sidebar_brand(
 )
 
 page_intro(
-    icon='🧪',
-    kicker='How do I confirm it works in real stores?',
+    kicker='Step 03 · How do I confirm it works in real stores?',
     title='Validate · Plan an A/B test',
     tagline=(
         'Every candidate needs a controlled A/B test before deployment. '
@@ -36,8 +35,7 @@ page_intro(
     chips=[
         'Top-10 test plan',
         'Store-level randomization',
-        '80% power sizing',
-        'Auto-flag for underpowered tests',
+        'Checks the test is long enough',
     ],
 )
 

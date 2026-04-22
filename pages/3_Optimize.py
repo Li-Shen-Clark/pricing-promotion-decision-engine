@@ -30,8 +30,7 @@ sidebar_brand(
 )
 
 page_intro(
-    icon='⚙️',
-    kicker='Which products are worth testing first?',
+    kicker='Step 02 · Which products are worth testing first?',
     title='Optimize · Find candidates',
     tagline=(
         'Browse 5,896 product-store combinations ranked by expected weekly '

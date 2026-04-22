@@ -25,8 +25,7 @@ sidebar_brand(
 )
 
 page_intro(
-    icon='📐',
-    kicker='Can I trust this model?',
+    kicker='Step 01 · Can I trust this model?',
     title='Model Evidence',
     tagline=(
         'A plain-language summary of what the model says about pricing — '

@@ -34,9 +34,8 @@ sidebar_brand(
 
 # ---- Hero ----
 page_intro(
-    icon='📊',
-    kicker='Find pricing and promotion changes worth testing.',
-    title='Pricing & Promotion Decision Engine',
+    kicker='Pricing & Promotion Decision Engine',
+    title='Find pricing and promotion changes worth testing.',
     tagline=(
         'Pick a product at a store. Test a price or promo change. Get the '
         'expected weekly profit lift plus an A/B test plan.'
@@ -51,39 +50,32 @@ page_intro(
 # ---- What you can do here ----
 section_header(
     'What you can do here',
-    caption='Core workflow: Evidence → Simulate → Optimize → Validate. '
+    caption='Core workflow: Evidence → Simulate / Optimize → Validate. '
             'Boundaries and Upload are optional — read Boundaries to see what the demo '
             'will not claim; use Upload to score your own data.',
 )
 insight_row([
     Insight(
-        label='1 · Learn the response',
-        headline='How do sales react to price and promotion?',
-        detail=('Estimated from 2.59M weekly records across 5,896 product-store '
-                'combinations. Plain-language summary on the Evidence page.'),
+        label='Step 01',
+        headline='Learn how sales respond to price and promotion',
+        detail=('Plain-language summary plus the underlying coefficients on '
+                'the Evidence page.'),
         tone='brand',
     ),
     Insight(
-        label='2 · Try a change',
-        headline='What happens if I move the price?',
-        detail=('Pick one product at one store, slide a candidate price, and '
-                'read the model-predicted units, revenue, and profit response.'),
+        label='Step 02',
+        headline='Test a change',
+        detail=('Try one product at one store on the Simulate page, or rank '
+                'all 5,896 product-store combinations by expected lift on '
+                'the Optimize page.'),
         tone='brand',
     ),
     Insight(
-        label='3 · Rank candidates',
-        headline='Which changes are worth testing first?',
-        detail=('Sort 5,896 product-store combinations by expected weekly '
-                'profit lift. The top of the list is where to test next — '
-                'not where to deploy.'),
-        tone='brand',
-    ),
-    Insight(
-        label='4 · Plan a test',
-        headline='How do I confirm it works in real stores?',
-        detail=('A test plan with store-level randomization, 80% power sizing, '
-                'and an automatic flag for tests too short to detect a real '
-                'lift.'),
+        label='Step 03',
+        headline='Plan validation',
+        detail=('Size the A/B test that confirms the lift is real on the '
+                'Validate page. Auto-flags tests too short to detect the '
+                'expected lift.'),
         tone='brand',
     ),
 ])
@@ -116,14 +108,15 @@ e4.caption('Planned test is too short to reliably detect this lift; extend durat
            'only commit if the test catches a much larger effect.')
 
 st.markdown(
-    'This single row reproduces the entire pipeline: the demand model fits the '
-    'elasticity, the simulator predicts the response, the optimizer ranks the '
-    'candidate, the risk flags fire, and the test planner sizes the experiment. '
-    'Open any page on the left to see the same row from that page\'s perspective.'
+    'This single row reproduces the entire workflow: the model learns how sales '
+    'usually respond to price, the simulator predicts the result, the optimizer '
+    'ranks the candidate, and the validator checks whether the planned test is '
+    'long enough. Open any page on the left to see the same row from that '
+    'page\'s perspective.'
 )
 
 # ---- Model evidence (collapsed) ----
-with st.expander('Model evidence — coefficients, IV checks, robustness', expanded=False):
+with st.expander('Why we trust the ranking', expanded=False):
     st.markdown(
         f"- **Own-price elasticity ≈ {MAIN_COEFS['beta_own']:.2f}** "
         '(fixed-effects OLS, frozen for the entire pipeline).\n'
@@ -172,7 +165,6 @@ home_show_technical = st.toggle('Show technical columns', value=False, key='home
 
 decision_cols = {
     'brand_final':           'Brand',
-    'size_oz_rounded':       'Size (oz)',
     'STORE':                 'Store',
     'mean_p':                'Current price ($)',
     'opt_price':             'Test price ($)',
@@ -180,6 +172,7 @@ decision_cols = {
     'opt_hits_upper':        'At price ceiling?',
 }
 technical_cols = {
+    'size_oz_rounded':       'Size (oz)',
     'opt_promo':             'Promo (model)',
     'baseline_q':            'Baseline units/wk',
     'opt_q':                 'Test units/wk',
