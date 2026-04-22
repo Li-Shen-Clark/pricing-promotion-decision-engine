@@ -21,64 +21,98 @@ apply_page_theme()
 
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support · Dominick's cereals",
-    badges=[
-        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
-        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
-        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
-    ],
-    workflow=[
-        (1, 'Overview',   False),
-        (2, 'Evidence',   True),
-        (3, 'Simulate',   False),
-        (4, 'Optimize',   False),
-        (5, 'Validate',   False),
-        (6, 'Boundaries', False),
-        (7, 'Upload',     False),
-    ],
+    tag='Decision support for cereal pricing',
 )
 
 page_intro(
     icon='📐',
-    kicker='Workflow · Step 2 · Can I trust this model?',
+    kicker='Can I trust this model?',
     title='Model Evidence',
     tagline=(
-        'The estimated elasticities and the robustness evidence behind them. '
-        'These coefficients are frozen and reused everywhere downstream.'
+        'A plain-language summary of what the model says about pricing — '
+        'and a tested-robustness check below.'
     ),
     chips=[
-        'β_own / β_cross / θ_promo',
-        'Holdout diagnostic',
-        'Coefficient variants',
-        'IV-sensitivity tested',
+        'Business translation',
+        'Robustness tested',
+        'Frozen for the whole app',
     ],
 )
 
+# ---- Plain-language business translation ----
+section_header('What the model says (in business language)')
 insight_row([
     Insight(
-        label='Frozen',
-        headline='One model, used end-to-end',
-        detail=('Every simulation, optimizer run, and test plan calls these '
-                'same coefficients. No silent re-fits.'),
+        label='Price → Units',
+        headline='Raise price, sell fewer units — but margins can rise',
+        detail=('A 10% price increase is associated with roughly a 17% drop in '
+                'units sold for the same product, on average. Depending on the '
+                'starting margin, total weekly profit can still go up.'),
         tone='brand',
     ),
     Insight(
-        label='IV-tested',
-        headline='OLS and IV agree within 3.0%',
-        detail=('β_own moves from −1.73 (OLS) to −1.78 (IV); store-week FE '
-                'gives −1.80, a 4.5% shift. Same sign across all three. '
-                'First-stage F ≫ 10, CI ratio 1.08.'),
-        tone='ok',
+        label='Rivals matter',
+        headline='Competitor prices push in the expected direction',
+        detail=('When competing brands raise their prices, this brand sells '
+                'somewhat more — the relationship has the sign business teams '
+                'expect.'),
+        tone='brand',
     ),
     Insight(
-        label='Scope',
-        headline='Designed to rank actions, not forecast sales',
-        detail=('Point predictions should be read alongside the sensitivity '
-                'grid in the simulator. Every recommendation downstream goes '
-                'through a controlled A/B test.'),
+        label='Promotion weeks',
+        headline='Sale weeks sell more, but it is not a clean causal estimate',
+        detail=('Weeks flagged as "on sale" sell about 50% more units in this '
+                'data — but those weeks also tend to be when vendors fund '
+                'promotions and when retailers push inventory, so this is an '
+                'association, not a clean uplift.'),
         tone='note',
     ),
 ])
+
+# ---- Robustness summary ----
+section_header(
+    'Is this stable under stricter assumptions?',
+    caption='Same headline, three different identification choices.',
+)
+insight_row([
+    Insight(
+        label='Robustness 1 of 3',
+        headline='Standard fit · price-sensitivity index −1.73',
+        detail='Brand-size-store and week effects controlled out.',
+        tone='brand',
+    ),
+    Insight(
+        label='Robustness 2 of 3',
+        headline='Stricter fit · price-sensitivity index −1.80',
+        detail='Adds store-week effects to absorb local promo and demand shocks. 4.5% drift.',
+        tone='ok',
+    ),
+    Insight(
+        label='Robustness 3 of 3',
+        headline='Causal-style fit · price-sensitivity index −1.78',
+        detail='Uses other-store prices as instruments to address simultaneity. 3.0% drift.',
+        tone='ok',
+    ),
+])
+
+st.caption(
+    'Same direction across all three approaches; the headline shifts by less than '
+    '5%. Decision rule says: keep the standard fit as the working number, but '
+    'remember it was tested.'
+)
+
+# ---- Technical detail expander (β / OLS / IV / R² / smearing) ----
+with st.expander('Model details — coefficients, standard errors, IV diagnostics', expanded=False):
+    st.markdown(
+        f"Frozen coefficients (the actual numbers reused everywhere):\n\n"
+        f"- **β_own = {MAIN_COEFS['beta_own']:.2f}** — own-price elasticity (log-log).\n"
+        f"- **β_cross = +{MAIN_COEFS['beta_cross']:.2f}** — cross-price elasticity (competitor index).\n"
+        f"- **θ_promo = +{MAIN_COEFS['theta_promo']:.2f}** — sale-code coefficient in log points; "
+        f"`exp(θ)-1 ≈ 54%` conditional uplift, not a clean causal effect.\n\n"
+        'See the coefficient table, holdout fit, and robustness variants in the sections '
+        'below. Full notebook: `notebooks/03_demand_estimation.ipynb` and '
+        '`notebooks/08_iv_sensitivity.ipynb`.'
+    )
 
 
 @st.cache_data
@@ -86,6 +120,10 @@ def _load() -> pd.DataFrame:
     return load_coefficients()
 
 coef = _load()
+
+st.markdown('---')
+st.caption('Below: the underlying coefficient tables, fit diagnostics, and report doc. '
+           'For technical reviewers.')
 
 # ---- Coefficients table ----
 section_header(

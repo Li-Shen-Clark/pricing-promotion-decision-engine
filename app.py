@@ -29,21 +29,7 @@ apply_page_theme()
 # ---- Sidebar (branded) ----
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support · Dominick's cereals",
-    badges=[
-        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
-        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
-        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
-    ],
-    workflow=[
-        (1, 'Overview',   True),
-        (2, 'Evidence',   False),
-        (3, 'Simulate',   False),
-        (4, 'Optimize',   False),
-        (5, 'Validate',   False),
-        (6, 'Boundaries', False),
-        (7, 'Upload',     False),
-    ],
+    tag="Decision support for cereal pricing",
 )
 
 # ---- Hero ----
@@ -52,13 +38,12 @@ page_intro(
     kicker='Find pricing and promotion changes worth testing.',
     title='Pricing & Promotion Decision Engine',
     tagline=(
-        'This app turns historical retail scanner data into a ranked list of '
-        'price and promotion changes worth A/B testing — with the demand '
-        'model, sensitivity grid, and test plan all visible.'
+        'Pick a product at a store. Test a price or promo change. Get the '
+        'expected weekly profit lift plus an A/B test plan.'
     ),
     chips=[
-        "Built on Dominick's cereals · 1989-1996",
-        '5,896 candidate cells',
+        "Dataset · Dominick's cereals 1989-1996",
+        '5,896 product-store combinations',
         'Live on Streamlit Cloud',
     ],
 )
@@ -70,34 +55,33 @@ section_header(
 )
 insight_row([
     Insight(
-        label='1 · Estimate demand',
-        headline='Learn how sales respond to price and promotion',
-        detail=('Fit on 2.59M weekly observations across 5,896 brand-size-store '
-                'cells. View the elasticities and the robustness checks behind '
-                'them on the Evidence page.'),
+        label='1 · Learn the response',
+        headline='How do sales react to price and promotion?',
+        detail=('Estimated from 2.59M weekly records across 5,896 product-store '
+                'combinations. Plain-language summary on the Evidence page.'),
         tone='brand',
     ),
     Insight(
-        label='2 · Simulate a change',
-        headline='Ask what happens if you move price, cost, or promo',
-        detail=('Pick a cell, slide a candidate price, and read the model-'
-                'predicted demand and profit response. Useful for pricing '
-                'committee what-ifs.'),
+        label='2 · Try a change',
+        headline='What happens if I move the price?',
+        detail=('Pick one product at one store, slide a candidate price, and '
+                'read the model-predicted units, revenue, and profit response.'),
         tone='brand',
     ),
     Insight(
         label='3 · Rank candidates',
-        headline='Sort 5,896 cells by expected weekly profit lift',
-        detail=('Filter by brand, size, or history. The top of the list is '
-                'where the model says to test next — not where to deploy.'),
+        headline='Which changes are worth testing first?',
+        detail=('Sort 5,896 product-store combinations by expected weekly '
+                'profit lift. The top of the list is where to test next — '
+                'not where to deploy.'),
         tone='brand',
     ),
     Insight(
         label='4 · Plan a test',
-        headline='Turn a candidate into a controlled A/B',
-        detail=('Store-level randomization, 80% power sizing, and an automatic '
-                'underpowered flag. No price change ships without a passing '
-                'test.'),
+        headline='How do I confirm it works in real stores?',
+        detail=('A test plan with store-level randomization, 80% power sizing, '
+                'and an automatic flag for tests too short to detect a real '
+                'lift.'),
         tone='brand',
     ),
 ])
@@ -124,7 +108,7 @@ e1.caption('76 weeks of history at this store.')
 e2.metric('2. Model says', '$4.30',           help='Optimizer candidate price')
 e2.caption('+42% — flagged as extrapolation beyond historical band.')
 e3.metric('3. Expected',   '+$311 / wk',      help='Model-implied weekly profit lift')
-e3.caption('+166.8% over baseline · model upper-bound, not a deployment target.')
+e3.caption('+166.8% over baseline. Likely overstated near the price ceiling — read as test motivation.')
 e4.metric('4. To validate', 'High-risk cluster RCT', help='Recommended test design')
 e4.caption('Flagged underpowered at planned duration — extend or accept larger MDE.')
 
@@ -148,16 +132,28 @@ with st.expander('Model evidence — coefficients, IV checks, robustness', expan
         'on **Boundaries**.'
     )
 
-# ---- Portfolio snapshot ----
-section_header('Portfolio snapshot', caption='Model-implied top-line figures across the eligible panel.')
+# ---- Pipeline snapshot ----
+section_header(
+    'Pipeline snapshot',
+    caption='How the model narrows from the full panel down to a small list of testable candidates.',
+)
 col1, col2, col3, col4 = st.columns(4)
-col1.metric('Eligible cells (brand-size-store)', f'{len(cells_df):,}')
-col2.metric('Expected weekly profit lift (model upper-bound)',
-            f"${cells_df['profit_lift_abs'].sum():,.0f}")
-col3.metric('High-risk candidates (top-10)',
-            int((exp_df['risk_flag'] == 'high').sum()))
-col4.metric('Underpowered tests (planned vs required)',
+col1.metric('Product-store combinations screened', f'{len(cells_df):,}')
+col2.metric('Top-10 shortlisted for testing',      f'{len(top_df):,}')
+col3.metric('Top-10 flagged high-risk',            int((exp_df['risk_flag'] == 'high').sum()))
+col4.metric('Top-10 too short to detect a real lift',
             int(exp_df['underpowered'].sum()))
+
+with st.expander('Model-implied lift across the full panel — diagnostic only, not a forecast'):
+    st.markdown(
+        f"If you naively sum the model-implied weekly profit lift across all "
+        f"{len(cells_df):,} product-store combinations, you get "
+        f"**${cells_df['profit_lift_abs'].sum():,.0f} / week** — but this is "
+        '**not an additive portfolio forecast**. It assumes every candidate '
+        'gets deployed simultaneously and that the model holds at the '
+        'extrapolated upper price band for 98.5% of cases. Treat it as a '
+        'sanity-check on the magnitude of opportunity, not as a business case.'
+    )
 
 # ---- Top-10 table ----
 section_header(

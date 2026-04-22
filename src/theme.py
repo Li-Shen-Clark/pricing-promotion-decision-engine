@@ -196,8 +196,7 @@ def _css() -> str:
       section[data-testid="stSidebar"] .pe-badge {{
           display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px;
           background: var(--surface-2); border: 1px solid var(--border);
-          font-size: 0.78rem; font-family: "SF Mono", "Menlo", monospace;
-          color: var(--text);
+          font-size: 0.78rem; color: var(--text);
       }}
       section[data-testid="stSidebar"] .pe-nav {{
           font-size: 0.88rem; color: var(--text-muted); line-height: 1.55;
@@ -311,13 +310,19 @@ def section_header(title: str, caption: Optional[str] = None) -> None:
 # ---------------------------------------------------------------------------
 # Sidebar branding
 # ---------------------------------------------------------------------------
-def sidebar_brand(*, name: str, tag: str, badges: Optional[Iterable[tuple[str, str]]] = None,
+def sidebar_brand(*, name: str, tag: str,
+                  badges: Optional[Iterable[tuple[str, str]]] = None,
                   workflow: Optional[Iterable[tuple[int, str, bool]]] = None) -> None:
-    """Render the branded sidebar header + optional workflow nav.
+    """Render the branded sidebar header.
 
-    badges — iterable of (label, value) pairs rendered as monospace chips
-    workflow — iterable of (step_number, page_name, is_current) triples
+    badges — iterable of (label, value) pairs rendered as plain-text chips.
+             Labels should be business language (e.g. 'Price sensitivity'),
+             not Greek letters.
+    workflow — accepted for back-compat but no longer rendered. Streamlit's
+               native multipage sidebar nav already lists pages; rendering
+               a static workflow on top produces a confusing dual nav.
     """
+    del workflow  # intentionally unused
     with st.sidebar:
         badges_html = ''
         if badges:
@@ -335,12 +340,3 @@ def sidebar_brand(*, name: str, tag: str, badges: Optional[Iterable[tuple[str, s
             """,
             unsafe_allow_html=True,
         )
-        if workflow:
-            items = []
-            for step, name_, current in workflow:
-                style = ' style="color: var(--brand); font-weight: 600;"' if current else ''
-                items.append(f'<div{style}><span class="step">{step}.</span> {_escape(name_)}</div>')
-            st.markdown(
-                f'<div class="pe-nav">{"".join(items)}</div>',
-                unsafe_allow_html=True,
-            )

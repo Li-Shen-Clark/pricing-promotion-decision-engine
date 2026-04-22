@@ -21,37 +21,23 @@ apply_page_theme()
 
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support · Dominick's cereals",
-    badges=[
-        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
-        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
-        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
-    ],
-    workflow=[
-        (1, 'Overview',   False),
-        (2, 'Evidence',   False),
-        (3, 'Simulate',   False),
-        (4, 'Optimize',   False),
-        (5, 'Validate',   True),
-        (6, 'Boundaries', False),
-        (7, 'Upload',     False),
-    ],
+    tag='Decision support for cereal pricing',
 )
 
 page_intro(
     icon='🧪',
-    kicker='Workflow · Step 5 · How would I confirm this works in real stores?',
+    kicker='How do I confirm it works in real stores?',
     title='Test Planner',
     tagline=(
-        'Every optimizer candidate needs a controlled experiment before deployment. '
-        'Randomization unit is the store (or store-cluster), matching how prices '
-        'are actually set in the chain.'
+        'Every candidate needs a controlled A/B test before deployment. '
+        'The randomization unit is the store, matching how prices are '
+        'actually set in the chain.'
     ),
     chips=[
         'Top-10 test plan',
-        'Store-level RCT',
+        'Store-level randomization',
         '80% power sizing',
-        'Underpowered flag',
+        'Auto-flag for underpowered tests',
     ],
 )
 
@@ -101,28 +87,28 @@ display_cols = {
     'brand_final':                                       'Brand',
     'size_oz_rounded':                                   'Size (oz)',
     'STORE':                                             'Store',
-    'current_price':                                     'Current $',
-    'candidate_price':                                   'Candidate $',
+    'current_price':                                     'Current price',
+    'candidate_price':                                   'Test price',
     'promo_status':                                      'Promo',
     'baseline_profit':                                   'Baseline profit ($/wk)',
-    'profit_lift_abs':                                   'Δ profit ($/wk, model)',
-    'profit_std_wk':                                     'σ ($/wk)',
+    'profit_lift_abs':                                   'Expected lift ($/wk)',
+    'profit_std_wk':                                     'Weekly profit noise ($)',
     'risk_flag':                                         'Risk',
     'recommended_test_type':                             'Test type',
     'planned_duration_weeks':                            'Planned weeks',
-    'planned_stores_per_arm':                            'Stores per arm',
-    'n_storeweeks_per_arm_at_50pct_MDE_80pct_power':     'Required n_sw/arm @ 50% MDE',
-    'underpowered':                                      'Underpowered?',
+    'planned_stores_per_arm':                            'Stores per group',
+    'n_storeweeks_per_arm_at_50pct_MDE_80pct_power':     'Required store-weeks per group',
+    'underpowered':                                      'Too short to detect?',
 }
 view = cand.rename(columns=display_cols)[list(display_cols.values())]
 st.dataframe(view.style.format({
-    'Size (oz)':                       '{:.2f}',
-    'Current $':                       '${:.2f}',
-    'Candidate $':                     '${:.2f}',
-    'Baseline profit ($/wk)':          '${:.0f}',
-    'Δ profit ($/wk, model)':          '${:+.0f}',
-    'σ ($/wk)':                        '${:.0f}',
-    'Required n_sw/arm @ 50% MDE':     '{:.0f}',
+    'Size (oz)':                            '{:.2f}',
+    'Current price':                        '${:.2f}',
+    'Test price':                           '${:.2f}',
+    'Baseline profit ($/wk)':               '${:.0f}',
+    'Expected lift ($/wk)':                 '${:+.0f}',
+    'Weekly profit noise ($)':              '${:.0f}',
+    'Required store-weeks per group':       '{:.0f}',
 }), width='stretch', hide_index=True)
 
 n_under = int(cand['underpowered'].sum())
@@ -136,44 +122,42 @@ if n_under:
 # ---- Sample size widget ----
 section_header(
     'Sample size calculator',
-    caption='Two-sample equal-variance t-test with store-week as the unit. Defaults are the '
-            'median σ and a 50% MDE drawn from the top-10 table above — change them to size a '
-            'different candidate. For panels with within-store correlation, multiply n by '
-            '`1 + (m-1)·ICC`.',
+    caption='Defaults are drawn from the median candidate above. Change the inputs to size '
+            'the test for a different candidate or a more conservative target.',
 )
 
 w1, w2, w3, w4 = st.columns(4)
-sigma = w1.number_input('σ (weekly profit standard deviation, $)',
+sigma = w1.number_input('Weekly profit noise ($)',
                         min_value=1.0, max_value=1000.0,
                         value=float(round(cand['profit_std_wk'].median(), 0)),
                         step=1.0,
-                        help='How much weekly profit varies within a single cell — '
-                             'the noise floor the test has to cut through.')
-delta = w2.number_input('δ — minimum detectable effect ($/week)',
+                        help='How much a single product-store\'s weekly profit varies week to week. '
+                             'The noise floor the test has to cut through. (σ)')
+delta = w2.number_input('Smallest lift to detect ($/week)',
                         min_value=1.0, max_value=2000.0,
                         value=float(round(cand['baseline_profit'].median() * 0.5, 0)),
                         step=1.0,
-                        help='The smallest weekly profit lift the test has to be able to '
-                             'distinguish from noise.')
-alpha = w3.select_slider('α — false-positive rate (two-sided)',
+                        help='Set the test to reliably catch a real weekly profit improvement '
+                             'of at least this size. (δ — minimum detectable effect)')
+alpha = w3.select_slider('False-alarm risk',
                          options=[0.01, 0.05, 0.10], value=0.05,
                          format_func=lambda v: f'{v:.2f}',
-                         help='Probability of declaring a winner when there is no real lift.')
-power = w4.select_slider('Power (1−β) — true-positive rate',
+                         help='Chance of declaring a winner when there is no real lift. (α, two-sided)')
+power = w4.select_slider('Chance of catching a real lift',
                          options=[0.70, 0.80, 0.90, 0.95],
                          value=0.80, format_func=lambda v: f'{v:.2f}',
-                         help='Probability of detecting a real lift of at least δ.')
+                         help='Chance the test detects a real lift of at least the size above. (1−β)')
 
 n = n_per_arm(sigma, delta, alpha=alpha, power=power)
 r1, r2, r3 = st.columns(3)
-r1.metric('Required n per arm (store-weeks)', f'{n:,.0f}')
-r2.metric('Total store-weeks (both arms)',    f'{2*n:,.0f}')
+r1.metric('Required store-weeks per group', f'{n:,.0f}')
+r2.metric('Total store-weeks (both groups)', f'{2*n:,.0f}')
 weeks_at_5_stores = n / 5 if n != float('inf') else float('inf')
-r3.metric('Weeks if 5 stores per arm',
+r3.metric('Weeks needed (5 stores per group)',
           '∞' if weeks_at_5_stores == float('inf') else f'{weeks_at_5_stores:,.1f}')
 
-section_header('Sample size curve (log scale)',
-               caption='Required store-weeks per arm vs detectable effect size.')
+section_header('Sample size curve',
+               caption='How required store-weeks per group changes as the smallest lift you want to catch shrinks.')
 st.plotly_chart(
     sample_size_curve(sigma=float(sigma),
                       baseline_profit=float(round(cand['baseline_profit'].median(), 0))),

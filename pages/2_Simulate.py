@@ -27,58 +27,45 @@ apply_page_theme()
 
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support · Dominick's cereals",
-    badges=[
-        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
-        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
-        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
-    ],
-    workflow=[
-        (1, 'Overview',   False),
-        (2, 'Evidence',   False),
-        (3, 'Simulate',   True),
-        (4, 'Optimize',   False),
-        (5, 'Validate',   False),
-        (6, 'Boundaries', False),
-        (7, 'Upload',     False),
-    ],
+    tag='Decision support for cereal pricing',
 )
 
 page_intro(
     icon='🎚',
-    kicker='Workflow · Step 3 · What happens if I change the price?',
+    kicker='What happens if I change the price?',
     title='What-If Simulator',
     tagline=(
-        'Pick a product. Move the candidate price. See the demand and profit '
-        'response under the frozen model.'
+        'Pick one product at one store. Move the candidate price. See the '
+        'predicted units, revenue, and weekly profit response.'
     ),
     chips=[
-        'Cell-level what-if',
-        'Sensitivity sliders',
-        'Scenario overlays (optional)',
+        'Single product-store',
+        'Optional stress-test scenarios',
         'Demand + profit curves',
     ],
 )
 
 insight_row([
     Insight(
-        label='1 · Pick a cell',
+        label='1 · Pick a product-store',
         headline='One brand-size at one store',
-        detail='Use the dropdowns below to select the product context.',
+        detail='Use the dropdowns below to choose the product and store.',
         tone='brand',
     ),
     Insight(
         label='2 · Move the price',
-        headline='Slide within the historical band',
-        detail=('The slider is bounded by the cell\'s observed price range with a '
-                'margin floor; numbers near the edges are extrapolations.'),
+        headline='Slide within the historical price band',
+        detail=('The slider is bounded by the prices this product has actually '
+                'traded at; numbers at the edges are extrapolations and should '
+                'be read with extra skepticism.'),
         tone='brand',
     ),
     Insight(
-        label='3 · Read the curves',
-        headline='Demand and profit vs price',
-        detail=('Dashed markers show the observed baseline and your candidate. '
-                'Sidebar sliders stress-test elasticities and shock scenarios.'),
+        label='3 · Read the response',
+        headline='Predicted units, revenue, and profit',
+        detail=('Dashed markers on the curves show the historical baseline vs '
+                'your candidate. Sidebar sliders let you stress-test demand, '
+                'cost, and competitor shocks.'),
         tone='brand',
     ),
 ])
@@ -109,14 +96,15 @@ row = cells.loc[
     (cells['STORE'] == store)
 ].iloc[0].to_dict()
 
-# ---- Cell baseline ----
-section_header('Cell baseline (observed)', caption='Means over the observed history of this brand-size-store cell.')
+# ---- Baseline for this product-store ----
+section_header('Baseline for this product-store',
+               caption='Average over all weeks this product has been observed at this store.')
 b1, b2, b3, b4, b5 = st.columns(5)
-b1.metric('Mean price', f"${row['mean_p']:.2f}")
-b2.metric('Mean cost (AAC)', f"${row['mean_cost']:.2f}")
-b3.metric('Mean units / week', f"{row['mean_q']:.1f}")
-b4.metric('Baseline profit / week', f"${row['baseline_profit']:.0f}")
-b5.metric('History (weeks)', f"{int(row['n_weeks'])}")
+b1.metric('Average price', f"${row['mean_p']:.2f}")
+b2.metric('Average unit cost', f"${row['mean_cost']:.2f}", help='Acquisition cost proxy from the dataset')
+b3.metric('Average units / week', f"{row['mean_q']:.1f}")
+b4.metric('Average profit / week', f"${row['baseline_profit']:.0f}")
+b5.metric('Weeks of history', f"{int(row['n_weeks'])}")
 
 # ---- Sidebar: sensitivity controls ----
 def _nearest(grid, target):
@@ -124,48 +112,23 @@ def _nearest(grid, target):
 
 
 with st.sidebar:
-    st.markdown('### Demand parameters')
-    beta_own = st.select_slider(
-        'β_own (own-price elasticity)',
-        options=SENSITIVITY_GRID['beta_own'],
-        value=_nearest(SENSITIVITY_GRID['beta_own'], MAIN_COEFS['beta_own']),
-        format_func=lambda v: f'{v:+.2f}',
-    )
-    beta_cross = st.select_slider(
-        'β_cross (competitor)',
-        options=SENSITIVITY_GRID['beta_cross'], value=0.0,
-        format_func=lambda v: f'{v:+.2f}',
-    )
-    theta = st.select_slider(
-        'θ_promo (sale-code effect, log-points)',
-        options=SENSITIVITY_GRID['theta_promo'],
-        value=_nearest(SENSITIVITY_GRID['theta_promo'], MAIN_COEFS['theta_promo']),
-        format_func=lambda v: f'+{v:.2f}',
-    )
+    st.markdown('### Stress-test scenarios')
     st.caption(
-        'Defaults are the closest sensitivity-grid value to the frozen `baseline_with_cross` '
-        'point estimate (β_own=-1.73, θ=+0.43). θ is a conditional sale-code effect; '
-        'exp(0.43)-1 ≈ 54% under the model, not a clean causal effect. Move sliders to '
-        'explore the elasticity neighbourhood.'
-    )
-
-    st.markdown('---')
-    st.markdown('### Scenario controls')
-    st.caption(
-        'Layered on top of the model. Defaults are inert — leave everything at zero / off '
-        'to reproduce the frozen baseline.'
+        'Optional — defaults are inert. Use these to see how the candidate '
+        'profit holds up under a softer demand world, a cost increase, '
+        'a competitor price move, or an inventory cap.'
     )
     demand_shock_pct = st.slider(
         'Demand shock (%)', min_value=-30, max_value=30, value=0, step=5,
-        help='Multiplicative on predicted Q. Use to stress-test soft- or hot-demand worlds.',
+        help='Shifts the predicted units up or down by a flat percentage.',
     )
     cost_shock_pct = st.slider(
         'Cost shock (%)', min_value=-25, max_value=40, value=0, step=5,
-        help='Multiplicative on AAC unit cost. Use to test commodity / supplier scenarios.',
+        help='Shifts the unit cost up or down by a flat percentage.',
     )
     comp_shock_pct = st.slider(
         'Competitor price shock (%)', min_value=-25, max_value=25, value=0, step=5,
-        help='Multiplicative on competitor index. Activates β_cross.',
+        help='Shifts the competitor price index up or down. Routes through the cross-price effect.',
     )
     use_inv_cap = st.toggle('Inventory cap?', value=False,
                             help='Hard ceiling on units sold per week.')
@@ -178,6 +141,34 @@ with st.sidebar:
         'Promo fixed cost ($/wk)', min_value=0.0, max_value=2000.0, value=0.0, step=5.0,
         help='Deducted from profit when promo is on. Set above 0 to test promo break-even.',
     )
+
+    st.markdown('---')
+    with st.expander('Advanced — model coefficients', expanded=False):
+        st.caption(
+            'Override the frozen demand-model coefficients to see how '
+            'sensitive the result is to the elasticity estimate. Defaults '
+            'are the frozen values used everywhere else in the app.'
+        )
+        beta_own = st.select_slider(
+            'Own-price sensitivity (β_own)',
+            options=SENSITIVITY_GRID['beta_own'],
+            value=_nearest(SENSITIVITY_GRID['beta_own'], MAIN_COEFS['beta_own']),
+            format_func=lambda v: f'{v:+.2f}',
+            help='More negative = larger units drop per 1% price increase.',
+        )
+        beta_cross = st.select_slider(
+            'Competitor-price sensitivity (β_cross)',
+            options=SENSITIVITY_GRID['beta_cross'], value=0.0,
+            format_func=lambda v: f'{v:+.2f}',
+            help='Positive = rivals raise prices → this product sells more.',
+        )
+        theta = st.select_slider(
+            'Promo coefficient (θ_promo, log points)',
+            options=SENSITIVITY_GRID['theta_promo'],
+            value=_nearest(SENSITIVITY_GRID['theta_promo'], MAIN_COEFS['theta_promo']),
+            format_func=lambda v: f'+{v:.2f}',
+            help='Conditional sale-code effect; exp(θ)-1 ≈ implied % uplift.',
+        )
 
 scenario = Scenario(
     demand_shock=demand_shock_pct / 100.0,

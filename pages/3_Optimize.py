@@ -26,60 +26,45 @@ apply_page_theme()
 
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support · Dominick's cereals",
-    badges=[
-        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
-        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
-        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
-    ],
-    workflow=[
-        (1, 'Overview',   False),
-        (2, 'Evidence',   False),
-        (3, 'Simulate',   False),
-        (4, 'Optimize',   True),
-        (5, 'Validate',   False),
-        (6, 'Boundaries', False),
-        (7, 'Upload',     False),
-    ],
+    tag='Decision support for cereal pricing',
 )
 
 page_intro(
     icon='⚙️',
-    kicker='Workflow · Step 4 · Which products should I consider changing?',
+    kicker='Which products are worth testing first?',
     title='Candidate Finder',
     tagline=(
-        'Browse 5,896 brand-size-store cells ranked by expected weekly profit lift. '
-        'The top of the list is where the model wants to test next.'
+        'Browse 5,896 product-store combinations ranked by expected weekly '
+        'profit lift. The top of the list is where to test next — not where '
+        'to deploy.'
     ),
     chips=[
-        '5,896 candidate cells',
+        '5,896 product-store combinations',
         'Filter + drill-down',
-        'Scenario-aware re-ranking',
-        'Per-cell profit curve',
+        'Re-ranks under your scenario',
     ],
 )
 
 insight_row([
     Insight(
         label='1 · Ranked list',
-        headline='Sorted by model-implied weekly profit lift',
-        detail=('The leaderboard is the union of every cell\'s individual '
-                'optimization. Read the top as test prioritization.'),
+        headline='Top of list = first test, not first rollout',
+        detail=('The order is by model-implied weekly profit lift. Treat it as '
+                'a test-prioritization queue.'),
         tone='brand',
     ),
     Insight(
         label='2 · Filter + inspect',
-        headline='Narrow by brand, size, or history',
-        detail=('Drill into any single row to see its profit-vs-price curve, '
-                'risk flags (price ceiling, large quantity shift), and recommended '
-                'promo state.'),
+        headline='Narrow by brand, size, or history depth',
+        detail=('Click any row to see its price-vs-profit curve and the risk '
+                'flags (price ceiling, large quantity shift) the model fired.'),
         tone='brand',
     ),
     Insight(
-        label='3 · No row deploys without a test',
-        headline='Every candidate flows to the Test Planner',
-        detail=('The optimizer is a search heuristic. The A/B test on the next '
-                'page is what turns a candidate into a decision.'),
+        label='3 · Validate before deploy',
+        headline='Every row goes through the Test Planner',
+        detail=('The optimizer is a search heuristic. The A/B test on the '
+                'next page is what turns a candidate into a decision.'),
         tone='note',
     ),
 ])
@@ -111,7 +96,7 @@ cost_shock_pct = st.sidebar.slider(
 )
 comp_shock_pct = st.sidebar.slider(
     'Competitor price shock (%)', min_value=-25, max_value=25, value=0, step=5,
-    help='Activates β_cross.',
+    help='Shifts the competitor price index up or down. Routes through the cross-price effect.',
 )
 use_inv_cap = st.sidebar.toggle('Inventory cap?', value=False)
 inventory_cap_val = (
@@ -134,7 +119,7 @@ scenario = Scenario(
 if not scenario.is_baseline:
     # Live re-optimization. Vectorised, ~10ms across the full panel.
     cells = optimize_all_cells(cells, scenario=scenario)
-    st.sidebar.success(f'Re-optimized {len(cells):,} cells under active scenario.')
+    st.sidebar.success(f'Re-ranked {len(cells):,} product-store combinations under active scenario.')
     sc_flags = scenario_warnings(scenario, baseline_q=float(cells['mean_q'].median()))
     if sc_flags:
         _warnings_placeholder.warning(
@@ -164,9 +149,9 @@ n_weeks_min = st.sidebar.slider(
     value=52,
 )
 hide_ceiling = st.sidebar.checkbox(
-    'Hide candidates that hit price ceiling',
+    'Hide candidates at the price ceiling',
     value=False,
-    help='98.5% of cells bind at the upper guardrail. Toggle to focus on interior optima.',
+    help='98.5% of combinations want the model maximum — toggle on to see only interior optima.',
 )
 top_n = st.sidebar.slider('Top N to chart', min_value=5, max_value=50, value=15)
 
@@ -178,8 +163,8 @@ if hide_ceiling:
     mask &= ~cells['opt_hits_upper'].astype(bool)
 view = cells.loc[mask].copy()
 
-section_header(f'Filtered view · {len(view):,} of {len(cells):,} eligible cells',
-               caption='Sort, filter, and toggle ceiling-binding cells from the sidebar.')
+section_header(f'Filtered view · {len(view):,} of {len(cells):,} product-store combinations',
+               caption='Use the sidebar to filter by brand, size, history depth, or hide candidates that hit the historical price ceiling.')
 
 # ---- Top-N bar chart ----
 top = view.sort_values('profit_lift_abs', ascending=False).head(top_n)
@@ -190,34 +175,42 @@ if len(top) > 0:
 
 # ---- Table ----
 section_header('Candidate table',
-               caption='Top 500 rows of the filtered view, sorted by expected weekly profit lift.')
-display_cols = {
+               caption='Top 500 rows of the filtered view, sorted by expected weekly profit lift. '
+                       'Toggle "Show technical columns" for promo flag, baseline profit, and risk diagnostics.')
+
+show_technical = st.toggle('Show technical columns', value=False,
+                           help='Hide by default to keep the decision view clean.')
+
+decision_cols = {
     'brand_final':       'Brand',
     'size_oz_rounded':   'Size (oz)',
     'STORE':             'Store',
-    'n_weeks':           'Weeks',
     'mean_p':            'Current price',
-    'opt_price':         'Candidate price',
+    'opt_price':         'Test price',
+    'profit_lift_abs':   'Expected lift ($/wk)',
+    'opt_hits_upper':    'At price ceiling?',
+}
+technical_cols = {
+    'n_weeks':           'Weeks of history',
     'opt_promo':         'Promo (model)',
     'baseline_profit':   'Baseline profit ($/wk)',
-    'opt_profit':        'Expected profit ($/wk, model)',
-    'profit_lift_abs':   'Δ profit ($/wk, model)',
-    'profit_lift_pct':   'Δ profit (%)',
-    'q_lift_ratio':      'Q ratio (cand/baseline)',
-    'opt_hits_upper':    'Hits ceiling?',
+    'opt_profit':        'Expected profit ($/wk)',
+    'profit_lift_pct':   'Lift (%)',
+    'q_lift_ratio':      'Units ratio (cand/base)',
 }
+display_cols = {**decision_cols, **technical_cols} if show_technical else decision_cols
 view_disp = view.sort_values('profit_lift_abs', ascending=False)\
                 .head(500)\
                 .rename(columns=display_cols)[list(display_cols.values())]
 st.dataframe(view_disp.style.format({
     'Size (oz)':                       '{:.2f}',
     'Current price':                   '${:.2f}',
-    'Candidate price':                 '${:.2f}',
+    'Test price':                      '${:.2f}',
+    'Expected lift ($/wk)':            '${:.0f}',
     'Baseline profit ($/wk)':          '${:.0f}',
-    'Expected profit ($/wk, model)':   '${:.0f}',
-    'Δ profit ($/wk, model)':          '${:.0f}',
-    'Δ profit (%)':                    '{:.0f}%',
-    'Q ratio (cand/baseline)':         '{:.2f}×',
+    'Expected profit ($/wk)':          '${:.0f}',
+    'Lift (%)':                        '{:.0f}%',
+    'Units ratio (cand/base)':         '{:.2f}×',
 }), width='stretch', hide_index=True)
 # ---- Drill-down ----
 section_header('Inspect a single candidate',

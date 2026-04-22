@@ -33,35 +33,22 @@ apply_page_theme()
 
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support · Dominick's cereals",
-    badges=[
-        ('β_own',   f"{MAIN_COEFS['beta_own']:.2f}"),
-        ('β_cross', f"+{MAIN_COEFS['beta_cross']:.2f}"),
-        ('θ',       f"+{MAIN_COEFS['theta_promo']:.2f}"),
-    ],
-    workflow=[
-        (1, 'Overview',   False),
-        (2, 'Evidence',   False),
-        (3, 'Simulate',   False),
-        (4, 'Optimize',   False),
-        (5, 'Validate',   False),
-        (6, 'Boundaries', False),
-        (7, 'Upload',     True),
-    ],
+    tag='Decision support for cereal pricing',
 )
 
 page_intro(
     icon='📤',
-    kicker='Workflow · Step 7 · Can I try this on my own data?',
+    kicker='Can I try this on my own data?',
     title='Upload & Score',
     tagline=(
-        'Score a CSV of product rows against the frozen cereal-category coefficients. '
-        'No re-estimation — this is a transferability probe, not a new model fit.'
+        'Score a CSV of your product rows against the frozen cereal-category '
+        'price sensitivity. This is a transferability probe — not a new model '
+        'fit on your data.'
     ),
     chips=[
         'CSV template + validator',
-        f'Frozen β_own {MAIN_COEFS["beta_own"]:+.2f}',
-        'Scenario overlay',
+        'Reuses the frozen cereal price sensitivity',
+        'Optional stress-test scenarios',
         'Per-row + aggregate output',
     ],
 )
@@ -69,26 +56,26 @@ page_intro(
 insight_row([
     Insight(
         label='Scope',
-        headline='Scoring only — no re-estimation',
-        detail=('Rows are scored against the frozen Dominick\'s cereal coefficients. '
-                'Full re-estimation on user panels needs its own identification strategy '
-                'and held-out validation — that is a follow-up, not this MVP.'),
+        headline='Scoring only — your data does not refit the model',
+        detail=('Your rows are scored using the cereal-category price sensitivity '
+                'estimated elsewhere in this app. Estimating a new model on your '
+                'data needs its own identification design — a follow-up, not this MVP.'),
         tone='brand',
     ),
     Insight(
         label='Transfer assumption',
-        headline='Cereal elasticity → your rows',
-        detail=('Predictions assume cereal-category elasticity applies to the uploaded '
-                'product context. If category, channel, or buyer behaviour differ, read '
-                'the magnitudes as directional only.'),
+        headline='Cereal price sensitivity is reused on your rows',
+        detail=('If your category, channel, or buyer behaviour is materially different '
+                'from late-1990s grocery cereal, treat the predicted lifts as '
+                'directional only.'),
         tone='note',
     ),
     Insight(
-        label='Action under stress',
-        headline='Scenario overlay separates action from shock',
-        detail=('Sidebar sliders apply demand / cost / competitor / inventory shocks. '
-                'Profit lift is measured against "do-nothing under the same scenario", '
-                'so the reported Δ isolates the action you chose.'),
+        label='Stress test isolates action from shock',
+        headline='Sidebar shocks let you separate "what I changed" from "what the world did"',
+        detail=('Reported lift is measured against "do-nothing under the same '
+                'scenario" — so the number reflects the action you took, not '
+                'the headwind/tailwind of the scenario itself.'),
         tone='ok',
     ),
 ])
@@ -157,25 +144,9 @@ def _nearest(grid, target):
 
 
 with st.sidebar:
-    st.markdown('### Demand parameters (frozen)')
-    beta_own = st.select_slider(
-        'β_own', options=SENSITIVITY_GRID['beta_own'],
-        value=_nearest(SENSITIVITY_GRID['beta_own'], MAIN_COEFS['beta_own']),
-        format_func=lambda v: f'{v:+.2f}',
-    )
-    beta_cross = st.select_slider(
-        'β_cross', options=SENSITIVITY_GRID['beta_cross'], value=0.0,
-        format_func=lambda v: f'{v:+.2f}',
-    )
-    theta = st.select_slider(
-        'θ_promo', options=SENSITIVITY_GRID['theta_promo'],
-        value=_nearest(SENSITIVITY_GRID['theta_promo'], MAIN_COEFS['theta_promo']),
-        format_func=lambda v: f'+{v:.2f}',
-    )
-
-    st.markdown('---')
-    st.markdown('### Scenario overlay')
-    st.caption('Defaults inert — leave at zero / off to score the uploaded data as-is.')
+    st.markdown('### Stress-test scenarios')
+    st.caption('Optional — defaults are inert. Use these to see how the scoring '
+               'holds up under demand, cost, competitor, or inventory shocks.')
     demand_shock_pct = st.slider('Demand shock (%)', -30, 30, 0, 5)
     cost_shock_pct   = st.slider('Cost shock (%)',   -25, 40, 0, 5)
     comp_shock_pct   = st.slider('Competitor price shock (%)', -25, 25, 0, 5)
@@ -188,6 +159,28 @@ with st.sidebar:
     promo_fixed_cost = st.number_input(
         'Promo fixed cost ($/wk)', min_value=0.0, max_value=2000.0, value=0.0, step=5.0,
     )
+
+    st.markdown('---')
+    with st.expander('Advanced — model coefficients', expanded=False):
+        st.caption('Override the frozen cereal-category coefficients to see how '
+                   'sensitive your scoring is to the price-sensitivity estimate.')
+        beta_own = st.select_slider(
+            'Own-price sensitivity (β_own)',
+            options=SENSITIVITY_GRID['beta_own'],
+            value=_nearest(SENSITIVITY_GRID['beta_own'], MAIN_COEFS['beta_own']),
+            format_func=lambda v: f'{v:+.2f}',
+        )
+        beta_cross = st.select_slider(
+            'Competitor-price sensitivity (β_cross)',
+            options=SENSITIVITY_GRID['beta_cross'], value=0.0,
+            format_func=lambda v: f'{v:+.2f}',
+        )
+        theta = st.select_slider(
+            'Promo coefficient (θ_promo, log points)',
+            options=SENSITIVITY_GRID['theta_promo'],
+            value=_nearest(SENSITIVITY_GRID['theta_promo'], MAIN_COEFS['theta_promo']),
+            format_func=lambda v: f'+{v:.2f}',
+        )
 
 scenario = Scenario(
     demand_shock=demand_shock_pct / 100.0,
