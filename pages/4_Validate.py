@@ -1,4 +1,4 @@
-"""Page 5 — Test Planner: candidate test plan + sample size widget."""
+"""Page 5 — Validate: candidate test plan + sample size widget."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -16,7 +16,7 @@ from src.theme import (
     sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Test Planner', page_icon='🧪', layout='wide')
+st.set_page_config(page_title='Validate · Plan an A/B test', page_icon='🧪', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -27,7 +27,7 @@ sidebar_brand(
 page_intro(
     icon='🧪',
     kicker='How do I confirm it works in real stores?',
-    title='Test Planner',
+    title='Validate · Plan an A/B test',
     tagline=(
         'Every candidate needs a controlled A/B test before deployment. '
         'The randomization unit is the store, matching how prices are '
@@ -44,7 +44,7 @@ page_intro(
 insight_row([
     Insight(
         label='1 · Candidate',
-        headline='Comes from the Candidate Finder',
+        headline='Comes from the Optimize page',
         detail=('The top-10 table below is the offline baseline candidate set. '
                 'Re-running the optimizer under a scenario produces a new list that '
                 'plugs into the same sizing template.'),
@@ -52,18 +52,18 @@ insight_row([
     ),
     Insight(
         label='2 · Test design',
-        headline='Risk tier chooses the test type',
-        detail=('High/medium/low risk maps to single-store flight, cluster RCT, '
-                'or standard A/B. Store is the randomization unit to match real '
-                'pricing operations.'),
+        headline='Risk tier picks the test type',
+        detail=('High-risk candidates need matched store tests; lower-risk '
+                'candidates can use simpler A/B tests. The store is the '
+                'randomization unit to match how prices are actually set.'),
         tone='note',
     ),
     Insight(
         label='3 · Power check',
-        headline='Size the test to detect a real lift',
-        detail=('Two-sample t-test with store-week as the unit. The calculator '
-                'flags candidates whose required duration exceeds planned weeks '
-                'so they can be re-designed or deprioritised.'),
+        headline='Is the planned test long enough?',
+        detail=('The calculator checks whether the planned test is long enough '
+                'to reliably detect the expected lift — and flags candidates '
+                'that would need more weeks or a tighter target.'),
         tone='ok',
     ),
 ])

@@ -89,8 +89,8 @@ insight_row([
     ),
     Insight(
         label='Robustness 3 of 3',
-        headline='Causal-style fit · price-sensitivity index −1.78',
-        detail='Uses other-store prices as instruments to address simultaneity. 3.0% drift.',
+        headline='Stricter robustness fit · price-sensitivity index −1.78',
+        detail='Uses other-store prices as a sensitivity check; not definitive causal proof. 3.0% drift.',
         tone='ok',
     ),
 ])

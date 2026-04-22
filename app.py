@@ -51,7 +51,7 @@ page_intro(
 # ---- What you can do here ----
 section_header(
     'What you can do here',
-    caption='Core workflow: Evidence → Simulate → Candidate Finder → Test Planner. '
+    caption='Core workflow: Evidence → Simulate → Optimize → Validate. '
             'Boundaries and Upload are optional — read Boundaries to see what the demo '
             'will not claim; use Upload to score your own data.',
 )
@@ -107,10 +107,10 @@ section_header(
 e1, e2, e3, e4 = st.columns(4)
 e1.metric('1. Today',      '$3.03',           help='Current shelf price')
 e1.caption('76 weeks of history at this store.')
-e2.metric('2. Model says', '$4.30',           help='Optimizer candidate price')
-e2.caption('+42% — flagged as extrapolation beyond historical band.')
-e3.metric('3. Expected',   '+$311 / wk',      help='Model-implied weekly profit lift')
-e3.caption('+166.8% over baseline. Likely overstated near the price ceiling — read as test motivation.')
+e2.metric('2. Candidate to test', '$4.30',    help='Optimizer-suggested test price')
+e2.caption('Large price move; use only as a test candidate. +42% above historical band.')
+e3.metric('3. Model-estimated lift', '+$311 / wk', help='Model-implied weekly profit lift')
+e3.caption('+166.8% over baseline. Likely overstated near the price ceiling — read as test motivation, not a forecast.')
 e4.metric('4. To validate', 'Needs a controlled store test', help='Recommended test design')
 e4.caption('Planned test is too short to reliably detect this lift; extend duration or '
            'only commit if the test catches a much larger effect.')
@@ -201,7 +201,8 @@ st.dataframe(top_view.style.format({
     'Lift (%)':                        '{:.0f}%',
 }), width='stretch', hide_index=True)
 
-section_header('Top-10 expected weekly profit lift (model upper-bound)')
+section_header('Where the model would test first',
+               caption='Top-10 by model-estimated lift — read as test prioritization, not as a profit forecast.')
 fig = top_recommendations_bar(top_df)
 st.plotly_chart(fig)
 

@@ -143,31 +143,33 @@ with st.sidebar:
     )
 
     st.markdown('---')
-    with st.expander('Advanced — model coefficients', expanded=False):
+    with st.expander('Advanced — override model assumptions', expanded=False):
         st.caption(
-            'Override the frozen demand-model coefficients to see how '
-            'sensitive the result is to the elasticity estimate. Defaults '
-            'are the frozen values used everywhere else in the app.'
+            'Override the demo model assumptions to see how sensitive the '
+            'result is. Defaults are the values used everywhere else in the app.'
         )
         beta_own = st.select_slider(
-            'Own-price sensitivity (β_own)',
+            'Price sensitivity',
             options=SENSITIVITY_GRID['beta_own'],
             value=_nearest(SENSITIVITY_GRID['beta_own'], MAIN_COEFS['beta_own']),
             format_func=lambda v: f'{v:+.2f}',
-            help='More negative = larger units drop per 1% price increase.',
+            help='Own-price elasticity (β_own). More negative means a larger '
+                 'units drop per 1% price increase.',
         )
         beta_cross = st.select_slider(
-            'Competitor-price sensitivity (β_cross)',
+            'Rival-price sensitivity',
             options=SENSITIVITY_GRID['beta_cross'], value=0.0,
             format_func=lambda v: f'{v:+.2f}',
-            help='Positive = rivals raise prices → this product sells more.',
+            help='Cross-price elasticity (β_cross). Positive means rivals '
+                 'raise prices → this product sells more.',
         )
         theta = st.select_slider(
-            'Promo coefficient (θ_promo, log points)',
+            'Sale-week effect',
             options=SENSITIVITY_GRID['theta_promo'],
             value=_nearest(SENSITIVITY_GRID['theta_promo'], MAIN_COEFS['theta_promo']),
             format_func=lambda v: f'+{v:.2f}',
-            help='Conditional sale-code effect; exp(θ)-1 ≈ implied % uplift.',
+            help='Conditional promo coefficient θ_promo, in log points; '
+                 'exp(θ)-1 ≈ implied % uplift on a sale week.',
         )
 
 scenario = Scenario(

@@ -41,9 +41,9 @@ page_intro(
     kicker='Can I try this on my own data?',
     title='Upload & Score',
     tagline=(
-        'Score a CSV of your product rows against the frozen cereal-category '
-        'price sensitivity. This is a transferability probe — not a new model '
-        'fit on your data.'
+        'Score your CSV using the cereal model built in this demo. This checks '
+        'directional impact under a price/promo move; it does not train a new '
+        'model on your data.'
     ),
     chips=[
         'CSV template + validator',
@@ -161,25 +161,28 @@ with st.sidebar:
     )
 
     st.markdown('---')
-    with st.expander('Advanced — model coefficients', expanded=False):
-        st.caption('Override the frozen cereal-category coefficients to see how '
-                   'sensitive your scoring is to the price-sensitivity estimate.')
+    with st.expander('Advanced — override model assumptions', expanded=False):
+        st.caption('Override the demo model assumptions to see how sensitive '
+                   'your scoring is to the price-sensitivity estimate.')
         beta_own = st.select_slider(
-            'Own-price sensitivity (β_own)',
+            'Price sensitivity',
             options=SENSITIVITY_GRID['beta_own'],
             value=_nearest(SENSITIVITY_GRID['beta_own'], MAIN_COEFS['beta_own']),
             format_func=lambda v: f'{v:+.2f}',
+            help='Own-price elasticity (β_own).',
         )
         beta_cross = st.select_slider(
-            'Competitor-price sensitivity (β_cross)',
+            'Rival-price sensitivity',
             options=SENSITIVITY_GRID['beta_cross'], value=0.0,
             format_func=lambda v: f'{v:+.2f}',
+            help='Cross-price elasticity (β_cross).',
         )
         theta = st.select_slider(
-            'Promo coefficient (θ_promo, log points)',
+            'Sale-week effect',
             options=SENSITIVITY_GRID['theta_promo'],
             value=_nearest(SENSITIVITY_GRID['theta_promo'], MAIN_COEFS['theta_promo']),
             format_func=lambda v: f'+{v:.2f}',
+            help='Conditional promo coefficient (θ_promo, log points).',
         )
 
 scenario = Scenario(
@@ -197,7 +200,7 @@ st.info(
     '**This page does not optimize each uploaded product separately.** It scores '
     'one portfolio-wide price-and-promo action — for example, "raise every price '
     'by 5%" — using the demo model. Per-product candidate prices are produced '
-    'on the **Candidate Finder** page, but only for the demo cereal panel.'
+    'on the **Optimize** page, but only for the demo cereal panel.'
 )
 a1, a2 = st.columns([2, 1])
 price_change_pct = a1.slider(

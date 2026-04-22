@@ -1,4 +1,4 @@
-"""Page 4 — Candidate Finder: filter, sort, and inspect candidate cells."""
+"""Page 4 — Optimize: filter, sort, and inspect candidate cells."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -21,7 +21,7 @@ from src.theme import (
     sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Candidate Finder', page_icon='⚙️', layout='wide')
+st.set_page_config(page_title='Optimize · Find candidates', page_icon='⚙️', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -32,7 +32,7 @@ sidebar_brand(
 page_intro(
     icon='⚙️',
     kicker='Which products are worth testing first?',
-    title='Candidate Finder',
+    title='Optimize · Find candidates',
     tagline=(
         'Browse 5,896 product-store combinations ranked by expected weekly '
         'profit lift. The top of the list is where to test next — not where '
@@ -62,7 +62,7 @@ insight_row([
     ),
     Insight(
         label='3 · Validate before deploy',
-        headline='Every row goes through the Test Planner',
+        headline='Every row goes through the Validate page',
         detail=('The optimizer is a search heuristic. The A/B test on the '
                 'next page is what turns a candidate into a decision.'),
         tone='note',
@@ -266,5 +266,5 @@ else:
         )
 
 st.caption(
-    'Continue to the **Test Planner** page to size the A/B test for this candidate.'
+    'Continue to the **Validate** page to size the A/B test for this candidate.'
 )

@@ -32,7 +32,7 @@ page_intro(
     chips=[
         'Decision support, not deployment',
         'A/B required before any rollout',
-        'Robustness checked, identification limited',
+        'Robustness checked, still requires A/B tests',
     ],
 )
 
@@ -42,7 +42,7 @@ insight_row([
         headline='Candidate actions, not deployments',
         detail=('Optimizer output is a ranked list of raise-and-test candidates. '
                 'No price change ships without a controlled experiment from the '
-                'Test Planner.'),
+                'Validate page.'),
         tone='brand',
     ),
     Insight(
@@ -74,8 +74,8 @@ st.markdown(
 | Risk | What we checked | What you should do |
 |---|---|---|
 | **Cause vs correlation.** Prices and promotions in the data were chosen, not randomly assigned. | We re-ran the model with stricter controls and instrumental-variable methods; price-sensitivity moved by ≤4.5%, same direction. | Treat candidates as test prioritization; confirm with an A/B before deployment. |
-| **Promo lift is not a clean causal effect.** Sale weeks coincide with vendor funding and inventory pushes. | The "+54% on promo" figure is an in-sample association, not a causal estimate. | Don't quote the +54% as a forecast for "if we run more promos"; size promo bets via the Test Planner. |
-| **Competitors don't react.** The model treats rival prices as fixed. | The What-If Simulator lets you stress-test ±25% rival moves; we don't solve a Nash response. | If the test category has known reactive competitors, shorten the test or watch competitor moves. |
+| **Promo lift is not a clean causal effect.** Sale weeks coincide with vendor funding and inventory pushes. | The "+54% on promo" figure is an in-sample association, not a causal estimate. | Don't quote the +54% as a forecast for "if we run more promos"; size promo bets via the Validate page. |
+| **Competitors don't react.** The model treats rival prices as fixed. | The Simulate page lets you stress-test ±25% rival moves; we don't solve a Nash response. | If the test category has known reactive competitors, shorten the test or watch competitor moves. |
 | **Cross-size cannibalization.** Raising a 15oz price can shift sales to the 12oz of the same brand. | We measured the spillover: median +2.5%, max +4.0% on top-10 lifts — small enough that the per-product optimizer is kept. | Treat reported lifts as accurate within ±5%; for portfolio-wide moves, reassess. |
 | **Inventory limits.** Large predicted unit increases assume restock capacity. | The app flags large quantity shifts but does not enforce a stockout constraint. | Confirm restock feasibility with operations before any large up-volume test. |
 | **Cost is an accounting average, not true marginal cost.** | Profit numbers use the dataset's acquisition-cost proxy. | Treat absolute profit numbers as directional; in production, plug in real cost-of-goods. |
