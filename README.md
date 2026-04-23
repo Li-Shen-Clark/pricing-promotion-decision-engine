@@ -130,6 +130,26 @@ The main fixed-effects specification uses product-store and week fixed effects. 
 
 For the full demand model, counterfactual simulation logic, profit objective, optimization design, and identification caveats, see [`docs/methodology.md`](docs/methodology.md). A LaTeX version is available at [`docs/methodology.tex`](docs/methodology.tex).
 
+## Model Comparison
+
+The project uses an **anchored fixed-effects demand model plus a constrained price-promotion grid optimizer**. The design intentionally trades some behavioral richness for interpretability, fast scenario simulation, and deployment readiness.
+
+| Model / algorithm | Core idea | Best suited for | Complexity / engineering cost | How this project differs |
+|---|---|---|---|---|
+| Business rules / margin markup | Set prices from target margin, historical price bands, or buyer rules | Fast manual pricing guardrails | Very low | More data-driven: learns own-price, competitor-price, and promo response before ranking actions |
+| Simple log-log OLS demand | Estimate average elasticity with `log(Q) ~ log(P) + promo` | Transparent elasticity baseline | Low | Adds product-store and week fixed effects to reduce persistent product, store, and seasonality confounding |
+| Panel fixed-effects demand | Absorb product-store and week heterogeneity while estimating price and promo effects | Scanner-data demand estimation | Medium-low | This is the offline estimation core, then extended into counterfactual profit optimization |
+| **This project: anchored FE + constrained grid optimizer** | Estimate elasticities offline; simulate each cell from its observed baseline; search bounded price and promo candidates | **Auditable price/promo actions worth A/B testing** | **Online complexity `O(C x G x M)`; here `5,896 x 21 x 2` candidates, vectorized and interactive** | **Adds a decision layer while staying interpretable and lightweight enough for real-time scenario recomputation** |
+| Tree / boosting demand forecast | Predict sales with nonlinear features using Random Forest, XGBoost, etc. | Forecast accuracy and nonlinear pattern capture | Medium; tuning and explanation cost | May forecast better, but price effects are less causal and less directly usable for counterfactual pricing |
+| Time-series forecasting | Forecast each item/store path from trend and seasonality | Baseline demand planning | Medium; scales awkwardly across many sparse SKU-store series | Forecasts what will happen, but does not naturally answer "what if price changes?" |
+| Multinomial / nested logit | Model consumer choice across products or nests | Market-share and substitution analysis | Medium-high | Captures substitution more explicitly, but requires stronger choice-structure assumptions and more complex estimation |
+| BLP / random-coefficients demand | Estimate heterogeneous preferences and structural substitution with nonlinear GMM and simulation | Structural IO, welfare, market-power analysis | High | Richer behavioral model, but much heavier than an MVP decision-support system |
+| Full cross-elasticity matrix optimization | Estimate all product-product interactions and jointly optimize prices | Multi-product portfolio pricing | High; can face combinatorial growth as products and price grids expand | This project optimizes per cell, avoiding joint-optimization blowups while surfacing cannibalization as a diagnostic |
+| Bayesian hierarchical demand | Pool information across brands, stores, and SKUs with uncertainty estimates | Sparse products and uncertainty quantification | High; MCMC/VI and model monitoring | More expressive uncertainty model, but more expensive to fit and operate |
+| Bandit / reinforcement learning pricing | Learn prices online through exploration and exploitation | Live dynamic pricing systems with traffic and safety controls | High; needs online experiments and guardrails | This project is more conservative: offline ranking first, then controlled A/B validation |
+
+In short, the model is not claiming a new estimator. Its advantage is the productized workflow: a standard, interpretable fixed-effects demand model is converted into a fast, bounded, auditable optimizer that ranks price and promotion tests without requiring a full structural demand system.
+
 ## Project Structure
 
 ```text
