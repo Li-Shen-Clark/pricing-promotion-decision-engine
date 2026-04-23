@@ -63,7 +63,7 @@ insight_row([
     Insight(
         label='3 · Read the response',
         headline='Predicted units, revenue, and profit',
-        detail=('Dashed markers on the curves show the historical baseline vs '
+        detail=('Dashed markers on the curves show the observed historical average vs '
                 'your candidate. Sidebar sliders let you stress-test demand, '
                 'cost, and competitor shocks.'),
         tone='brand',
@@ -96,8 +96,8 @@ row = cells.loc[
     (cells['STORE'] == store)
 ].iloc[0].to_dict()
 
-# ---- Baseline for this product-store ----
-section_header('Baseline for this product-store',
+# ---- Historical average for this product-store ----
+section_header('Historical average for this product-store',
                caption='Average over all weeks this product has been observed at this store.')
 b1, b2, b3, b4, b5 = st.columns(5)
 b1.metric('Average price', f"${row['mean_p']:.2f}")
@@ -216,10 +216,10 @@ candidate_profit = float(compute_profit(
 ))
 
 # ---- Outputs ----
-section_header('Expected outcomes (under model)', caption='Frozen-model predictions; scenario overlay applied if sliders are off baseline.')
+section_header('Expected outcomes (under model)', caption='Frozen-model predictions; scenario overlay applied when sidebar controls are not at defaults.')
 o1, o2, o3, o4 = st.columns(4)
 o1.metric('Predicted units / week', f'{candidate_q:.1f}',
-          delta=f"{candidate_q - row['mean_q']:+.1f} vs baseline")
+          delta=f"{candidate_q - row['mean_q']:+.1f} vs observed avg")
 o2.metric('Predicted revenue / week', f'${candidate_rev:.0f}',
           delta=f"${candidate_rev - row['baseline_rev']:+.0f}")
 o3.metric('Predicted profit / week', f'${candidate_profit:.0f}',
@@ -244,7 +244,7 @@ curve_promo_match = evaluate_curve(
 
 section_header(
     'Demand & profit curves',
-    caption='Dashed markers show the observed baseline and your chosen candidate. '
+    caption='Dashed markers show the observed average and your chosen candidate. '
             'These curves come from the demo demand model: rival prices stay fixed '
             'unless you use the sidebar shock, and cost uses the dataset\'s accounting '
             'cost proxy. Numbers near the edges of the price band are extrapolations.',
@@ -261,4 +261,3 @@ c2.plotly_chart(
                        candidate_price=candidate_price, candidate_profit=candidate_profit,
                        cost=cost_eff),
 )
-

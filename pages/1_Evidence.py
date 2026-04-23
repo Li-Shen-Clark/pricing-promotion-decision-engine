@@ -133,7 +133,7 @@ if show_tech_evidence:
     # ---- Coefficients table ----
     section_header(
         'Estimated coefficients',
-        caption='Variants differ in controls; baseline_with_cross is frozen for downstream use.',
+        caption='Variants differ in controls; `baseline_with_cross` is the frozen main FE model used downstream.',
     )
     display = coef.rename(columns={
         'model':           'Model variant',

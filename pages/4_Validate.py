@@ -44,7 +44,7 @@ insight_row([
     Insight(
         label='1 · Candidate',
         headline='Comes from the Optimize page',
-        detail=('The top-10 table below is the offline baseline candidate set. '
+        detail=('The top-10 table below is the offline default-scenario candidate set. '
                 'Re-running the optimizer under a scenario produces a new list that '
                 'plugs into the same sizing template.'),
         tone='brand',
@@ -79,11 +79,11 @@ cand = _load()
 section_header(
     'Test plan · Top-10 portfolio candidates',
     caption='Default test plan for the top-10 candidates. Toggle "Show technical columns" '
-            'to add weekly noise, baseline profit, store counts, and required sample size.',
+            'to add weekly noise, observed profit, store counts, and required sample size.',
 )
 
 val_show_technical = st.toggle('Show technical columns', value=False, key='val_tech',
-                               help='Adds noise floor, baseline profit, stores per group, '
+                               help='Adds noise floor, observed profit, stores per group, '
                                     'and the required store-weeks per group.')
 
 decision_cols = {
@@ -100,7 +100,7 @@ decision_cols = {
 }
 technical_cols = {
     'promo_status':                                      'Promo',
-    'baseline_profit':                                   'Baseline profit ($/wk)',
+    'baseline_profit':                                   'Observed profit ($/wk)',
     'profit_std_wk':                                     'Weekly profit noise ($)',
     'planned_stores_per_arm':                            'Stores per group',
     'n_storeweeks_per_arm_at_50pct_MDE_80pct_power':     'Required store-weeks per group',
@@ -111,7 +111,7 @@ st.dataframe(view.style.format({
     'Size (oz)':                            '{:.2f}',
     'Current price':                        '${:.2f}',
     'Test price':                           '${:.2f}',
-    'Baseline profit ($/wk)':               '${:.0f}',
+    'Observed profit ($/wk)':               '${:.0f}',
     'Expected lift ($/wk)':                 '${:+.0f}',
     'Weekly profit noise ($)':              '${:.0f}',
     'Required store-weeks per group':       '{:.0f}',

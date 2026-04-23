@@ -202,7 +202,7 @@ def optimize_all_cells(cells: pd.DataFrame,
     opt_pi = profit[rows, g_idx, m_idx]
     opt_rev = opt_q * opt_p
 
-    baseline_profit = mean_q * (mean_p - mean_c)   # observational baseline (uses raw cost)
+    baseline_profit = mean_q * (mean_p - mean_c)   # observed benchmark (uses raw cost)
     lift_abs = opt_pi - baseline_profit
     lift_pct = np.where(baseline_profit > 0,
                         100.0 * lift_abs / baseline_profit, np.nan)

@@ -80,11 +80,11 @@ def _load_experiments() -> pd.DataFrame:
     return load_experiment_candidates()
 
 
-# baseline_cells is the always-on offline-baseline ranking (cached).
-# `cells` is the version actually displayed: identical to baseline if
+# baseline_cells is the always-on default-scenario ranking (cached).
+# `cells` is the version actually displayed: identical to the default if
 # the scenario sliders are inert, or re-optimized live otherwise. We
 # keep both around so the Decision-summary card can show rank-shift
-# vs the baseline.
+# vs the default scenario.
 baseline_cells = _load()
 cells = baseline_cells
 
@@ -187,7 +187,7 @@ if len(top) > 0:
 # ---- Table ----
 section_header('Candidate table',
                caption='Top 500 rows of the filtered view, sorted by expected weekly profit lift. '
-                       'Toggle "Show technical columns" for promo flag, baseline profit, and risk diagnostics.')
+                       'Toggle "Show technical columns" for promo flag, observed profit, and risk diagnostics.')
 
 show_technical = st.toggle('Show technical columns', value=False,
                            help='Hide by default to keep the decision view clean.')
@@ -204,10 +204,10 @@ decision_cols = {
 technical_cols = {
     'n_weeks':           'Weeks of history',
     'opt_promo':         'Promo (model)',
-    'baseline_profit':   'Baseline profit ($/wk)',
+    'baseline_profit':   'Observed profit ($/wk)',
     'opt_profit':        'Expected profit ($/wk)',
     'profit_lift_pct':   'Lift (%)',
-    'q_lift_ratio':      'Units ratio (cand/base)',
+    'q_lift_ratio':      'Units ratio (test/observed)',
 }
 display_cols = {**decision_cols, **technical_cols} if show_technical else decision_cols
 view_disp = view.sort_values('profit_lift_abs', ascending=False)\
@@ -218,10 +218,10 @@ st.dataframe(view_disp.style.format({
     'Current price':                   '${:.2f}',
     'Test price':                      '${:.2f}',
     'Expected lift ($/wk)':            '${:.0f}',
-    'Baseline profit ($/wk)':          '${:.0f}',
+    'Observed profit ($/wk)':          '${:.0f}',
     'Expected profit ($/wk)':          '${:.0f}',
     'Lift (%)':                        '{:.0f}%',
-    'Units ratio (cand/base)':         '{:.2f}×',
+    'Units ratio (test/observed)':     '{:.2f}×',
 }), width='stretch', hide_index=True)
 # ---- Drill-down ----
 section_header('Inspect a single candidate',
@@ -298,7 +298,7 @@ else:
     inv_binding     = bool(inv_active and row['opt_q'] >= scenario.inventory_cap - 1e-6)
     comp_shocked    = scenario.competitor_price_shock != 0
 
-    # Rank in baseline vs active scenario, by profit_lift_abs.
+    # Rank in default scenario vs active scenario, by profit_lift_abs.
     def _rank(df, brand, size, store):
         ranked = df.sort_values('profit_lift_abs', ascending=False).reset_index(drop=True)
         match = ranked[(ranked['brand_final'] == brand) &
@@ -331,7 +331,7 @@ else:
         delta_used    = float(ec['mde_dollars_50pct'])
         sample_source = 'precomputed for top-10'
     else:
-        # Heuristic σ ≈ 40% of baseline weekly profit, MDE = 50% of expected lift.
+        # Heuristic σ ≈ 40% of observed weekly profit, MDE = 50% of expected lift.
         sigma_used = max(float(row['baseline_profit']) * 0.4, 1.0)
         delta_used = max(abs(float(row['profit_lift_abs'])) * 0.5, 1.0)
         sample_size_n = float(n_per_arm(sigma_used, delta_used))
@@ -363,8 +363,8 @@ else:
         st.caption('How does the recommendation hold up under the active scenario?')
         if scenario.is_baseline:
             st.markdown(
-                f'- **Active scenario** — none (baseline view)\n'
-                f'- **Baseline rank** — #{baseline_rank} of {len(baseline_cells):,}\n'
+                f'- **Active scenario** — none (default scenario view)\n'
+                f'- **Default-scenario rank** — #{baseline_rank} of {len(baseline_cells):,}\n'
                 f'- **Candidate price** — ${row["opt_price"]:.2f}\n'
                 f'- **Expected lift** — ${row["profit_lift_abs"]:+.0f} / wk\n'
                 f'- _Move a sidebar slider to stress-test the choice._'

@@ -103,7 +103,7 @@ e1.caption('76 weeks of history at this store.')
 e2.metric('2. Candidate to test', '$4.30',    help='Optimizer-suggested test price')
 e2.caption('Large price move; use only as a test candidate. +42% above historical band.')
 e3.metric('3. Model-estimated lift', '+$311 / wk', help='Model-implied weekly profit lift')
-e3.caption('+166.8% over baseline. Likely overstated near the price ceiling — read as test motivation, not a forecast.')
+e3.caption('+166.8% vs observed profit. Likely overstated near the price ceiling — read as test motivation, not a forecast.')
 e4.metric('4. To validate', 'Store test', help='Recommended test design')
 e4.caption('Planned test is too short to reliably detect this lift; extend duration or '
            'only commit if the test catches a much larger effect.')
@@ -161,8 +161,8 @@ section_header(
 )
 
 home_show_technical = st.toggle('Show technical columns', value=False, key='home_tech',
-                                help='Adds promo flag, baseline/candidate quantities, '
-                                     'baseline/candidate profit, and percent lift.')
+                                help='Adds promo flag, observed/test quantities, '
+                                     'observed/test profit, and percent lift.')
 
 decision_cols = {
     'brand_final':           'Brand',
@@ -175,9 +175,9 @@ decision_cols = {
 technical_cols = {
     'size_oz_rounded':       'Size (oz)',
     'opt_promo':             'Promo (model)',
-    'baseline_q':            'Baseline units/wk',
+    'baseline_q':            'Observed units/wk',
     'opt_q':                 'Test units/wk',
-    'baseline_profit':       'Baseline profit ($/wk)',
+    'baseline_profit':       'Observed profit ($/wk)',
     'opt_profit':            'Test profit ($/wk)',
     'profit_lift_pct':       'Lift (%)',
 }
@@ -188,9 +188,9 @@ st.dataframe(top_view.style.format({
     'Current price ($)':               '{:.2f}',
     'Test price ($)':                  '{:.2f}',
     'Expected lift ($/wk)':            '${:.0f}',
-    'Baseline units/wk':               '{:.1f}',
+    'Observed units/wk':               '{:.1f}',
     'Test units/wk':                   '{:.1f}',
-    'Baseline profit ($/wk)':          '${:.0f}',
+    'Observed profit ($/wk)':          '${:.0f}',
     'Test profit ($/wk)':              '${:.0f}',
     'Lift (%)':                        '{:.0f}%',
 }), width='stretch', hide_index=True)

@@ -262,9 +262,8 @@ def score(df: pd.DataFrame,
         cand_price, q_sold, cost_eff=cost_eff,
         promo=cand_promo, scenario=scenario,
     )
-    # Baseline ≡ row as observed (no shock, no action). Apples-to-apples
-    # decision benchmark is "do nothing under same scenario": use cost_eff but
-    # raw price/promo/q.
+    # Do-nothing benchmark: keep the uploaded row's current price/promo/quantity
+    # under the same scenario shocks, so lift isolates the proposed action.
     baseline_q       = apply_demand_overlay(qty, scenario)
     baseline_profit  = compute_profit(
         price, baseline_q, cost_eff=cost_eff,

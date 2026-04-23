@@ -25,7 +25,7 @@ def quantity_price_curve(curve: pd.DataFrame, *, baseline_price: float,
     fig.add_trace(go.Scatter(x=curve['price'], y=curve['q'], mode='lines',
                              name='Predicted demand', line=dict(color=PROJECT_BLUE)))
     fig.add_trace(go.Scatter(x=[baseline_price], y=[baseline_q], mode='markers',
-                             name='Observed baseline',
+                             name='Observed average',
                              marker=dict(color=PROJECT_GRAY, size=11, symbol='diamond')))
     fig.add_trace(go.Scatter(x=[candidate_price], y=[candidate_q], mode='markers',
                              name='Candidate',
@@ -48,7 +48,7 @@ def profit_price_curve(curve: pd.DataFrame, *, baseline_price: float,
                              name='Expected profit (model)',
                              line=dict(color=PROJECT_GREEN)))
     fig.add_trace(go.Scatter(x=[baseline_price], y=[baseline_profit], mode='markers',
-                             name='Observed baseline',
+                             name='Observed average',
                              marker=dict(color=PROJECT_GRAY, size=11, symbol='diamond')))
     fig.add_trace(go.Scatter(x=[candidate_price], y=[candidate_profit], mode='markers',
                              name='Candidate',
@@ -105,7 +105,7 @@ def coefficients_bar(coef_df: pd.DataFrame) -> go.Figure:
 
 def sample_size_curve(sigma: float, baseline_profit: float,
                       mde_pct_grid: np.ndarray | None = None) -> go.Figure:
-    """n_storeweeks per arm vs MDE (% of baseline weekly profit) at three power levels."""
+    """n_storeweeks per arm vs MDE (% of observed weekly profit) at three power levels."""
     if mde_pct_grid is None:
         mde_pct_grid = np.linspace(10, 200, 39)
     fig = go.Figure()
@@ -115,7 +115,7 @@ def sample_size_curve(sigma: float, baseline_profit: float,
         fig.add_trace(go.Scatter(x=mde_pct_grid, y=n_grid, mode='lines',
                                  name=f'power = {power:.2f}'))
     fig.update_layout(
-        xaxis_title='MDE (% of baseline weekly profit)',
+        xaxis_title='MDE (% of observed weekly profit)',
         yaxis_title='Required n_storeweeks per arm',
         yaxis_type='log',
         margin=dict(l=10, r=10, t=10, b=10),

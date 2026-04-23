@@ -107,7 +107,7 @@ def scenario_warnings(scenario: Scenario,
             and baseline_q is not None
             and scenario.inventory_cap < baseline_q):
         flags.append(
-            f'Inventory cap ({scenario.inventory_cap:.0f} units/wk) below baseline mean Q '
+            f'Inventory cap ({scenario.inventory_cap:.0f} units/wk) below observed mean Q '
             f'({baseline_q:.1f}) — profit estimate is capacity-constrained.'
         )
     if scenario.promo_fixed_cost > 0:
