@@ -27,7 +27,7 @@ apply_page_theme()
 
 sidebar_brand(
     name='Pricing Engine',
-    tag='Decision support for cereal pricing',
+    tag='Decision product for pricing teams',
 )
 
 page_intro(

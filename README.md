@@ -3,7 +3,7 @@
 > **Live demo →** https://pricing-promotion-decision-engine.streamlit.app/  
 > **Stack:** Python · Streamlit · `linearmodels` · `scipy` · `pandas` · `matplotlib` · `plotly`
 
-A deployed decision-support web app that turns 4.65M weekly retail scanner observations into a **ranked list of price and promotion changes worth A/B testing**. Demand model is IV-tested within 3% of OLS; every recommendation is paired with a powered, store-level test plan and a constraint diagnostic. Built on the Dominick's Finer Foods cereal panel.
+A deployed decision-support web app that turns 4.65M weekly retail scanner observations into a **ranked list of price and promotion changes worth A/B testing**. Demand model is IV-tested within 3% of OLS; every recommendation is paired with a powered, store-level test plan and a constraint diagnostic. Built on the Dominick's Finer Foods cereal panel and framed as a product-management case study for pricing decision tools.
 
 ![Pricing Engine — what the model says, how robust it is, and how it would be tested](reports/figures/readme_hero.png)
 
@@ -23,14 +23,17 @@ The methodology deliberately separates formula provenance: DFF price, quantity, 
 
 ## Project Status
 
-Current stage: Streamlit MVP and experiment-design workflow completed. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, and an interactive local app.
+Current stage: Streamlit MVP and product case-study workflow completed. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, cannibalization robustness, IV sensitivity, a Product Brief page, and an interactive deployed app.
 
 - Raw data dictionary: [`rawData/README.md`](rawData/README.md)
+- Product brief: [`pages/0_Product_Brief.py`](pages/0_Product_Brief.py)
 - Cleaning notebook: [`notebooks/01_data_cleaning.ipynb`](notebooks/01_data_cleaning.ipynb)
 - EDA notebook: [`notebooks/02_eda.ipynb`](notebooks/02_eda.ipynb)
 - Demand estimation notebook: [`notebooks/03_demand_estimation.ipynb`](notebooks/03_demand_estimation.ipynb)
 - Counterfactual notebook: [`notebooks/04_counterfactual.ipynb`](notebooks/04_counterfactual.ipynb)
 - A/B design notebook: [`notebooks/05_ab_testing_design.ipynb`](notebooks/05_ab_testing_design.ipynb)
+- Cannibalization robustness: [`notebooks/07_cannibalization_robustness.ipynb`](notebooks/07_cannibalization_robustness.ipynb)
+- IV sensitivity: [`notebooks/08_iv_sensitivity.ipynb`](notebooks/08_iv_sensitivity.ipynb)
 - Cleaning diagnostics: [`reports/data_cleaning_summary.md`](reports/data_cleaning_summary.md)
 - Demand summary: [`reports/demand_model_summary.md`](reports/demand_model_summary.md)
 - Counterfactual summary: [`reports/counterfactual_summary.md`](reports/counterfactual_summary.md)
@@ -40,7 +43,7 @@ Current stage: Streamlit MVP and experiment-design workflow completed. The proje
 - Brand-size panel: [`data/processed/brand_size_store_week_panel.parquet`](data/processed/brand_size_store_week_panel.parquet)
 - Streamlit app: [`app.py`](app.py)
 
-Next stages are cannibalization robustness, packaging/deployment polish, and optional causal-IV upgrades.
+Next stage: extend the same decision-product pattern into healthcare pricing, reimbursement, access, patient affordability, and value-evidence strategy.
 
 ## Business Problem
 
@@ -126,7 +129,7 @@ Formula provenance matters for interpretation. Effective price and dollar sales 
 
 When the app reports absolute candidate profit, the promo fixed cost enters as `profit = (price - cost) * sold_units - F * promo`. When it reports profit lift against the observed baseline, the same fixed cost is subtracted from both candidate and baseline profits, so the fixed cost only changes incremental lift when the candidate and baseline promotion states differ.
 
-The main fixed-effects specification uses product-store and week fixed effects. A stricter robustness check should estimate a store-week fixed-effects version to absorb local store demand shocks, campaigns, traffic, and inventory conditions; the competitor-price index may be excluded from that check when it is mechanically absorbed or unstable.
+The main fixed-effects specification uses product-store and week fixed effects. A stricter store-week fixed-effects robustness check absorbs local store demand shocks, campaigns, traffic, and inventory conditions; the competitor-price index is excluded from that check when it is mechanically absorbed or unstable.
 
 For the full demand model, counterfactual simulation logic, profit objective, optimization design, and identification caveats, see [`docs/methodology.md`](docs/methodology.md). A LaTeX version is available at [`docs/methodology.tex`](docs/methodology.tex).
 
@@ -188,6 +191,7 @@ pricing/
 |   |-- 05_ab_testing_design.ipynb
 |
 |-- pages/
+|   |-- 0_Product_Brief.py     # PM case-study brief
 |   |-- 1_Evidence.py          # Model Evidence
 |   |-- 2_Simulate.py          # What-If Simulator
 |   |-- 3_Optimize.py          # Candidate Finder
@@ -244,12 +248,12 @@ streamlit run app.py
 - Price, promotion, and competitor price are observational and may be endogenous.
 - The MVP cross-price term is an aggregate competitor price index, not a full brand-pair substitution matrix.
 - `promo_any` is a cleaned sale-code measure, not a randomized treatment; missing sale codes may still hide promotions.
-- Store-week demand shocks can still confound observational price and promotion variation; the planned store-week-FE robustness check is meant to stress-test this risk.
+- Store-week demand shocks can still confound observational price and promotion variation; the completed store-week-FE and IV checks are sensitivity bounds, not definitive causal proof.
 - Any candidate action should be validated with randomized or quasi-experimental rollout before production use.
 
 ## Next Steps
 
-1. Add `07_cannibalization_robustness.ipynb` to test same-brand cross-size substitution before treating upper-guardrail optimizer output as robust.
-2. Add focused tests for `src/data.py`, `src/features.py`, `src/scenario.py`, `src/optimization.py`, and `src/upload.py`.
-3. Package the Streamlit app for sharing and write a short case-study page tying data, model, optimizer, and experiment design together.
-4. Optionally add `08_causal_iv.ipynb` with Hausman-style other-store price instruments and cost-shock instruments.
+1. Extend the framework into a healthcare pricing and access decision engine.
+2. Add payer constraints, reimbursement logic, patient affordability, and value-evidence inputs.
+3. Model competitor reaction and stockpiling / inventory pull-forward as later pricing extensions.
+4. Add launch-readiness artifacts: product requirements, adoption metrics, and user feedback notes.
