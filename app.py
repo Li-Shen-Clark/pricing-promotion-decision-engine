@@ -35,7 +35,7 @@ sidebar_brand(
 # ---- Hero ----
 page_intro(
     icon='',
-    kicker='PM case study · pricing decision support',
+    kicker='Pricing decision product',
     title='Turn pricing data into testable product decisions.',
     tagline=(
         'A decision product for pricing teams: rank price and promotion actions, '
