@@ -48,38 +48,9 @@ page_intro(
     ],
 )
 
-# ---- PM positioning ----
-section_header(
-    'Product question',
-    caption='Which pricing actions are worth testing, and what evidence would make a team comfortable launching them?',
-)
-insight_row([
-    Insight(
-        label='Target user',
-        headline='Pricing, revenue, or category teams',
-        detail=('The user needs a short queue of actions to test, not a giant '
-                'spreadsheet of historical prices.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Pain today',
-        headline='A model output is not a launch decision',
-        detail=('Even profitable-looking recommendations need caveats, guardrails, '
-                'and an experiment design before rollout.'),
-        tone='warn',
-    ),
-    Insight(
-        label='Product choice',
-        headline='Recommend tests, not automatic price changes',
-        detail=('The MVP turns analytics into an auditable workflow: prioritize, '
-                'inspect risk, then validate.'),
-        tone='ok',
-    ),
-])
-
 section_header(
     'Fast demo path for reviewers',
-    caption='A short path through the product if you only have two minutes.',
+    caption='A short path through the product if you only have two minutes. The rest is optional depth.',
 )
 d1, d2, d3, d4 = st.columns(4)
 with d1:
@@ -99,54 +70,18 @@ with d4:
     st.caption('See the risks the product refuses to hide.')
     st.page_link('pages/5_Boundaries.py', label='Open Boundaries')
 
-section_header(
-    'How to read this as a PM case study',
-    caption='The model matters, but the product work is in the framing, trade-offs, and validation loop.',
-)
-st.markdown(
-    """
-| PM artifact | How it appears in the product |
+with st.expander('Product framing and workflow', expanded=False):
+    st.markdown(
+        """
+| Question | Product answer |
 |---|---|
-| **Problem framing** | Pricing teams need to decide which actions are worth testing, not just estimate demand. |
-| **MVP scope** | Retail cereal panel, frozen model, bounded optimizer, no automatic deployment. |
-| **Success metrics** | Test launch rate, decision time saved, underpowered tests avoided, validated weekly profit lift. |
-| **Trade-off** | Interpretable fixed-effects model over black-box forecasting so recommendations can be audited. |
-| **Validation strategy** | Every recommendation is paired with a store-level A/B test plan and power check. |
+| **Who is this for?** | Pricing, revenue, or category teams choosing which action to test next. |
+| **What is the workflow?** | Evidence -> Simulate / Optimize -> Validate -> Boundaries. |
+| **What is the core trade-off?** | Interpretable recommendations over black-box forecast accuracy. |
+| **What is the launch rule?** | No automatic price changes; every candidate needs validation. |
+| **What makes this product-relevant?** | It turns analysis into a decision queue, risk readout, and A/B test plan. |
 """
-)
-
-# ---- What you can do here ----
-section_header(
-    'Core workflow inside the product',
-    caption='Core workflow: Evidence → Simulate / Optimize → Validate. '
-            'Boundaries and Upload are optional — read Boundaries to see what the demo '
-            'will not claim; use Upload to score your own data.',
-)
-insight_row([
-    Insight(
-        label='Step 01',
-        headline='Learn how sales respond to price and promotion',
-        detail=('Plain-language summary plus the underlying coefficients on '
-                'the Evidence page.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Step 02',
-        headline='Test a change',
-        detail=('Try one product at one store on the Simulate page, or rank '
-                'all 5,896 product-store combinations by expected lift on '
-                'the Optimize page.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Step 03',
-        headline='Plan validation',
-        detail=('Size the A/B test that confirms the lift is real on the '
-                'Validate page. Auto-flags tests too short to detect the '
-                'expected lift.'),
-        tone='brand',
-    ),
-])
+    )
 
 
 # ---- Worked example ----
@@ -197,10 +132,7 @@ with st.expander('Why we trust the ranking', expanded=False):
     )
 
 # ---- Pipeline snapshot ----
-section_header(
-    'Pipeline snapshot',
-    caption='How the model narrows from the full panel down to a small list of testable candidates.',
-)
+section_header('Pipeline snapshot')
 col1, col2, col3, col4 = st.columns(4)
 col1.metric('Product-store combinations screened', f'{len(cells_df):,}')
 col2.metric('Top-10 shortlisted for testing',      f'{len(top_df):,}')
@@ -262,10 +194,9 @@ st.dataframe(top_view.style.format({
     'Lift (%)':                        '{:.0f}%',
 }), width='stretch', hide_index=True)
 
-section_header('Where the model would test first',
-               caption='Top-10 by model-estimated lift — read as test prioritization, not as a profit forecast.')
-fig = top_recommendations_bar(top_df)
-st.plotly_chart(fig)
+with st.expander('Open chart view', expanded=False):
+    fig = top_recommendations_bar(top_df)
+    st.plotly_chart(fig)
 
 st.markdown('---')
 st.caption(
@@ -290,29 +221,13 @@ with st.expander('Technical audit trail', expanded=False):
         """
     )
 
-section_header(
-    'Next domain: healthcare pricing & access',
-    caption='This project is the first step in a broader product-management path.',
-)
-insight_row([
-    Insight(
-        label='Current product',
-        headline='Retail pricing decisions',
-        detail='Turn historical scanner data into a ranked queue of price/promo tests.',
-        tone='brand',
-    ),
-    Insight(
-        label='Next product domain',
-        headline='Healthcare pricing, reimbursement, and access',
-        detail=('Extend the same decision workflow to provider prices, payer constraints, '
-                'patient affordability, and value evidence.'),
-        tone='note',
-    ),
-    Insight(
-        label='PM trajectory',
-        headline='Data-heavy product management',
-        detail=('Translate complex analytics into products that help teams make '
-                'high-stakes decisions with clear trade-offs.'),
-        tone='ok',
-    ),
-])
+with st.expander('Next domain: healthcare pricing and access', expanded=False):
+    st.markdown(
+        """
+| Stage | Focus |
+|---|---|
+| **Current product** | Retail pricing decisions: rank price/promo tests from scanner data. |
+| **Next domain** | Healthcare pricing, reimbursement, payer constraints, patient affordability, and value evidence. |
+| **PM trajectory** | Data-heavy product management for high-stakes decision workflows. |
+"""
+    )

@@ -36,20 +36,13 @@ page_intro(
     ],
 )
 
-section_header('Product thesis')
-st.markdown(
-    """
-Pricing teams do not need another static elasticity table. They need a workflow
-that turns pricing evidence into a short list of actions worth testing, explains
-where the recommendation could fail, and defines the validation plan before any
-rollout decision.
-"""
+section_header(
+    'Product thesis',
+    caption='Pricing teams need a testable decision queue, not another static elasticity table.',
 )
-
-section_header('User and problem')
 insight_row([
     Insight(
-        label='Primary user',
+        label='User',
         headline='Pricing or revenue decision owner',
         detail=('A PM, category manager, pricing analyst, or revenue lead deciding '
                 'which price/promo action deserves a controlled test.'),
@@ -71,23 +64,6 @@ insight_row([
     ),
 ])
 
-section_header(
-    'MVP scope',
-    caption='The scope is intentionally conservative: prove the decision loop before broadening the domain.',
-)
-st.markdown(
-    """
-| Decision | In this MVP | Why |
-|---|---|---|
-| **User workflow** | Evidence -> Simulate / Optimize -> Validate -> Boundaries | Mirrors how a team should move from analysis to a test decision. |
-| **Recommendation type** | Ranked test candidates | Avoids pretending the model can safely auto-deploy prices. |
-| **Model choice** | Interpretable fixed-effects demand model | Easier for business reviewers to audit than a black-box forecast. |
-| **Optimization** | Bounded grid search across product-store cells | Fast, transparent, and robust enough for interactive scenario testing. |
-| **Validation** | Store-level A/B test sizing | Keeps every action tied to a launch decision rule. |
-| **Out of scope** | Live deployment, live costs, live inventory, competitor retaliation | These are roadmap items, not hidden assumptions. |
-"""
-)
-
 section_header('Reviewer path')
 r1, r2, r3, r4 = st.columns(4)
 with r1:
@@ -107,57 +83,54 @@ with r4:
     st.caption('What should the product refuse to claim?')
     st.page_link('pages/5_Boundaries.py', label='Open Boundaries')
 
-section_header('Success metrics')
-st.markdown(
-    """
-| Metric family | Example metric | Product reason |
+section_header('Product decisions')
+scope_tab, metrics_tab, roadmap_tab = st.tabs(['MVP Scope', 'Success Metrics', 'Roadmap'])
+
+with scope_tab:
+    st.markdown(
+        """
+| Decision | In this MVP | Why |
 |---|---|---|
-| **Activation** | % of users who reach a candidate and validation card | Measures whether the workflow is understandable. |
-| **Decision velocity** | Time from product selection to test-ready recommendation | Pricing work often gets stuck between analysis and action. |
-| **Decision quality** | % of recommendations with visible risk flags and power status | Prevents model output from becoming unreviewed launch advice. |
-| **Experiment quality** | Underpowered tests avoided or resized | Keeps tests from wasting stores, time, and stakeholder trust. |
-| **Business outcome** | Validated weekly profit lift from launched tests | Connects the product to economic value. |
+| **User workflow** | Evidence -> Simulate / Optimize -> Validate -> Boundaries | Mirrors how a team should move from analysis to a test decision. |
+| **Recommendation type** | Ranked test candidates | Avoids pretending the model can safely auto-deploy prices. |
+| **Model choice** | Interpretable fixed-effects demand model | Easier for business reviewers to audit than a black-box forecast. |
+| **Validation** | Store-level A/B test sizing | Keeps every action tied to a launch decision rule. |
+| **Out of scope** | Live deployment, live costs, live inventory, competitor retaliation | These are roadmap items, not hidden assumptions. |
 """
-)
+    )
 
-section_header('Key product trade-offs')
-insight_row([
-    Insight(
-        label='Explainability',
-        headline='Interpretable first, predictive second',
-        detail=('A pricing PM needs an action a stakeholder can inspect, not just '
-                'a high-scoring forecast.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Safety',
-        headline='Test recommendation, not price automation',
-        detail=('The product deliberately stops before deployment and pushes every '
-                'candidate through validation.'),
-        tone='warn',
-    ),
-    Insight(
-        label='Product shape',
-        headline='One workflow beats many notebooks',
-        detail=('The app compresses cleaning, modeling, optimization, and experiment '
-                'design into a repeatable decision surface.'),
-        tone='ok',
-    ),
-])
+with metrics_tab:
+    st.markdown(
+        """
+| Metric family | Example metric |
+|---|---|
+| **Activation** | % of users who reach a candidate and validation card |
+| **Decision velocity** | Time from product selection to test-ready recommendation |
+| **Decision quality** | % of recommendations with visible risk flags and power status |
+| **Experiment quality** | Underpowered tests avoided or resized |
+| **Business outcome** | Validated weekly profit lift from launched tests |
+"""
+    )
 
-section_header(
-    'Roadmap: retail pricing -> healthcare pricing & access',
-    caption='The next project should reuse the decision-product pattern in a regulated, payer-driven domain.',
-)
-st.markdown(
-    """
+with roadmap_tab:
+    st.markdown(
+        """
 | Stage | Product focus | What changes |
 |---|---|---|
 | **Current** | Retail price/promotion test engine | Demand, profit, risk flags, and A/B test planning from scanner data. |
 | **Next** | Healthcare pricing and access decision engine | Add payer constraints, reimbursement logic, patient affordability, value evidence, and access risk. |
 | **Longer-term PM path** | Data-heavy product management | Own products where analytics, economics, regulation, and user workflows meet. |
 """
-)
+    )
+
+with st.expander('Key product trade-offs', expanded=False):
+    st.markdown(
+        """
+- **Interpretable first, predictive second.** A pricing PM needs an action a stakeholder can inspect, not just a high-scoring forecast.
+- **Test recommendation, not price automation.** The product deliberately stops before deployment and pushes every candidate through validation.
+- **One workflow beats many notebooks.** The app compresses cleaning, modeling, optimization, and experiment design into a repeatable decision surface.
+"""
+    )
 
 st.caption(
     'This is why the current project is framed as a product case study: the core skill is '

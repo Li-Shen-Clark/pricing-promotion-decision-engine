@@ -24,8 +24,7 @@ from src.upload import (
     REQUIRED_COLUMNS, OPTIONAL_COLUMNS, MAX_ROWS,
 )
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(page_title='Upload & Score', page_icon='📤', layout='wide')
@@ -53,35 +52,17 @@ page_intro(
     ],
 )
 
-insight_row([
-    Insight(
-        label='Scope',
-        headline='Scoring only — your data does not refit the model',
-        detail=('Your rows are scored using the cereal-category price sensitivity '
-                'estimated elsewhere in this app. Estimating a new model on your '
-                'data needs its own identification design — a follow-up, not this demo.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Transfer assumption',
-        headline='Cereal price sensitivity is reused on your rows',
-        detail=('If your category, channel, or buyer behaviour is materially different '
-                'from late-1990s grocery cereal, treat the predicted lifts as '
-                'directional only.'),
-        tone='note',
-    ),
-    Insight(
-        label='Stress test isolates action from shock',
-        headline='Sidebar shocks let you separate "what I changed" from "what the world did"',
-        detail=('Reported lift is measured against "do-nothing under the same '
-                'scenario" — so the number reflects the action you took, not '
-                'the headwind/tailwind of the scenario itself.'),
-        tone='ok',
-    ),
-])
+with st.expander('Scope of this sandbox', expanded=False):
+    st.markdown(
+        """
+- This page scores uploaded rows; it does **not** refit the model.
+- The cereal-category price sensitivity is reused, so magnitudes are directional outside this demo category.
+- Reported lift is measured against do-nothing under the same scenario, isolating the chosen action from demand or cost shocks.
+"""
+    )
 
 # ---- Template download ----
-section_header('Step 1 · Download the CSV template', caption='Optional, but the fastest way to get the schema right the first time.')
+section_header('Upload CSV', caption='Download the template, then upload rows to score one portfolio-wide price/promo action.')
 st.caption(
     'Required columns: ' + ', '.join(f'`{c}`' for c in REQUIRED_COLUMNS) + '. '
     'Optional columns: ' + ', '.join(f'`{c}`' for c in OPTIONAL_COLUMNS) + '. '
@@ -94,8 +75,6 @@ st.download_button(
     mime='text/csv',
 )
 
-# ---- Upload ----
-section_header('Step 2 · Upload your CSV')
 upload = st.file_uploader('Pick a CSV file', type=['csv'])
 
 if upload is None:
@@ -110,7 +89,7 @@ except Exception as exc:
     st.stop()
 
 # ---- Validate FIRST ----
-section_header('Step 3 · Validation report')
+section_header('Validation report')
 report = validate(raw)
 
 c1, c2, c3 = st.columns(3)
@@ -194,7 +173,7 @@ scenario = Scenario(
 )
 
 # ---- Counterfactual action ----
-section_header('Step 4 · Apply a portfolio-wide action',
+section_header('Apply a portfolio-wide action',
                caption='One uniform action applied to every uploaded row.')
 st.info(
     '**This page does not optimize each uploaded product separately.** It scores '
@@ -230,7 +209,7 @@ if sc_flags:
     st.warning('**Scenario warnings.**\n' + '\n'.join(f'- {f}' for f in sc_flags))
 
 # ---- Aggregate KPIs ----
-section_header('Step 5 · Portfolio outcomes',
+section_header('Portfolio outcomes',
                caption='Under the frozen model + scenario overlay + chosen action.')
 agg_q_obs    = float(df['quantity'].sum())
 agg_rev_obs  = float((df['quantity'] * df['price']).sum())

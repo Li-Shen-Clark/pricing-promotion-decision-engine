@@ -12,8 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.simulation import load_coefficients, read_markdown, REPORTS, MAIN_COEFS
 from src.plots import coefficients_bar
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(page_title='Model Evidence', page_icon='📐', layout='wide')
@@ -39,67 +38,26 @@ page_intro(
     ],
 )
 
-# ---- Plain-language business translation ----
-section_header('What the model says (in business language)')
-insight_row([
-    Insight(
-        label='Price → Units',
-        headline='Raise price, sell fewer units — but margins can rise',
-        detail=('A 10% price increase is associated with roughly a 17% drop in '
-                'units sold for the same product, on average. Depending on the '
-                'starting margin, total weekly profit can still go up.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Rivals matter',
-        headline='Competitor prices push in the expected direction',
-        detail=('When competing brands raise their prices, this brand sells '
-                'somewhat more — the relationship has the sign business teams '
-                'expect.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Promotion weeks',
-        headline='Sale weeks sell more, but it is not a clean causal estimate',
-        detail=('Weeks flagged as "on sale" sell about 50% more units in this '
-                'data — but those weeks also tend to be when vendors fund '
-                'promotions and when retailers push inventory, so this is an '
-                'association, not a clean uplift.'),
-        tone='note',
-    ),
-])
-
-# ---- Robustness summary ----
 section_header(
-    'Is this stable under stricter assumptions?',
-    caption='Same headline, three different identification choices.',
+    'Evidence snapshot',
+    caption='The app freezes one working model, then checks whether the headline survives stricter assumptions.',
 )
-insight_row([
-    Insight(
-        label='Robustness 1 of 3',
-        headline='Standard fit · price-sensitivity index −1.73',
-        detail='Brand-size-store and week effects controlled out.',
-        tone='brand',
-    ),
-    Insight(
-        label='Robustness 2 of 3',
-        headline='Stricter fit · price-sensitivity index −1.80',
-        detail='Adds store-week effects to absorb local promo and demand shocks. 4.5% drift.',
-        tone='ok',
-    ),
-    Insight(
-        label='Robustness 3 of 3',
-        headline='Stricter robustness fit · price-sensitivity index −1.78',
-        detail='Uses other-store prices as a sensitivity check; not definitive causal proof. 3.0% drift.',
-        tone='ok',
-    ),
-])
+e1, e2, e3 = st.columns(3)
+e1.metric('Price-sensitivity index', f"{MAIN_COEFS['beta_own']:.2f}")
+e1.caption('A 10% price increase is associated with roughly 17% fewer units.')
+e2.metric('Robustness drift', '<5%')
+e2.caption('Store-week FE and IV checks keep the same direction.')
+e3.metric('Promo-week association', '+54%')
+e3.caption('Association only; not a clean causal promotion effect.')
 
-st.caption(
-    'Same direction across all three approaches; the headline shifts by less than '
-    '5%. Decision rule says: keep the standard fit as the working number, but '
-    'remember it was tested.'
-)
+with st.expander('Interpret these three signals', expanded=False):
+    st.markdown(
+        """
+- **Price -> units.** Raise price, sell fewer units, but margins can still improve depending on starting cost.
+- **Competitors matter.** Rival prices move demand in the expected direction, but this is not a full substitution system.
+- **Robustness.** The headline estimate is stable enough for test prioritization, not strong enough for automatic rollout.
+"""
+    )
 
 # ---- Technical detail expander (β / OLS / IV / R² / smearing) ----
 with st.expander('Model details — coefficients, standard errors, IV diagnostics', expanded=False):

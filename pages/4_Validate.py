@@ -12,8 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.simulation import load_experiment_candidates, n_per_arm, read_markdown, REPORTS, MAIN_COEFS
 from src.plots import sample_size_curve
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(page_title='Validate · Plan an A/B test', page_icon='🧪', layout='wide')
@@ -40,32 +39,14 @@ page_intro(
     ],
 )
 
-insight_row([
-    Insight(
-        label='1 · Candidate',
-        headline='Comes from the Optimize page',
-        detail=('The top-10 table below is the offline default-scenario candidate set. '
-                'Re-running the optimizer under a scenario produces a new list that '
-                'plugs into the same sizing template.'),
-        tone='brand',
-    ),
-    Insight(
-        label='2 · Test design',
-        headline='Risk tier picks the test type',
-        detail=('High-risk candidates need matched store tests; lower-risk '
-                'candidates can use simpler A/B tests. The store is the '
-                'randomization unit to match how prices are actually set.'),
-        tone='note',
-    ),
-    Insight(
-        label='3 · Power check',
-        headline='Is the planned test long enough?',
-        detail=('The calculator checks whether the planned test is long enough '
-                'to reliably detect the expected lift — and flags candidates '
-                'that would need more weeks or a tighter target.'),
-        tone='ok',
-    ),
-])
+with st.expander('How to read this page', expanded=False):
+    st.markdown(
+        """
+- The table uses the default top-10 candidate set from Optimize.
+- The key question is whether the planned test is long enough to detect the expected lift.
+- The calculator below lets you resize a test for a different noise level or target effect.
+"""
+    )
 
 
 @st.cache_data
@@ -74,6 +55,13 @@ def _load() -> pd.DataFrame:
 
 
 cand = _load()
+n_under = int(cand['underpowered'].sum())
+
+section_header('Validation snapshot')
+v1, v2, v3 = st.columns(3)
+v1.metric('Candidates reviewed', f'{len(cand)}')
+v2.metric('Too short to detect', f'{n_under}')
+v3.metric('Randomization unit', 'Store')
 
 # ---- Top-10 test plan table ----
 section_header(
@@ -117,7 +105,6 @@ st.dataframe(view.style.format({
     'Required store-weeks per group':       '{:.0f}',
 }), width='stretch', hide_index=True)
 
-n_under = int(cand['underpowered'].sum())
 if n_under:
     st.warning(
         f'⚠ **{n_under} of {len(cand)} candidates are flagged "too short to detect."** '
@@ -164,12 +151,11 @@ weeks_at_5_stores = n / 5 if n != float('inf') else float('inf')
 r3.metric('Weeks needed (5 stores per group)',
           '∞' if weeks_at_5_stores == float('inf') else f'{weeks_at_5_stores:,.1f}')
 
-section_header('Sample size curve',
-               caption='How required store-weeks per group changes as the smallest lift you want to catch shrinks.')
-st.plotly_chart(
-    sample_size_curve(sigma=float(sigma),
-                      baseline_profit=float(round(cand['baseline_profit'].median(), 0))),
-)
+with st.expander('Open sample size curve', expanded=False):
+    st.plotly_chart(
+        sample_size_curve(sigma=float(sigma),
+                          baseline_profit=float(round(cand['baseline_profit'].median(), 0))),
+    )
 
 # ---- A/B test plan markdown ----
 section_header('Reference · Full test plan',

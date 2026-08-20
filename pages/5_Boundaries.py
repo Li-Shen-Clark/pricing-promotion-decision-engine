@@ -10,8 +10,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.simulation import read_markdown, REPORTS, MAIN_COEFS
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(page_title='Trust & Boundaries', page_icon='🧭', layout='wide')
@@ -36,34 +35,14 @@ page_intro(
     ],
 )
 
-insight_row([
-    Insight(
-        label='Scope',
-        headline='Candidate actions, not deployments',
-        detail=('Optimizer output is a ranked list of raise-and-test candidates. '
-                'No price change ships without a controlled experiment from the '
-                'Validate page.'),
-        tone='brand',
-    ),
-    Insight(
-        label='Optimizer signal',
-        headline='98.5% of candidates want the upper price band',
-        detail=('Given the estimated price sensitivity and the cost proxy, the '
-                'model almost always recommends raising price up to the historical '
-                'maximum. That is a test-prioritization signal, not a deployment '
-                'instruction.'),
-        tone='warn',
-    ),
-    Insight(
-        label='Identification',
-        headline='Headline holds within ±5% under stricter checks',
-        detail=('Two stricter identification approaches (instrumental variables '
-                'and store-week effects) preserve the direction and shift the '
-                'price-sensitivity number by 3.0% and 4.5% respectively. '
-                'Same-chain caveat flagged.'),
-        tone='ok',
-    ),
-])
+section_header('Boundary snapshot')
+b1, b2, b3 = st.columns(3)
+b1.metric('Recommendation status', 'Test only')
+b1.caption('No price change ships without validation.')
+b2.metric('Robustness drift', '<5%')
+b2.caption('Stable enough for prioritization, not causal proof.')
+b3.metric('Known limits tracked', '6')
+b3.caption('The product exposes the risks instead of hiding them.')
 
 section_header('Six things this demo does NOT do',
                caption='Each row is a deliberate scope choice, not an unknown failure mode. '
@@ -123,20 +102,19 @@ with st.expander('Technical detail — what each row means in model language', e
 """
     )
 
-section_header('Roadmap',
-               caption='Where the project would go next to remove the remaining business gaps.')
-st.markdown(
-    """
+with st.expander('Roadmap', expanded=False):
+    st.markdown(
+        """
 | Gap to close | Status | Why it matters |
 |---|---|---|
-| **Cross-size cannibalization** within a brand | ✅ Measured · ≤4% spillover, optimizer kept | Confirms the per-product candidate list is not double-counting demand. |
-| **Causal identification** of the price effect | ✅ Robustness-tested · ≤4.5% drift | Confirms the headline price-sensitivity number is not an artefact of one specification. |
-| **Competitor reaction** to a price change | 🔜 Next | Lets the test plan account for likely rival countermoves rather than holding rival prices fixed. |
-| **Stockpiling / inventory pull-forward** | 🔜 Later | Sharpens short-horizon forecasts so the test is sized against post-pull-forward demand. |
-| **Live cost-of-goods feed** (replace accounting proxy) | Production | Turns the demo profit numbers into accounting-grade business cases. |
-| **Live inventory feed** (real stop-test guardrail) | Production | Stops a successful price test that drains stock faster than the chain can restock. |
+| **Cross-size cannibalization** within a brand | Measured · <=4% spillover, optimizer kept | Confirms the per-product candidate list is not double-counting demand. |
+| **Causal identification** of the price effect | Robustness-tested · <=4.5% drift | Confirms the headline price-sensitivity number is not an artefact of one specification. |
+| **Competitor reaction** to a price change | Next | Lets the test plan account for likely rival countermoves rather than holding rival prices fixed. |
+| **Stockpiling / inventory pull-forward** | Later | Sharpens short-horizon forecasts so the test is sized against post-pull-forward demand. |
+| **Live cost-of-goods feed** | Production | Turns the demo profit numbers into accounting-grade business cases. |
+| **Live inventory feed** | Production | Adds a real stop-test guardrail for stockout risk. |
 """
-)
+    )
 
 with st.expander('Roadmap — notebook view (for technical reviewers)', expanded=False):
     st.markdown(
@@ -150,21 +128,18 @@ with st.expander('Roadmap — notebook view (for technical reviewers)', expanded
 """
     )
 
-section_header('Source documents',
-               caption='The reports below are what a reviewer would read to check the claims above.')
-tabs = st.tabs(['Case study (top candidate end-to-end)',
-                'Counterfactual summary', 'Demand model summary',
-                'A/B test plan', 'Cannibalization diagnostic',
-                'IV sensitivity'])
-with tabs[0]:
-    st.markdown(read_markdown(REPORTS / 'case_study.md'))
-with tabs[1]:
-    st.markdown(read_markdown(REPORTS / 'counterfactual_summary.md'))
-with tabs[2]:
-    st.markdown(read_markdown(REPORTS / 'demand_model_summary.md'))
-with tabs[3]:
-    st.markdown(read_markdown(REPORTS / 'ab_test_plan.md'))
-with tabs[4]:
-    st.markdown(read_markdown(REPORTS / 'cannibalization_robustness_summary.md'))
-with tabs[5]:
-    st.markdown(read_markdown(REPORTS / 'iv_sensitivity_summary.md'))
+with st.expander('Source documents', expanded=False):
+    tabs = st.tabs(['Case study', 'Counterfactual', 'Demand model',
+                    'A/B test plan', 'Cannibalization', 'IV sensitivity'])
+    with tabs[0]:
+        st.markdown(read_markdown(REPORTS / 'case_study.md'))
+    with tabs[1]:
+        st.markdown(read_markdown(REPORTS / 'counterfactual_summary.md'))
+    with tabs[2]:
+        st.markdown(read_markdown(REPORTS / 'demand_model_summary.md'))
+    with tabs[3]:
+        st.markdown(read_markdown(REPORTS / 'ab_test_plan.md'))
+    with tabs[4]:
+        st.markdown(read_markdown(REPORTS / 'cannibalization_robustness_summary.md'))
+    with tabs[5]:
+        st.markdown(read_markdown(REPORTS / 'iv_sensitivity_summary.md'))

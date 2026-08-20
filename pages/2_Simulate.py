@@ -18,8 +18,7 @@ from src.scenario import (
     apply_demand_overlay, effective_cost, compute_profit, scenario_warnings,
 )
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(page_title='What-If Simulator', page_icon='🎚', layout='wide')
@@ -45,30 +44,16 @@ page_intro(
     ],
 )
 
-insight_row([
-    Insight(
-        label='1 · Pick a product-store',
-        headline='One brand-size at one store',
-        detail='Use the dropdowns below to choose the product and store.',
-        tone='brand',
-    ),
-    Insight(
-        label='2 · Move the price',
-        headline='Slide within the historical price band',
-        detail=('The slider is bounded by the prices this product has actually '
-                'traded at; numbers at the edges are extrapolations and should '
-                'be read with extra skepticism.'),
-        tone='brand',
-    ),
-    Insight(
-        label='3 · Read the response',
-        headline='Predicted units, revenue, and profit',
-        detail=('Dashed markers on the curves show the observed historical average vs '
-                'your candidate. Sidebar sliders let you stress-test demand, '
-                'cost, and competitor shocks.'),
-        tone='brand',
-    ),
-])
+with st.expander('How to use this page', expanded=False):
+    st.markdown(
+        """
+1. Pick one brand-size-store cell.
+2. Move the price or promo setting.
+3. Read the predicted units, revenue, and profit response.
+
+Sidebar shocks are optional; defaults show the frozen model without scenario overlays.
+"""
+    )
 
 
 @st.cache_data

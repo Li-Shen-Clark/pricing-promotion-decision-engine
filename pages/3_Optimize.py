@@ -17,8 +17,7 @@ from src.optimization import (
 from src.plots import profit_price_curve, top_recommendations_bar
 from src.scenario import Scenario, BASELINE, scenario_warnings
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(page_title='Optimize · Find candidates', page_icon='⚙️', layout='wide')
@@ -45,29 +44,14 @@ page_intro(
     ],
 )
 
-insight_row([
-    Insight(
-        label='1 · Ranked list',
-        headline='Top of list = first test, not first rollout',
-        detail=('The order is by model-implied weekly profit lift. Treat it as '
-                'a test-prioritization queue.'),
-        tone='brand',
-    ),
-    Insight(
-        label='2 · Filter + inspect',
-        headline='Narrow by brand, size, or history depth',
-        detail=('Click any row to see its price-vs-profit curve and the risk '
-                'flags (price ceiling, large quantity shift) the model fired.'),
-        tone='brand',
-    ),
-    Insight(
-        label='3 · Validate before deploy',
-        headline='Every row goes through the Validate page',
-        detail=('The optimizer is a search heuristic. The A/B test on the '
-                'next page is what turns a candidate into a decision.'),
-        tone='note',
-    ),
-])
+with st.expander('How to read the ranked list', expanded=False):
+    st.markdown(
+        """
+- The top rows are **test priorities**, not automatic price changes.
+- Use filters to narrow the queue, then inspect one candidate below.
+- Open **Validate** before treating any candidate as a launch decision.
+"""
+    )
 
 
 @st.cache_data
@@ -177,13 +161,6 @@ view = cells.loc[mask].copy()
 section_header(f'Filtered view · {len(view):,} of {len(cells):,} product-store combinations',
                caption='Use the sidebar to filter by brand, size, history depth, or hide candidates that hit the historical price ceiling.')
 
-# ---- Top-N bar chart ----
-top = view.sort_values('profit_lift_abs', ascending=False).head(top_n)
-if len(top) > 0:
-    st.plotly_chart(
-        top_recommendations_bar(top, title=f'Top {len(top)} candidates by expected weekly profit lift'),
-    )
-
 # ---- Table ----
 section_header('Candidate table',
                caption='Top 500 rows of the filtered view, sorted by expected weekly profit lift. '
@@ -223,6 +200,14 @@ st.dataframe(view_disp.style.format({
     'Lift (%)':                        '{:.0f}%',
     'Units ratio (test/observed)':     '{:.2f}×',
 }), width='stretch', hide_index=True)
+
+with st.expander('Open chart view', expanded=False):
+    top = view.sort_values('profit_lift_abs', ascending=False).head(top_n)
+    if len(top) > 0:
+        st.plotly_chart(
+            top_recommendations_bar(top, title=f'Top {len(top)} candidates by expected weekly profit lift'),
+        )
+
 # ---- Drill-down ----
 section_header('Inspect a single candidate',
                caption='Pick a row to see its profit-vs-price curve and active risk flags.')
@@ -282,123 +267,119 @@ else:
     # constraints bound the optimizer, how stable the choice is
     # under stress, and what an A/B test for this row looks like.
     # ---------------------------------------------------------------
-    section_header(
-        'Decision summary',
-        caption='Where the model hit a constraint, how the choice moves under stress, '
-                'and what an A/B test for this candidate would look like.',
-    )
+    with st.expander('Open decision summary for this candidate', expanded=False):
 
-    # ---- Pre-compute everything the three cards need ----
-    cost_eff = float(row.get('cost_eff', row['mean_cost']))
-    margin_floor_price = cost_eff * MARGIN_FLOOR_RATIO
-    at_margin_floor = row['opt_price'] <= margin_floor_price + 1e-3
-    above_history   = row['opt_price'] > row['p_max']
-    below_history   = row['opt_price'] < row['p_min']
-    inv_active      = scenario.inventory_cap is not None
-    inv_binding     = bool(inv_active and row['opt_q'] >= scenario.inventory_cap - 1e-6)
-    comp_shocked    = scenario.competitor_price_shock != 0
+        # ---- Pre-compute everything the three cards need ----
+        cost_eff = float(row.get('cost_eff', row['mean_cost']))
+        margin_floor_price = cost_eff * MARGIN_FLOOR_RATIO
+        at_margin_floor = row['opt_price'] <= margin_floor_price + 1e-3
+        above_history   = row['opt_price'] > row['p_max']
+        below_history   = row['opt_price'] < row['p_min']
+        inv_active      = scenario.inventory_cap is not None
+        inv_binding     = bool(inv_active and row['opt_q'] >= scenario.inventory_cap - 1e-6)
+        comp_shocked    = scenario.competitor_price_shock != 0
 
-    # Rank in default scenario vs active scenario, by profit_lift_abs.
-    def _rank(df, brand, size, store):
-        ranked = df.sort_values('profit_lift_abs', ascending=False).reset_index(drop=True)
-        match = ranked[(ranked['brand_final'] == brand) &
-                       (ranked['size_oz_rounded'] == size) &
-                       (ranked['STORE'] == store)]
-        return int(match.index[0]) + 1 if len(match) else None
+        # Rank in default scenario vs active scenario, by profit_lift_abs.
+        def _rank(df, brand, size, store):
+            ranked = df.sort_values('profit_lift_abs', ascending=False).reset_index(drop=True)
+            match = ranked[(ranked['brand_final'] == brand) &
+                           (ranked['size_oz_rounded'] == size) &
+                           (ranked['STORE'] == store)]
+            return int(match.index[0]) + 1 if len(match) else None
 
-    baseline_rank = _rank(baseline_cells, row['brand_final'], row['size_oz_rounded'], int(row['STORE']))
-    active_rank   = _rank(cells,           row['brand_final'], row['size_oz_rounded'], int(row['STORE']))
-    baseline_match = baseline_cells[
-        (baseline_cells['brand_final'] == row['brand_final']) &
-        (baseline_cells['size_oz_rounded'] == row['size_oz_rounded']) &
-        (baseline_cells['STORE'] == int(row['STORE']))
-    ]
-    baseline_price = float(baseline_match['opt_price'].iloc[0]) if len(baseline_match) else None
-    baseline_lift  = float(baseline_match['profit_lift_abs'].iloc[0]) if len(baseline_match) else None
-
-    # Validation card — pull from experiment_candidates if this cell is on the top-10
-    # test plan (precomputed with real σ); otherwise fall back to a rough on-the-fly estimate.
-    exp_df = _load_experiments()
-    exp_match = exp_df[
-        (exp_df['brand_final'] == row['brand_final']) &
-        (exp_df['size_oz_rounded'] == row['size_oz_rounded']) &
-        (exp_df['STORE'] == int(row['STORE']))
-    ]
-    if len(exp_match):
-        ec = exp_match.iloc[0]
-        sample_size_n = float(ec['n_storeweeks_per_arm_at_50pct_MDE_80pct_power'])
-        sigma_used    = float(ec['profit_std_wk'])
-        delta_used    = float(ec['mde_dollars_50pct'])
-        sample_source = 'precomputed for top-10'
-    else:
-        # Heuristic σ ≈ 40% of observed weekly profit, MDE = 50% of expected lift.
-        sigma_used = max(float(row['baseline_profit']) * 0.4, 1.0)
-        delta_used = max(abs(float(row['profit_lift_abs'])) * 0.5, 1.0)
-        sample_size_n = float(n_per_arm(sigma_used, delta_used))
-        sample_source = 'rough estimate · open Validate for the full calculator'
-
-    # ---- Render the three cards ----
-    dc1, dc2, dc3 = st.columns(3)
-
-    with dc1:
-        st.markdown('**Decision diagnostics**')
-        st.caption('Which constraints did the optimizer hit on this row?')
-        diags = [
-            ('Upper price ceiling',    'Yes — at historical max' if row['opt_hits_upper'] else 'No'),
-            ('Margin floor',           f'Yes — at ${margin_floor_price:.2f}' if at_margin_floor else 'No'),
-            ('Inventory cap',          ('Yes — binding' if inv_binding
-                                        else 'No' if inv_active
-                                        else 'Not active')),
-            ('Outside historical band', ('Yes (above ' + f'${row["p_max"]:.2f})' if above_history
-                                          else 'Yes (below ' + f'${row["p_min"]:.2f})' if below_history
-                                          else 'No')),
-            ('Competitor prices',      'Held fixed' if not comp_shocked
-                                        else f'Shocked {scenario.competitor_price_shock:+.0%}'),
+        baseline_rank = _rank(baseline_cells, row['brand_final'], row['size_oz_rounded'], int(row['STORE']))
+        active_rank   = _rank(cells,           row['brand_final'], row['size_oz_rounded'], int(row['STORE']))
+        baseline_match = baseline_cells[
+            (baseline_cells['brand_final'] == row['brand_final']) &
+            (baseline_cells['size_oz_rounded'] == row['size_oz_rounded']) &
+            (baseline_cells['STORE'] == int(row['STORE']))
         ]
-        for k, v in diags:
-            st.markdown(f'- **{k}** — {v}')
+        baseline_price = float(baseline_match['opt_price'].iloc[0]) if len(baseline_match) else None
+        baseline_lift  = float(baseline_match['profit_lift_abs'].iloc[0]) if len(baseline_match) else None
 
-    with dc2:
-        st.markdown('**Sensitivity readout**')
-        st.caption('How does the recommendation hold up under the active scenario?')
-        if scenario.is_baseline:
-            st.markdown(
-                f'- **Active scenario** — none (default scenario view)\n'
-                f'- **Default-scenario rank** — #{baseline_rank} of {len(baseline_cells):,}\n'
-                f'- **Candidate price** — ${row["opt_price"]:.2f}\n'
-                f'- **Expected lift** — ${row["profit_lift_abs"]:+.0f} / wk\n'
-                f'- _Move a sidebar slider to stress-test the choice._'
-            )
+        # Validation card — pull from experiment_candidates if this cell is on the top-10
+        # test plan (precomputed with real σ); otherwise fall back to a rough on-the-fly estimate.
+        exp_df = _load_experiments()
+        exp_match = exp_df[
+            (exp_df['brand_final'] == row['brand_final']) &
+            (exp_df['size_oz_rounded'] == row['size_oz_rounded']) &
+            (exp_df['STORE'] == int(row['STORE']))
+        ]
+        if len(exp_match):
+            ec = exp_match.iloc[0]
+            sample_size_n = float(ec['n_storeweeks_per_arm_at_50pct_MDE_80pct_power'])
+            sigma_used    = float(ec['profit_std_wk'])
+            delta_used    = float(ec['mde_dollars_50pct'])
+            sample_source = 'precomputed for top-10'
         else:
-            rank_delta = (baseline_rank - active_rank) if (baseline_rank and active_rank) else None
-            rank_arrow = ('↑' if rank_delta and rank_delta > 0
-                          else '↓' if rank_delta and rank_delta < 0
-                          else '→')
-            price_delta = (row['opt_price'] - baseline_price) if baseline_price else 0
-            lift_delta  = (row['profit_lift_abs'] - baseline_lift) if baseline_lift is not None else 0
-            st.markdown(
-                f'- **Rank shift** — #{baseline_rank} → #{active_rank} '
-                f'({rank_arrow} {abs(rank_delta) if rank_delta else 0})\n'
-                f'- **Candidate price** — ${baseline_price:.2f} → ${row["opt_price"]:.2f} '
-                f'(${price_delta:+.2f})\n'
-                f'- **Expected lift** — ${baseline_lift:+.0f} → ${row["profit_lift_abs"]:+.0f} / wk '
-                f'(${lift_delta:+.0f})\n'
-                f'- **Still recommended?** — '
-                + ('Yes — top quintile under both' if (active_rank or 999) <= len(cells) // 5
-                   else 'Maybe — re-check before testing')
-            )
+            # Heuristic σ ≈ 40% of observed weekly profit, MDE = 50% of expected lift.
+            sigma_used = max(float(row['baseline_profit']) * 0.4, 1.0)
+            delta_used = max(abs(float(row['profit_lift_abs'])) * 0.5, 1.0)
+            sample_size_n = float(n_per_arm(sigma_used, delta_used))
+            sample_source = 'rough estimate · open Validate for the full calculator'
 
-    with dc3:
-        st.markdown('**Validation card**')
-        st.caption('What an A/B test for this candidate would look like.')
-        st.markdown(
-            f'- **Primary metric** — Weekly profit per store\n'
-            f'- **Randomization unit** — Store (or store cluster)\n'
-            f'- **Treatment** — Test price ${row["opt_price"]:.2f}'
-            + (' + promo on' if row['opt_promo'] else '') + '\n'
-            f'- **Control** — Current price ${row["mean_p"]:.2f}\n'
-            f'- **Guardrails** — ≥40% units drop, margin floor ${margin_floor_price:.2f}, stockout watch\n'
-            f'- **Required sample size** — ~{sample_size_n:,.0f} store-weeks per group '
-            f'_(50% MDE @ 80% power · {sample_source})_\n'
-            f'- _Open the **Validate** page for the full sizing calculator and the test plan markdown._'
-        )
+        # ---- Render the three cards ----
+        dc1, dc2, dc3 = st.columns(3)
+
+        with dc1:
+            st.markdown('**Decision diagnostics**')
+            st.caption('Which constraints did the optimizer hit on this row?')
+            diags = [
+                ('Upper price ceiling',    'Yes — at historical max' if row['opt_hits_upper'] else 'No'),
+                ('Margin floor',           f'Yes — at ${margin_floor_price:.2f}' if at_margin_floor else 'No'),
+                ('Inventory cap',          ('Yes — binding' if inv_binding
+                                            else 'No' if inv_active
+                                            else 'Not active')),
+                ('Outside historical band', ('Yes (above ' + f'${row["p_max"]:.2f})' if above_history
+                                              else 'Yes (below ' + f'${row["p_min"]:.2f})' if below_history
+                                              else 'No')),
+                ('Competitor prices',      'Held fixed' if not comp_shocked
+                                            else f'Shocked {scenario.competitor_price_shock:+.0%}'),
+            ]
+            for k, v in diags:
+                st.markdown(f'- **{k}** — {v}')
+
+        with dc2:
+            st.markdown('**Sensitivity readout**')
+            st.caption('How does the recommendation hold up under the active scenario?')
+            if scenario.is_baseline:
+                st.markdown(
+                    f'- **Active scenario** — none (default scenario view)\n'
+                    f'- **Default-scenario rank** — #{baseline_rank} of {len(baseline_cells):,}\n'
+                    f'- **Candidate price** — ${row["opt_price"]:.2f}\n'
+                    f'- **Expected lift** — ${row["profit_lift_abs"]:+.0f} / wk\n'
+                    f'- _Move a sidebar slider to stress-test the choice._'
+                )
+            else:
+                rank_delta = (baseline_rank - active_rank) if (baseline_rank and active_rank) else None
+                rank_arrow = ('↑' if rank_delta and rank_delta > 0
+                              else '↓' if rank_delta and rank_delta < 0
+                              else '→')
+                price_delta = (row['opt_price'] - baseline_price) if baseline_price else 0
+                lift_delta  = (row['profit_lift_abs'] - baseline_lift) if baseline_lift is not None else 0
+                st.markdown(
+                    f'- **Rank shift** — #{baseline_rank} → #{active_rank} '
+                    f'({rank_arrow} {abs(rank_delta) if rank_delta else 0})\n'
+                    f'- **Candidate price** — ${baseline_price:.2f} → ${row["opt_price"]:.2f} '
+                    f'(${price_delta:+.2f})\n'
+                    f'- **Expected lift** — ${baseline_lift:+.0f} → ${row["profit_lift_abs"]:+.0f} / wk '
+                    f'(${lift_delta:+.0f})\n'
+                    f'- **Still recommended?** — '
+                    + ('Yes — top quintile under both' if (active_rank or 999) <= len(cells) // 5
+                       else 'Maybe — re-check before testing')
+                )
+
+        with dc3:
+            st.markdown('**Validation card**')
+            st.caption('What an A/B test for this candidate would look like.')
+            st.markdown(
+                f'- **Primary metric** — Weekly profit per store\n'
+                f'- **Randomization unit** — Store (or store cluster)\n'
+                f'- **Treatment** — Test price ${row["opt_price"]:.2f}'
+                + (' + promo on' if row['opt_promo'] else '') + '\n'
+                f'- **Control** — Current price ${row["mean_p"]:.2f}\n'
+                f'- **Guardrails** — ≥40% units drop, margin floor ${margin_floor_price:.2f}, stockout watch\n'
+                f'- **Required sample size** — ~{sample_size_n:,.0f} store-weeks per group '
+                f'_(50% MDE @ 80% power · {sample_source})_\n'
+                f'- _Open the **Validate** page for the full sizing calculator and the test plan markdown._'
+            )
