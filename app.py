@@ -29,28 +29,95 @@ apply_page_theme()
 # ---- Sidebar (branded) ----
 sidebar_brand(
     name='Pricing Engine',
-    tag="Decision support for cereal pricing",
+    tag='Decision product for pricing teams',
 )
 
 # ---- Hero ----
 page_intro(
     icon='',
-    kicker='Pricing decision support',
-    title='Find pricing and promotion changes worth testing.',
+    kicker='PM case study · pricing decision support',
+    title='Turn pricing data into testable product decisions.',
     tagline=(
-        'Pick a product at a store. Test a price or promo change. Get the '
-        'expected weekly profit lift plus an A/B test plan.'
+        'A decision product for pricing teams: rank price and promotion actions, '
+        'explain risk, and define the A/B validation plan before rollout.'
     ),
     chips=[
-        "Dataset · Dominick's cereals 1989-1996",
-        '5,896 product-store combinations',
-        'Live on Streamlit Cloud',
+        '4.65M scanner observations',
+        '5,896 candidate actions',
+        'Retail pricing -> healthcare pricing roadmap',
     ],
+)
+
+# ---- PM positioning ----
+section_header(
+    'Product question',
+    caption='Which pricing actions are worth testing, and what evidence would make a team comfortable launching them?',
+)
+insight_row([
+    Insight(
+        label='Target user',
+        headline='Pricing, revenue, or category teams',
+        detail=('The user needs a short queue of actions to test, not a giant '
+                'spreadsheet of historical prices.'),
+        tone='brand',
+    ),
+    Insight(
+        label='Pain today',
+        headline='A model output is not a launch decision',
+        detail=('Even profitable-looking recommendations need caveats, guardrails, '
+                'and an experiment design before rollout.'),
+        tone='warn',
+    ),
+    Insight(
+        label='Product choice',
+        headline='Recommend tests, not automatic price changes',
+        detail=('The MVP turns analytics into an auditable workflow: prioritize, '
+                'inspect risk, then validate.'),
+        tone='ok',
+    ),
+])
+
+section_header(
+    'Fast demo path for reviewers',
+    caption='A short path through the product if you only have two minutes.',
+)
+d1, d2, d3, d4 = st.columns(4)
+with d1:
+    st.markdown('**1. Product brief**')
+    st.caption('User, problem, MVP scope, metrics, and roadmap.')
+    st.page_link('pages/0_Product_Brief.py', label='Open Product Brief')
+with d2:
+    st.markdown('**2. Find candidates**')
+    st.caption('See how 5,896 product-store cells become a ranked test queue.')
+    st.page_link('pages/3_Optimize.py', label='Open Optimize')
+with d3:
+    st.markdown('**3. Validate**')
+    st.caption('Check whether the test is long enough to trust the lift.')
+    st.page_link('pages/4_Validate.py', label='Open Validate')
+with d4:
+    st.markdown('**4. Read boundaries**')
+    st.caption('See the risks the product refuses to hide.')
+    st.page_link('pages/5_Boundaries.py', label='Open Boundaries')
+
+section_header(
+    'How to read this as a PM case study',
+    caption='The model matters, but the product work is in the framing, trade-offs, and validation loop.',
+)
+st.markdown(
+    """
+| PM artifact | How it appears in the product |
+|---|---|
+| **Problem framing** | Pricing teams need to decide which actions are worth testing, not just estimate demand. |
+| **MVP scope** | Retail cereal panel, frozen model, bounded optimizer, no automatic deployment. |
+| **Success metrics** | Test launch rate, decision time saved, underpowered tests avoided, validated weekly profit lift. |
+| **Trade-off** | Interpretable fixed-effects model over black-box forecasting so recommendations can be audited. |
+| **Validation strategy** | Every recommendation is paired with a store-level A/B test plan and power check. |
+"""
 )
 
 # ---- What you can do here ----
 section_header(
-    'What you can do here',
+    'Core workflow inside the product',
     caption='Core workflow: Evidence → Simulate / Optimize → Validate. '
             'Boundaries and Upload are optional — read Boundaries to see what the demo '
             'will not claim; use Upload to score your own data.',
@@ -222,3 +289,30 @@ with st.expander('Technical audit trail', expanded=False):
         `{(REPORTS / "case_study.md").relative_to(PROJECT_ROOT)}`.
         """
     )
+
+section_header(
+    'Next domain: healthcare pricing & access',
+    caption='This project is the first step in a broader product-management path.',
+)
+insight_row([
+    Insight(
+        label='Current product',
+        headline='Retail pricing decisions',
+        detail='Turn historical scanner data into a ranked queue of price/promo tests.',
+        tone='brand',
+    ),
+    Insight(
+        label='Next product domain',
+        headline='Healthcare pricing, reimbursement, and access',
+        detail=('Extend the same decision workflow to provider prices, payer constraints, '
+                'patient affordability, and value evidence.'),
+        tone='note',
+    ),
+    Insight(
+        label='PM trajectory',
+        headline='Data-heavy product management',
+        detail=('Translate complex analytics into products that help teams make '
+                'high-stakes decisions with clear trade-offs.'),
+        tone='ok',
+    ),
+])
