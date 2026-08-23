@@ -12,7 +12,10 @@ from src.simulation import (
     load_cells, load_top_recommendations, load_experiment_candidates,
     MAIN_COEFS, REPORTS,
 )
-from src.plots import top_recommendations_bar
+from src.plots import (
+    candidate_landscape, risk_validation_bars, screening_funnel,
+    top_recommendations_bar,
+)
 from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header,
 )
@@ -63,29 +66,24 @@ best_plan = exp_df[
 best_plan_row = best_plan.iloc[0] if len(best_plan) else None
 
 section_header(
-    'Cockpit preview',
-    caption='One candidate, one decision path. Deeper tables and model notes stay available below.',
+    'Decision landscape',
+    caption='Top candidates plotted by price move, expected lift, validation need, and risk.',
 )
-preview_left, preview_right = st.columns([2.2, 1])
-with preview_left:
-    m1, m2, m3, m4 = st.columns(4)
+visual_left, visual_right = st.columns([1.8, 1])
+with visual_left:
+    st.plotly_chart(candidate_landscape(top_df, exp_df), use_container_width=True)
+
+with visual_right:
+    m1, m2 = st.columns(2)
     m1.metric('Current price', f"${best['mean_p']:.2f}")
     m2.metric('Test price', f"${best['opt_price']:.2f}")
+    m3, m4 = st.columns(2)
     m3.metric('Expected lift', f"${best['profit_lift_abs']:.0f}/wk")
     m4.metric(
         'Validation',
         'Extend test' if bool(best_plan_row['underpowered']) else 'Ready to test',
     )
 
-    n1, n2, n3 = st.columns(3)
-    with n1:
-        st.page_link('pages/3_Optimize.py', label='Open Cockpit')
-    with n2:
-        st.page_link('pages/4_Validate.py', label='Check Validation')
-    with n3:
-        st.page_link('pages/0_Product_Brief.py', label='Read Brief')
-
-with preview_right:
     risk = best_plan_row['risk_flag'] if best_plan_row is not None else 'review'
     test_type = best_plan_row['recommended_test_type'] if best_plan_row is not None else 'store test'
     st.markdown('**Decision read**')
@@ -97,6 +95,9 @@ with preview_right:
 - **Next step:** {test_type.replace('_', ' ')}
 """
     )
+    st.page_link('pages/3_Optimize.py', label='Open Cockpit')
+    st.page_link('pages/4_Validate.py', label='Validate')
+    st.page_link('pages/0_Product_Brief.py', label='Brief')
 
 # ---- Model evidence (collapsed) ----
 with st.expander('Why we trust the ranking', expanded=False):
@@ -119,6 +120,12 @@ col2.metric('Shortlisted for testing',             f'{len(top_df):,}')
 col3.metric('Flagged high-risk',                   int((exp_df['risk_flag'] == 'high').sum()))
 col4.metric('Need longer validation',
             int(exp_df['underpowered'].sum()))
+
+funnel_col, readiness_col = st.columns(2)
+with funnel_col:
+    st.plotly_chart(screening_funnel(cells_df, top_df, exp_df), use_container_width=True)
+with readiness_col:
+    st.plotly_chart(risk_validation_bars(exp_df), use_container_width=True)
 
 with st.expander('Model-implied lift across the full panel — diagnostic only, not a forecast'):
     st.markdown(

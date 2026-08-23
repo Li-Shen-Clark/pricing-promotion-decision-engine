@@ -81,6 +81,144 @@ def top_recommendations_bar(df: pd.DataFrame, value_col: str = 'profit_lift_abs'
     return fig
 
 
+def candidate_landscape(top_df: pd.DataFrame, exp_df: pd.DataFrame) -> go.Figure:
+    """Top candidates by price move, expected lift, and risk status."""
+    key_cols = ['brand_final', 'size_oz_rounded', 'STORE']
+    exp_cols = key_cols + ['risk_flag', 'underpowered', 'recommended_test_type']
+    df = top_df.merge(exp_df[exp_cols], on=key_cols, how='left').copy()
+    df = df.sort_values('profit_lift_abs', ascending=False).reset_index(drop=True)
+    df['rank'] = np.arange(1, len(df) + 1)
+    df['price_move_pct'] = (df['opt_price'] / df['mean_p'] - 1) * 100
+    df['risk_flag'] = df['risk_flag'].fillna('review')
+    df['underpowered'] = df['underpowered'].fillna(False).astype(bool)
+    df['recommended_test_type'] = df['recommended_test_type'].fillna('review')
+
+    risk_order = ['high', 'medium', 'low', 'review']
+    risk_colors = {
+        'high': PROJECT_RED,
+        'medium': '#d49a1d',
+        'low': PROJECT_GREEN,
+        'review': PROJECT_GRAY,
+    }
+
+    fig = go.Figure()
+    for risk in risk_order:
+        sub = df[df['risk_flag'] == risk]
+        if sub.empty:
+            continue
+        fig.add_trace(go.Scatter(
+            x=sub['price_move_pct'],
+            y=sub['profit_lift_abs'],
+            mode='markers+text',
+            name=f'{risk.title()} risk',
+            text=[f'#{rank}' for rank in sub['rank']],
+            textposition='top center',
+            customdata=np.stack([
+                sub['brand_final'],
+                sub['size_oz_rounded'],
+                sub['STORE'],
+                sub['mean_p'],
+                sub['opt_price'],
+                sub['underpowered'],
+                sub['recommended_test_type'],
+            ], axis=-1),
+            hovertemplate=(
+                '<b>%{customdata[0]} %{customdata[1]:.0f}oz · Store %{customdata[2]}</b><br>'
+                'Price move: %{x:.1f}%<br>'
+                'Expected lift: $%{y:.0f}/wk<br>'
+                'Current -> test: $%{customdata[3]:.2f} -> $%{customdata[4]:.2f}<br>'
+                'Needs longer test: %{customdata[5]}<br>'
+                'Test type: %{customdata[6]}<extra></extra>'
+            ),
+            marker=dict(
+                color=risk_colors[risk],
+                size=np.clip(22 - sub['rank'], 12, 20),
+                symbol=['x' if flag else 'circle' for flag in sub['underpowered']],
+                line=dict(color='white', width=1),
+            ),
+        ))
+
+    fig.add_vline(
+        x=30,
+        line=dict(color=PROJECT_GRAY, dash='dot', width=1),
+        annotation_text='+30% price-move watch',
+        annotation_position='top right',
+    )
+    fig.update_layout(
+        xaxis_title='Candidate price move vs current',
+        yaxis_title='Expected weekly profit lift under model',
+        xaxis_ticksuffix='%',
+        yaxis_tickprefix='$',
+        margin=dict(l=10, r=10, t=10, b=10),
+        height=390,
+        legend=dict(orientation='h', yanchor='bottom', y=1.02),
+    )
+    return fig
+
+
+def screening_funnel(cells_df: pd.DataFrame, top_df: pd.DataFrame,
+                     exp_df: pd.DataFrame) -> go.Figure:
+    """Compact funnel from all screened cells to test-ready candidates."""
+    ready_now = int((~exp_df['underpowered'].astype(bool)).sum())
+    labels = ['Screened cells', 'Shortlisted candidates', 'Sized for current plan']
+    values = [len(cells_df), len(top_df), ready_now]
+    fig = go.Figure(go.Funnel(
+        y=labels,
+        x=values,
+        textinfo='value',
+        marker=dict(color=[PROJECT_BLUE, '#6aa6c9', PROJECT_GREEN]),
+        connector=dict(line=dict(color='#d9dee8', width=1)),
+    ))
+    fig.update_layout(
+        title='From panel to launchable test',
+        margin=dict(l=10, r=10, t=42, b=10),
+        height=310,
+        showlegend=False,
+    )
+    return fig
+
+
+def risk_validation_bars(exp_df: pd.DataFrame) -> go.Figure:
+    """Stacked bar summary of shortlist risk and validation readiness."""
+    high = int((exp_df['risk_flag'] == 'high').sum())
+    medium = int((exp_df['risk_flag'] == 'medium').sum())
+    low = int((exp_df['risk_flag'] == 'low').sum())
+    ready = int((~exp_df['underpowered'].astype(bool)).sum())
+    needs_longer = int(exp_df['underpowered'].astype(bool).sum())
+
+    fig = go.Figure()
+    stacks = [
+        ('Ready now', 'Validation', ready, PROJECT_GREEN),
+        ('Needs longer test', 'Validation', needs_longer, PROJECT_RED),
+        ('Low risk', 'Risk', low, PROJECT_GREEN),
+        ('Medium risk', 'Risk', medium, '#d49a1d'),
+        ('High risk', 'Risk', high, PROJECT_RED),
+    ]
+    for name, row, value, color in stacks:
+        fig.add_trace(go.Bar(
+            name=name,
+            y=[row],
+            x=[value],
+            orientation='h',
+            marker_color=color,
+            text=[value if value else ''],
+            textposition='inside',
+            hovertemplate=f'{name}: {value}<extra></extra>',
+        ))
+
+    fig.update_layout(
+        title='Shortlist readiness',
+        barmode='stack',
+        xaxis_title='Top-10 candidates',
+        xaxis=dict(range=[0, max(len(exp_df), 1)], dtick=2),
+        yaxis=dict(autorange='reversed'),
+        margin=dict(l=10, r=10, t=42, b=10),
+        height=310,
+        legend=dict(orientation='h', yanchor='bottom', y=1.02),
+    )
+    return fig
+
+
 def coefficients_bar(coef_df: pd.DataFrame) -> go.Figure:
     """Side-by-side bars of own / cross / promo coefficients across model variants."""
     melt = coef_df.melt(id_vars='model',
