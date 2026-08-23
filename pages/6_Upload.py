@@ -63,11 +63,6 @@ with st.expander('Scope of this sandbox', expanded=False):
 
 # ---- Template download ----
 section_header('Upload CSV', caption='Download the template, then upload rows to score one portfolio-wide price/promo action.')
-st.caption(
-    'Required columns: ' + ', '.join(f'`{c}`' for c in REQUIRED_COLUMNS) + '. '
-    'Optional columns: ' + ', '.join(f'`{c}`' for c in OPTIONAL_COLUMNS) + '. '
-    f'Max rows: {MAX_ROWS:,}. Common synonyms are auto-mapped (e.g. `qty`→`quantity`, `sku`→`product_id`).'
-)
 st.download_button(
     label='⬇ Download template CSV',
     data=template_csv(),
@@ -76,6 +71,14 @@ st.download_button(
 )
 
 upload = st.file_uploader('Pick a CSV file', type=['csv'])
+
+with st.expander('CSV schema', expanded=False):
+    st.markdown(
+        'Required columns: ' + ', '.join(f'`{c}`' for c in REQUIRED_COLUMNS) + '.\n\n'
+        'Optional columns: ' + ', '.join(f'`{c}`' for c in OPTIONAL_COLUMNS) + '.\n\n'
+        f'Max rows: {MAX_ROWS:,}. Common synonyms are auto-mapped '
+        '(for example, `qty` -> `quantity`, `sku` -> `product_id`).'
+    )
 
 if upload is None:
     st.info('Upload a CSV to continue. Use the template above as a starting point.')

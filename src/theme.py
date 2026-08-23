@@ -42,7 +42,7 @@ PALETTE = {
 
 GITHUB_URL = 'https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine'
 AUTHOR_NAME = 'Li Shen'
-AUTHOR_AFFILIATION = 'Applied Economist'
+AUTHOR_AFFILIATION = 'Applied Economist · Pricing & Decision Science'
 
 SIDEBAR_SECTIONS = [
     ('Decision Workflow', [

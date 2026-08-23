@@ -11,6 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.simulation import read_markdown, REPORTS, MAIN_COEFS
 from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header,
+    insight_row, Insight,
 )
 
 st.set_page_config(page_title='Trust & Boundaries', page_icon='🧭', layout='wide')
@@ -48,8 +49,30 @@ section_header('Six things this demo does NOT do',
                caption='Each row is a deliberate scope choice, not an unknown failure mode. '
                        'Open the expander below for the technical detail behind each row.')
 
-st.markdown(
-    """
+insight_row([
+    Insight(
+        label='Use',
+        headline='Prioritize what deserves a controlled test',
+        detail='The model ranks candidates and exposes guardrails before anyone touches live prices.',
+        tone='ok',
+    ),
+    Insight(
+        label='Do not use',
+        headline='Do not auto-deploy the recommended price',
+        detail='The app stops at test design because causality, cost, inventory, and competitor reaction still matter.',
+        tone='alert',
+    ),
+    Insight(
+        label='Production gap',
+        headline='Live constraints decide whether a test is launchable',
+        detail='Real cost-of-goods, inventory, payer or channel rules, and operational capacity are roadmap inputs.',
+        tone='warn',
+    ),
+])
+
+with st.expander('Open the six boundary checks', expanded=False):
+    st.markdown(
+        """
 | Risk | What we checked | What you should do |
 |---|---|---|
 | **Cause vs correlation.** Prices and promotions in the data were chosen, not randomly assigned. | We re-ran the model with stricter controls and instrumental-variable methods; price-sensitivity moved by ≤4.5%, same direction. | Treat candidates as test prioritization; confirm with an A/B before deployment. |
@@ -59,7 +82,7 @@ st.markdown(
 | **Inventory limits.** Large predicted unit increases assume restock capacity. | The app flags large quantity shifts but does not enforce a stockout constraint. | Confirm restock feasibility with operations before any large up-volume test. |
 | **Cost is an accounting average, not true marginal cost.** | Profit numbers use the dataset's acquisition-cost proxy. | Treat absolute profit numbers as directional; in production, plug in real cost-of-goods. |
 """
-)
+    )
 
 with st.expander('Technical detail — what each row means in model language', expanded=False):
     st.markdown(

@@ -162,52 +162,51 @@ section_header(
     caption='Use sidebar filters to narrow the queue. Select one candidate below for the decision card.',
 )
 
-# ---- Table ----
-section_header('Candidate table',
-               caption='Top 500 rows of the filtered view, sorted by expected weekly profit lift. '
-                       'Toggle "Show technical columns" for promo flag, observed profit, and risk diagnostics.')
-
-show_technical = st.toggle('Show technical columns', value=False,
-                           help='Hide by default to keep the decision view clean.')
-
-decision_cols = {
-    'brand_final':       'Brand',
-    'size_oz_rounded':   'Size (oz)',
-    'STORE':             'Store',
-    'mean_p':            'Current price',
-    'opt_price':         'Test price',
-    'profit_lift_abs':   'Expected lift ($/wk)',
-    'opt_hits_upper':    'At price ceiling?',
-}
-technical_cols = {
-    'n_weeks':           'Weeks of history',
-    'opt_promo':         'Promo (model)',
-    'baseline_profit':   'Observed profit ($/wk)',
-    'opt_profit':        'Expected profit ($/wk)',
-    'profit_lift_pct':   'Lift (%)',
-    'q_lift_ratio':      'Units ratio (test/observed)',
-}
-display_cols = {**decision_cols, **technical_cols} if show_technical else decision_cols
-view_disp = view.sort_values('profit_lift_abs', ascending=False)\
-                .head(500)\
-                .rename(columns=display_cols)[list(display_cols.values())]
-st.dataframe(view_disp.style.format({
-    'Size (oz)':                       '{:.2f}',
-    'Current price':                   '${:.2f}',
-    'Test price':                      '${:.2f}',
-    'Expected lift ($/wk)':            '${:.0f}',
-    'Observed profit ($/wk)':          '${:.0f}',
-    'Expected profit ($/wk)':          '${:.0f}',
-    'Lift (%)':                        '{:.0f}%',
-    'Units ratio (test/observed)':     '{:.2f}×',
-}), width='stretch', hide_index=True)
-
-with st.expander('Open chart view', expanded=False):
+if len(view) > 0:
     top = view.sort_values('profit_lift_abs', ascending=False).head(top_n)
-    if len(top) > 0:
-        st.plotly_chart(
-            top_recommendations_bar(top, title=f'Top {len(top)} candidates by expected weekly profit lift'),
-        )
+    st.plotly_chart(
+        top_recommendations_bar(top, title=f'Top {len(top)} candidates by expected weekly profit lift'),
+    )
+
+# ---- Table ----
+with st.expander('Open candidate table', expanded=False):
+    st.caption(
+        'Top 500 rows of the filtered view. Toggle technical columns for promo flag, observed profit, and risk diagnostics.'
+    )
+    show_technical = st.toggle('Show technical columns', value=False,
+                               help='Hide by default to keep the decision view clean.')
+
+    decision_cols = {
+        'brand_final':       'Brand',
+        'size_oz_rounded':   'Size (oz)',
+        'STORE':             'Store',
+        'mean_p':            'Current price',
+        'opt_price':         'Test price',
+        'profit_lift_abs':   'Expected lift ($/wk)',
+        'opt_hits_upper':    'At price ceiling?',
+    }
+    technical_cols = {
+        'n_weeks':           'Weeks of history',
+        'opt_promo':         'Promo (model)',
+        'baseline_profit':   'Observed profit ($/wk)',
+        'opt_profit':        'Expected profit ($/wk)',
+        'profit_lift_pct':   'Lift (%)',
+        'q_lift_ratio':      'Units ratio (test/observed)',
+    }
+    display_cols = {**decision_cols, **technical_cols} if show_technical else decision_cols
+    view_disp = view.sort_values('profit_lift_abs', ascending=False)\
+                    .head(500)\
+                    .rename(columns=display_cols)[list(display_cols.values())]
+    st.dataframe(view_disp.style.format({
+        'Size (oz)':                       '{:.2f}',
+        'Current price':                   '${:.2f}',
+        'Test price':                      '${:.2f}',
+        'Expected lift ($/wk)':            '${:.0f}',
+        'Observed profit ($/wk)':          '${:.0f}',
+        'Expected profit ($/wk)':          '${:.0f}',
+        'Lift (%)':                        '{:.0f}%',
+        'Units ratio (test/observed)':     '{:.2f}×',
+    }), width='stretch', hide_index=True)
 
 # ---- Drill-down ----
 section_header('Inspect a single candidate',
