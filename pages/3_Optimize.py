@@ -20,7 +20,7 @@ from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Optimize · Find candidates', page_icon='⚙️', layout='wide')
+st.set_page_config(page_title='Pricing Cockpit', page_icon='⚙️', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -30,17 +30,16 @@ sidebar_brand(
 
 page_intro(
     icon='',
-    kicker='Step 02 · Which products are worth testing first?',
-    title='Optimize · Find candidates',
+    kicker='Pricing cockpit',
+    title='Rank candidates. Inspect one decision.',
     tagline=(
-        'Browse 5,896 product-store combinations ranked by expected weekly '
-        'profit lift. The top of the list is where to test next — not where '
-        'to deploy.'
+        'A focused cockpit for choosing the next pricing test: filter the queue, '
+        'inspect one candidate, then validate before rollout.'
     ),
     chips=[
-        '5,896 product-store combinations',
-        'Filter + drill-down',
-        'Re-ranks under your scenario',
+        'Candidate queue',
+        'Decision card',
+        'Scenario re-ranking',
     ],
 )
 
@@ -158,8 +157,10 @@ if hide_ceiling:
     mask &= ~cells['opt_hits_upper'].astype(bool)
 view = cells.loc[mask].copy()
 
-section_header(f'Filtered view · {len(view):,} of {len(cells):,} product-store combinations',
-               caption='Use the sidebar to filter by brand, size, history depth, or hide candidates that hit the historical price ceiling.')
+section_header(
+    f'Candidate queue · {len(view):,} of {len(cells):,}',
+    caption='Use sidebar filters to narrow the queue. Select one candidate below for the decision card.',
+)
 
 # ---- Table ----
 section_header('Candidate table',

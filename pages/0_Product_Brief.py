@@ -23,10 +23,10 @@ sidebar_brand(
 
 page_intro(
     icon='',
-    kicker='PM case study',
+    kicker='Research notes',
     title='Product Brief',
     tagline=(
-        'A product-management read of the Pricing Engine: user, problem, MVP scope, '
+        'The portfolio essay behind the cockpit: user, problem, MVP scope, '
         'success metrics, trade-offs, and roadmap.'
     ),
     chips=[
