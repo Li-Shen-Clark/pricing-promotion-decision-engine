@@ -14,7 +14,6 @@ from src.theme import (
     insight_row, Insight,
 )
 
-st.set_page_config(page_title='Trust & Boundaries', page_icon='🧭', layout='wide')
 apply_page_theme()
 
 sidebar_brand(

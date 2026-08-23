@@ -26,7 +26,7 @@ The methodology deliberately separates formula provenance: DFF price, quantity, 
 Current stage: Streamlit MVP and product case-study workflow completed. The project now has cleaned panels, EDA, demand estimation, counterfactual simulation, profit optimization, A/B validation design, cannibalization robustness, IV sensitivity, a Product Brief page, and an interactive deployed app.
 
 - Raw data dictionary: [`rawData/README.md`](rawData/README.md)
-- Product brief: [`pages/0_Product_Brief.py`](pages/0_Product_Brief.py)
+- Product brief: [`views/0_Product_Brief.py`](views/0_Product_Brief.py)
 - Cleaning notebook: [`notebooks/01_data_cleaning.ipynb`](notebooks/01_data_cleaning.ipynb)
 - EDA notebook: [`notebooks/02_eda.ipynb`](notebooks/02_eda.ipynb)
 - Demand estimation notebook: [`notebooks/03_demand_estimation.ipynb`](notebooks/03_demand_estimation.ipynb)
@@ -190,7 +190,8 @@ pricing/
 |   |-- 04_counterfactual.ipynb
 |   |-- 05_ab_testing_design.ipynb
 |
-|-- pages/
+|-- views/
+|   |-- 0_Overview.py          # Visual product overview
 |   |-- 0_Product_Brief.py     # PM case-study brief
 |   |-- 1_Evidence.py          # Model Evidence
 |   |-- 2_Simulate.py          # What-If Simulator

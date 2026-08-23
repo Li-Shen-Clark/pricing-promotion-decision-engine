@@ -98,11 +98,11 @@ Implemented in `src/scenario.py` as a frozen `Scenario` dataclass with five iner
 In a SaaS / e-commerce setting, the randomization unit shifts from `store` to `user / session`. The same design pattern applies: define a primary economic metric, compute σ from historical user-week spend, and size the test the same way. The DFF MVP uses store-level rollout because it matches the underlying scanner-panel structure; replacing the unit and the σ source is the only change needed.
 
 ## Build sequence
-1. `app/main.py` (sidebar + router)
-2. `app/pages/1_executive_summary.py`
-3. `app/pages/2_demand_model.py`
-4. `app/pages/3_counterfactual_simulator.py`  ← shared `predict_q` helper imported from `src/`
-5. `app/pages/4_profit_optimizer.py`
-6. `app/pages/5_experiment_design.py`
-7. `app/pages/6_limitations.py`
-8. Deploy: `streamlit run app/main.py` locally → free-tier Streamlit Cloud for portfolio link
+1. `app.py` (explicit navigation)
+2. `views/0_Overview.py`
+3. `views/1_Evidence.py`
+4. `views/2_Simulate.py`  ← shared `predict_q` helper imported from `src/`
+5. `views/3_Optimize.py`
+6. `views/4_Validate.py`
+7. `views/5_Boundaries.py`
+8. Deploy: `streamlit run app.py` locally → free-tier Streamlit Cloud for portfolio link

@@ -3,7 +3,7 @@
 Centralises palette, Plotly template, and a small set of markup helpers so
 every page looks like part of the same product rather than a notebook wrapper.
 Each page that wants the polished look calls :func:`apply_page_theme` once at
-the top (after ``st.set_page_config``); downstream renders use ``page_intro``,
+the top; downstream renders use ``page_intro``,
 ``insight_row``, ``metric_card``, ``section_header``, and ``status_pill``.
 """
 from __future__ import annotations
@@ -46,16 +46,16 @@ AUTHOR_AFFILIATION = 'Applied Economist · Pricing & Decision Science'
 
 SIDEBAR_SECTIONS = [
     ('Decision Workflow', [
-        ('app.py', 'Overview'),
-        ('pages/3_Optimize.py', 'Cockpit'),
-        ('pages/2_Simulate.py', 'Simulator'),
-        ('pages/4_Validate.py', 'Validation'),
-        ('pages/6_Upload.py', 'Upload Sandbox'),
+        ('views/0_Overview.py', 'Overview'),
+        ('views/3_Optimize.py', 'Cockpit'),
+        ('views/2_Simulate.py', 'Simulator'),
+        ('views/4_Validate.py', 'Validation'),
+        ('views/6_Upload.py', 'Upload Sandbox'),
     ]),
     ('Research Notes', [
-        ('pages/0_Product_Brief.py', 'Product Brief'),
-        ('pages/1_Evidence.py', 'Model Evidence'),
-        ('pages/5_Boundaries.py', 'Trust & Boundaries'),
+        ('views/0_Product_Brief.py', 'Product Brief'),
+        ('views/1_Evidence.py', 'Model Evidence'),
+        ('views/5_Boundaries.py', 'Trust & Boundaries'),
     ]),
 ]
 

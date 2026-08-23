@@ -13,7 +13,6 @@ from src.theme import (
     sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Product Brief', page_icon='📌', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
@@ -69,19 +68,19 @@ r1, r2, r3, r4 = st.columns(4)
 with r1:
     st.markdown('**1. Evidence**')
     st.caption('Can we trust the price-response signal enough to use it?')
-    st.page_link('pages/1_Evidence.py', label='Open Evidence')
+    st.page_link('views/1_Evidence.py', label='Open Evidence')
 with r2:
     st.markdown('**2. Optimize**')
     st.caption('Which actions rise to the top of the test queue?')
-    st.page_link('pages/3_Optimize.py', label='Open Optimize')
+    st.page_link('views/3_Optimize.py', label='Open Optimize')
 with r3:
     st.markdown('**3. Validate**')
     st.caption('How much test evidence is needed before rollout?')
-    st.page_link('pages/4_Validate.py', label='Open Validate')
+    st.page_link('views/4_Validate.py', label='Open Validate')
 with r4:
     st.markdown('**4. Boundaries**')
     st.caption('What should the product refuse to claim?')
-    st.page_link('pages/5_Boundaries.py', label='Open Boundaries')
+    st.page_link('views/5_Boundaries.py', label='Open Boundaries')
 
 section_header('Product decisions')
 scope_tab, metrics_tab, roadmap_tab = st.tabs(['MVP Scope', 'Success Metrics', 'Roadmap'])

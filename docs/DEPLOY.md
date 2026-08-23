@@ -23,7 +23,7 @@ Run these in order. Each catches a different class of failure that the deploy ho
 ### 2.1 Python syntax + import preflight
 
 ```bash
-python -m py_compile app.py pages/*.py src/*.py
+python -m py_compile app.py views/*.py src/*.py
 ```
 
 Expected: silent exit 0. Any failure here means the deploy slug will not boot.
@@ -147,4 +147,4 @@ The five small runtime files stay in regular git history, so the deploy slug pul
 - **No model retraining endpoint.** The frozen coefficients ship with the slug; updating them requires a re-deploy.
 - **No background jobs.** Notebook 07 runs locally only — its outputs are checked into the slug as static artifacts.
 
-These are intentional MVP scope cuts, not bugs. They are listed in [`pages/5_Boundaries.py`](../pages/5_Boundaries.py) for the user-facing version.
+These are intentional MVP scope cuts, not bugs. They are listed in [`views/5_Boundaries.py`](../views/5_Boundaries.py) for the user-facing version.

@@ -20,7 +20,6 @@ from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
-st.set_page_config(page_title='Pricing Cockpit', page_icon='⚙️', layout='wide')
 apply_page_theme()
 
 sidebar_brand(
