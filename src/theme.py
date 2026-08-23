@@ -44,15 +44,19 @@ GITHUB_URL = 'https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine
 AUTHOR_NAME = 'Li Shen'
 AUTHOR_AFFILIATION = 'Pricing Analytics & Healthcare Product Strategy'
 
-SIDEBAR_PAGES = [
-    ('app.py', 'Overview'),
-    ('pages/0_Product_Brief.py', 'Product Brief'),
-    ('pages/1_Evidence.py', 'Evidence'),
-    ('pages/2_Simulate.py', 'Simulate'),
-    ('pages/3_Optimize.py', 'Optimize'),
-    ('pages/4_Validate.py', 'Validate'),
-    ('pages/5_Boundaries.py', 'Boundaries'),
-    ('pages/6_Upload.py', 'Upload'),
+SIDEBAR_SECTIONS = [
+    ('Product', [
+        ('app.py', 'Overview'),
+        ('pages/3_Optimize.py', 'Cockpit'),
+        ('pages/2_Simulate.py', 'Simulator'),
+        ('pages/4_Validate.py', 'Validation'),
+        ('pages/6_Upload.py', 'Upload Sandbox'),
+    ]),
+    ('Research Notes', [
+        ('pages/0_Product_Brief.py', 'Product Brief'),
+        ('pages/1_Evidence.py', 'Model Evidence'),
+        ('pages/5_Boundaries.py', 'Trust & Boundaries'),
+    ]),
 ]
 
 _TONE_CLASSES = {
@@ -420,9 +424,13 @@ def sidebar_brand(*, name: str, tag: str,
             """,
             unsafe_allow_html=True,
         )
-        st.markdown('<div class="pe-nav-label">Navigate</div>', unsafe_allow_html=True)
-        for path, label in SIDEBAR_PAGES:
-            st.page_link(path, label=label)
+        for section, pages in SIDEBAR_SECTIONS:
+            st.markdown(
+                f'<div class="pe-nav-label">{_escape(section)}</div>',
+                unsafe_allow_html=True,
+            )
+            for path, label in pages:
+                st.page_link(path, label=label)
         st.markdown(
             f"""
             <div class="pe-sidebar-footer">
