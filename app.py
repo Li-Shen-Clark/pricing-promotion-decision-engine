@@ -14,8 +14,7 @@ from src.simulation import (
 )
 from src.plots import top_recommendations_bar
 from src.theme import (
-    apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header,
 )
 
 st.set_page_config(
@@ -49,37 +48,31 @@ page_intro(
 )
 
 section_header(
-    'Fast demo path for reviewers',
-    caption='A short path through the product if you only have two minutes. The rest is optional depth.',
+    'Start in the cockpit',
+    caption='The product experience starts with the ranked decision queue. Research notes stay available when you want depth.',
 )
-d1, d2, d3, d4 = st.columns(4)
+d1, d2, d3 = st.columns(3)
 with d1:
-    st.markdown('**1. Product brief**')
-    st.caption('User, problem, MVP scope, metrics, and roadmap.')
-    st.page_link('pages/0_Product_Brief.py', label='Open Product Brief')
+    st.markdown('**1. Cockpit**')
+    st.caption('Rank price/promo actions and inspect the selected candidate.')
+    st.page_link('pages/3_Optimize.py', label='Open Cockpit')
 with d2:
-    st.markdown('**2. Find candidates**')
-    st.caption('See how 5,896 product-store cells become a ranked test queue.')
-    st.page_link('pages/3_Optimize.py', label='Open Optimize')
+    st.markdown('**2. Validation**')
+    st.caption('Check whether the test is powered enough before rollout.')
+    st.page_link('pages/4_Validate.py', label='Open Validation')
 with d3:
-    st.markdown('**3. Validate**')
-    st.caption('Check whether the test is long enough to trust the lift.')
-    st.page_link('pages/4_Validate.py', label='Open Validate')
-with d4:
-    st.markdown('**4. Read boundaries**')
-    st.caption('See the risks the product refuses to hide.')
-    st.page_link('pages/5_Boundaries.py', label='Open Boundaries')
+    st.markdown('**3. Research notes**')
+    st.caption('Open the portfolio essay, model evidence, and trust boundaries.')
+    st.page_link('pages/0_Product_Brief.py', label='Open Research Notes')
 
-with st.expander('Product framing and workflow', expanded=False):
+with st.expander('What is kept behind the research interface?', expanded=False):
     st.markdown(
         """
-| Question | Product answer |
+| Interface | What lives there |
 |---|---|
-| **Who is this for?** | Pricing, revenue, or category teams choosing which action to test next. |
-| **What is the workflow?** | Evidence -> Simulate / Optimize -> Validate -> Boundaries. |
-| **What is the core trade-off?** | Interpretable recommendations over black-box forecast accuracy. |
-| **What is the launch rule?** | No automatic price changes; every candidate needs validation. |
-| **What makes this product-relevant?** | It turns analysis into a decision queue, risk readout, and A/B test plan. |
+| **Product Brief** | User, problem, MVP scope, metrics, roadmap, and PM trade-offs. |
+| **Model Evidence** | Elasticity, robustness checks, and technical coefficient tables. |
+| **Trust & Boundaries** | Causal caveats, risk matrix, source reports, and future extensions. |
 """
     )
 
