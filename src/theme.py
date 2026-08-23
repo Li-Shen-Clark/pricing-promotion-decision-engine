@@ -430,7 +430,13 @@ def sidebar_brand(*, name: str, tag: str,
                 unsafe_allow_html=True,
             )
             for path, label in pages:
-                st.page_link(path, label=label)
+                try:
+                    st.page_link(path, label=label)
+                except KeyError:
+                    st.markdown(
+                        f'<div class="pe-nav">{_escape(label)}</div>',
+                        unsafe_allow_html=True,
+                    )
         st.markdown(
             f"""
             <div class="pe-sidebar-footer">

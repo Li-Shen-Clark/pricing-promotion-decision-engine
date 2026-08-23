@@ -1,5 +1,6 @@
 """Page 3 — What-If Simulator: cell selector + sliders + curves."""
 from __future__ import annotations
+from html import escape
 import sys
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from src.scenario import (
     apply_demand_overlay, effective_cost, compute_profit, scenario_warnings,
 )
 from src.theme import (
-    apply_page_theme, page_intro, sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header, status_pill,
 )
 
 apply_page_theme()
@@ -30,20 +31,111 @@ sidebar_brand(
 
 page_intro(
     icon='',
-    kicker='Step 02 · What happens if I change the price?',
-    title='What-If Simulator',
+    kicker='Simulation workbench',
+    title='Simulate one price move.',
     tagline=(
-        'Pick one product at one store. Move the candidate price. See the '
-        'predicted units, revenue, and weekly profit response.'
+        'Select one product-store cell, set a candidate action, and read the '
+        'before/after economics before opening the curves.'
     ),
     chips=[
         'Single product-store',
-        'Optional stress-test scenarios',
+        'Before / after outcomes',
         'Demand + profit curves',
     ],
 )
 
-with st.expander('How to use this page', expanded=False):
+st.markdown(
+    """
+    <style>
+      .pe-sim-eyebrow {
+          font-size: 0.78rem; font-weight: 650; letter-spacing: 0.06em;
+          text-transform: uppercase; color: var(--text-muted);
+          margin-bottom: 0.35rem;
+      }
+      .pe-sim-title {
+          font-size: 1.12rem; font-weight: 650; color: var(--text);
+          line-height: 1.35; margin-bottom: 0.55rem;
+      }
+      .pe-sim-stat-grid,
+      .pe-sim-outcome-grid {
+          display: grid; gap: 0.7rem;
+      }
+      .pe-sim-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pe-sim-outcome-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .pe-sim-stat,
+      .pe-sim-outcome {
+          border: 1px solid var(--border); border-radius: 8px;
+          background: var(--surface-card); padding: 0.85rem 0.95rem;
+          min-height: 6.4rem;
+      }
+      .pe-sim-stat .label,
+      .pe-sim-outcome .label {
+          font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;
+      }
+      .pe-sim-stat .value,
+      .pe-sim-outcome .value {
+          font-size: 1.34rem; color: var(--text); font-weight: 700;
+          line-height: 1.2; margin-top: 0.25rem;
+      }
+      .pe-sim-stat .detail,
+      .pe-sim-outcome .detail {
+          font-size: 0.86rem; color: var(--text-muted); line-height: 1.45;
+          margin-top: 0.35rem;
+      }
+      .pe-sim-control-note {
+          border-left: 3px solid var(--brand-soft);
+          background: var(--surface-2); padding: 0.8rem 0.95rem;
+          color: var(--text-muted); font-size: 0.92rem; line-height: 1.5;
+          border-radius: 8px; margin-top: 0.75rem;
+      }
+      @media (max-width: 900px) {
+          .pe-sim-stat-grid,
+          .pe-sim-outcome-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 560px) {
+          .pe-sim-stat-grid,
+          .pe-sim-outcome-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def _money(value: float, digits: int = 0) -> str:
+    return f"${value:,.{digits}f}"
+
+
+def _signed_money(value: float, digits: int = 0) -> str:
+    sign = '+' if value >= 0 else '-'
+    return f"{sign}${abs(value):,.{digits}f}"
+
+
+def _signed_number(value: float, digits: int = 1) -> str:
+    return f"{value:+,.{digits}f}"
+
+
+def _stat(label: str, value: str, detail: str) -> str:
+    return (
+        '<div class="pe-sim-stat">'
+        f'<div class="label">{escape(label)}</div>'
+        f'<div class="value">{escape(value)}</div>'
+        f'<div class="detail">{escape(detail)}</div>'
+        '</div>'
+    )
+
+
+def _outcome(label: str, value: str, detail: str) -> str:
+    return (
+        '<div class="pe-sim-outcome">'
+        f'<div class="label">{escape(label)}</div>'
+        f'<div class="value">{escape(value)}</div>'
+        f'<div class="detail">{escape(detail)}</div>'
+        '</div>'
+    )
+
+
+with st.expander('How to read this simulator', expanded=False):
     st.markdown(
         """
 1. Pick one brand-size-store cell.
@@ -64,6 +156,10 @@ def _cells() -> pd.DataFrame:
 cells = _cells()
 
 # ---- Selector cascade ----
+section_header(
+    'Choose context',
+    caption='The simulator works on one product at one store so the economics stay inspectable.',
+)
 sel_col1, sel_col2, sel_col3 = st.columns([1, 1, 1])
 brand = sel_col1.selectbox('Brand', sorted(cells['brand_final'].unique()))
 sizes = sorted(cells.loc[cells['brand_final'] == brand, 'size_oz_rounded'].unique())
@@ -79,16 +175,6 @@ row = cells.loc[
     (cells['size_oz_rounded'] == size) &
     (cells['STORE'] == store)
 ].iloc[0].to_dict()
-
-# ---- Historical average for this product-store ----
-section_header('Historical average for this product-store',
-               caption='Average over all weeks this product has been observed at this store.')
-b1, b2, b3, b4, b5 = st.columns(5)
-b1.metric('Average price', f"${row['mean_p']:.2f}")
-b2.metric('Average unit cost', f"${row['mean_cost']:.2f}", help='Acquisition cost proxy from the dataset')
-b3.metric('Average units / week', f"{row['mean_q']:.1f}")
-b4.metric('Average profit / week', f"${row['baseline_profit']:.0f}")
-b5.metric('Weeks of history', f"{int(row['n_weeks'])}")
 
 # ---- Sidebar: sensitivity controls ----
 def _nearest(grid, target):
@@ -166,24 +252,61 @@ scenario = Scenario(
 cost_eff = float(effective_cost(row['mean_cost'], scenario))
 
 # ---- Candidate sliders ----
-section_header('Candidate price & promo', caption='Move the slider to set the counterfactual price point.')
-
-# Price grid uses *effective* cost so the margin floor moves with the cost shock.
 _grid = make_price_grid(row['p_min'], row['p_max'], cost_eff)
 p_lo, p_hi = float(_grid.min()), float(_grid.max())
 
-s1, s2 = st.columns([2, 1])
-candidate_price = s1.slider(
-    'Candidate price ($)',
-    min_value=round(p_lo, 2), max_value=round(p_hi, 2),
-    value=float(round(min(max(row['mean_p'], p_lo), p_hi), 2)),
-    step=0.05,
-    help=(f'The candidate price stays within a cautious range around the prices '
-          f'this product has actually traded at, and must stay above the margin '
-          f'floor (${cost_eff * MARGIN_FLOOR_RATIO:.2f} = unit cost ${cost_eff:.2f} '
-          f'× {MARGIN_FLOOR_RATIO}).'),
+section_header(
+    'Simulation workbench',
+    caption='Baseline context on the left. Candidate action controls on the right.',
 )
-candidate_promo = s2.toggle('Promo on?', value=bool(round(row['mean_promo'])))
+
+context_col, action_col = st.columns([1, 1.15])
+with context_col:
+    st.markdown('<div class="pe-sim-eyebrow">Selected product-store</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="pe-sim-title">{escape(str(row["brand_final"]))} '
+        f'{row["size_oz_rounded"]:.2f}oz · Store {int(row["STORE"])}</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="pe-sim-stat-grid">'
+        + _stat('Average price', _money(row['mean_p'], 2), f"{int(row['n_weeks'])} weeks of history")
+        + _stat('Average unit cost', _money(row['mean_cost'], 2), 'Dataset acquisition-cost proxy')
+        + _stat('Average units / week', f"{row['mean_q']:,.1f}", 'Observed weekly baseline')
+        + _stat('Average profit / week', _money(row['baseline_profit'], 0), 'Observed baseline profit')
+        + '</div>',
+        unsafe_allow_html=True,
+    )
+
+with action_col:
+    st.markdown('<div class="pe-sim-eyebrow">Candidate action</div>', unsafe_allow_html=True)
+    scenario_label = (
+        status_pill('Baseline scenario', 'neutral')
+        if scenario.is_baseline else
+        status_pill('Stress scenario active', 'warn')
+    )
+    st.markdown(scenario_label, unsafe_allow_html=True)
+    candidate_price = st.slider(
+        'Candidate price ($)',
+        min_value=round(p_lo, 2), max_value=round(p_hi, 2),
+        value=float(round(min(max(row['mean_p'], p_lo), p_hi), 2)),
+        step=0.05,
+        help=(f'The candidate price stays within a cautious range around the prices '
+              f'this product has actually traded at, and must stay above the margin '
+              f'floor (${cost_eff * MARGIN_FLOOR_RATIO:.2f} = unit cost ${cost_eff:.2f} '
+              f'× {MARGIN_FLOOR_RATIO}).'),
+    )
+    candidate_promo = st.toggle('Promo on?', value=bool(round(row['mean_promo'])))
+    st.markdown(
+        f"""
+        <div class="pe-sim-control-note">
+          Price band: <strong>{_money(p_lo, 2)} to {_money(p_hi, 2)}</strong><br>
+          Effective unit cost: <strong>{_money(cost_eff, 2)}</strong><br>
+          Margin floor: <strong>{_money(cost_eff * MARGIN_FLOOR_RATIO, 2)}</strong>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # ---- Predict (model output, then scenario overlay) ----
 q_model = float(predict_q(
@@ -198,18 +321,38 @@ candidate_profit = float(compute_profit(
     candidate_price, candidate_q,
     cost_eff=cost_eff, promo=int(candidate_promo), scenario=scenario,
 ))
+delta_pct = (candidate_profit - row['baseline_profit']) / max(row['baseline_profit'], 1e-6) * 100
 
 # ---- Outputs ----
-section_header('Expected outcomes (under model)', caption='Frozen-model predictions; scenario overlay applied when sidebar controls are not at defaults.')
-o1, o2, o3, o4 = st.columns(4)
-o1.metric('Predicted units / week', f'{candidate_q:.1f}',
-          delta=f"{candidate_q - row['mean_q']:+.1f} vs observed avg")
-o2.metric('Predicted revenue / week', f'${candidate_rev:.0f}',
-          delta=f"${candidate_rev - row['baseline_rev']:+.0f}")
-o3.metric('Predicted profit / week', f'${candidate_profit:.0f}',
-          delta=f"${candidate_profit - row['baseline_profit']:+.0f}")
-delta_pct = (candidate_profit - row['baseline_profit']) / max(row['baseline_profit'], 1e-6) * 100
-o4.metric('Δ profit (%)', f'{delta_pct:+.1f}%')
+section_header(
+    'Outcome preview',
+    caption='Frozen-model prediction; sidebar stress controls are included when active.',
+)
+st.markdown(
+    '<div class="pe-sim-outcome-grid">'
+    + _outcome(
+        'Action price',
+        _money(candidate_price, 2),
+        f"Current {_money(row['mean_p'], 2)} | {_signed_money(candidate_price - row['mean_p'], 2)}",
+    )
+    + _outcome(
+        'Predicted units / week',
+        f'{candidate_q:,.1f}',
+        f"Observed {row['mean_q']:,.1f} | {_signed_number(candidate_q - row['mean_q'], 1)}",
+    )
+    + _outcome(
+        'Predicted revenue / week',
+        _money(candidate_rev, 0),
+        f"Observed {_money(row['baseline_rev'], 0)} | {_signed_money(candidate_rev - row['baseline_rev'], 0)}",
+    )
+    + _outcome(
+        'Predicted profit / week',
+        _money(candidate_profit, 0),
+        f"Observed {_money(row['baseline_profit'], 0)} | {_signed_money(candidate_profit - row['baseline_profit'], 0)} ({delta_pct:+.1f}%)",
+    )
+    + '</div>',
+    unsafe_allow_html=True,
+)
 
 # ---- Scenario warnings ----
 sc_flags = scenario_warnings(scenario, baseline_q=row['mean_q'])
@@ -227,7 +370,7 @@ curve_promo_match = evaluate_curve(
 )
 
 section_header(
-    'Demand & profit curves',
+    'Decision evidence curves',
     caption='Dashed markers show the observed average and your chosen candidate. '
             'These curves come from the demo demand model: rival prices stay fixed '
             'unless you use the sidebar shock, and cost uses the dataset\'s accounting '
@@ -238,10 +381,12 @@ c1.plotly_chart(
     quantity_price_curve(curve_promo_match,
                          baseline_price=row['mean_p'], baseline_q=row['mean_q'],
                          candidate_price=candidate_price, candidate_q=candidate_q),
+    use_container_width=True,
 )
 c2.plotly_chart(
     profit_price_curve(curve_promo_match,
                        baseline_price=row['mean_p'], baseline_profit=row['baseline_profit'],
                        candidate_price=candidate_price, candidate_profit=candidate_profit,
                        cost=cost_eff),
+    use_container_width=True,
 )
