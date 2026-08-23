@@ -16,6 +16,13 @@ PROJECT_BLUE = '#3a78b8'
 PROJECT_GRAY = '#888'
 PROJECT_RED  = '#c0504d'
 PROJECT_GREEN= '#5da651'
+SOFT_BLUE = '#86aeca'
+SOFT_BLUE_LIGHT = '#b7ccd8'
+SOFT_GREEN = '#91b39c'
+SOFT_RED = '#cf8f8b'
+SOFT_GOLD = '#d3b16c'
+SOFT_BORDER = '#d9dee8'
+PLOT_TEXT = '#1f2933'
 
 
 def quantity_price_curve(curve: pd.DataFrame, *, baseline_price: float,
@@ -166,12 +173,16 @@ def screening_funnel(cells_df: pd.DataFrame, top_df: pd.DataFrame,
         y=labels,
         x=values,
         textinfo='value',
-        marker=dict(color=[PROJECT_BLUE, '#6aa6c9', PROJECT_GREEN]),
-        connector=dict(line=dict(color='#d9dee8', width=1)),
+        textfont=dict(color=PLOT_TEXT),
+        marker=dict(
+            color=[SOFT_BLUE, SOFT_BLUE_LIGHT, SOFT_GREEN],
+            line=dict(color='white', width=1),
+        ),
+        connector=dict(line=dict(color=SOFT_BORDER, width=1)),
     ))
     fig.update_layout(
-        title='From panel to launchable test',
-        margin=dict(l=10, r=10, t=42, b=10),
+        title=dict(text='From panel to launchable test', x=0, xanchor='left'),
+        margin=dict(l=10, r=10, t=54, b=18),
         height=310,
         showlegend=False,
     )
@@ -188,11 +199,11 @@ def risk_validation_bars(exp_df: pd.DataFrame) -> go.Figure:
 
     fig = go.Figure()
     stacks = [
-        ('Ready now', 'Validation', ready, PROJECT_GREEN),
-        ('Needs longer test', 'Validation', needs_longer, PROJECT_RED),
-        ('Low risk', 'Risk', low, PROJECT_GREEN),
-        ('Medium risk', 'Risk', medium, '#d49a1d'),
-        ('High risk', 'Risk', high, PROJECT_RED),
+        ('Ready now', 'Validation', ready, SOFT_GREEN),
+        ('Needs longer test', 'Validation', needs_longer, SOFT_RED),
+        ('Low risk', 'Risk', low, SOFT_GREEN),
+        ('Medium risk', 'Risk', medium, SOFT_GOLD),
+        ('High risk', 'Risk', high, SOFT_RED),
     ]
     for name, row, value, color in stacks:
         fig.add_trace(go.Bar(
@@ -200,21 +211,28 @@ def risk_validation_bars(exp_df: pd.DataFrame) -> go.Figure:
             y=[row],
             x=[value],
             orientation='h',
-            marker_color=color,
+            marker=dict(color=color, line=dict(color='white', width=1)),
             text=[value if value else ''],
             textposition='inside',
+            textfont=dict(color=PLOT_TEXT),
             hovertemplate=f'{name}: {value}<extra></extra>',
         ))
 
     fig.update_layout(
-        title='Shortlist readiness',
+        title=dict(text='Shortlist readiness', x=0, xanchor='left'),
         barmode='stack',
         xaxis_title='Top-10 candidates',
         xaxis=dict(range=[0, max(len(exp_df), 1)], dtick=2),
         yaxis=dict(autorange='reversed'),
-        margin=dict(l=10, r=10, t=42, b=10),
-        height=310,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02),
+        margin=dict(l=10, r=10, t=54, b=76),
+        height=340,
+        legend=dict(
+            orientation='h',
+            yanchor='top',
+            y=-0.28,
+            xanchor='left',
+            x=0,
+        ),
     )
     return fig
 
