@@ -88,6 +88,63 @@ def top_recommendations_bar(df: pd.DataFrame, value_col: str = 'profit_lift_abs'
     return fig
 
 
+def candidate_queue_bar(df: pd.DataFrame, value_col: str = 'profit_lift_abs',
+                        title: str = 'Top test priorities') -> go.Figure:
+    """A quieter ranked queue chart for the cockpit page."""
+    queue = df.sort_values(value_col, ascending=False).reset_index(drop=True).copy()
+    queue['rank'] = np.arange(1, len(queue) + 1)
+    labels = [
+        f"#{row['rank']}  {row['brand_final']} {row['size_oz_rounded']:.0f}oz · S{int(row['STORE'])}"
+        for _, row in queue.iterrows()
+    ]
+    colors = [SOFT_BLUE if rank == 1 else '#d8e6ee' for rank in queue['rank']]
+    values = queue[value_col].astype(float)
+    max_value = float(values.max()) if len(values) else 0.0
+
+    fig = go.Figure(go.Bar(
+        x=values,
+        y=labels,
+        orientation='h',
+        marker=dict(color=colors, line=dict(color='white', width=1)),
+        text=[f"${value:,.0f}/wk" for value in values],
+        textposition='outside',
+        cliponaxis=False,
+        customdata=np.stack([
+            queue['brand_final'],
+            queue['size_oz_rounded'],
+            queue['STORE'],
+            queue['mean_p'],
+            queue['opt_price'],
+            queue['opt_hits_upper'],
+        ], axis=-1),
+        hovertemplate=(
+            '<b>%{customdata[0]} %{customdata[1]:.0f}oz · Store %{customdata[2]}</b><br>'
+            'Expected lift: $%{x:.0f}/wk<br>'
+            'Current -> test: $%{customdata[3]:.2f} -> $%{customdata[4]:.2f}<br>'
+            'At price ceiling: %{customdata[5]}<extra></extra>'
+        ),
+    ))
+    fig.update_layout(
+        title=dict(text=title, x=0, xanchor='left'),
+        xaxis_title='Expected weekly profit lift under model',
+        xaxis=dict(
+            tickprefix='$',
+            gridcolor=SOFT_BORDER,
+            zeroline=False,
+            range=[0, max_value * 1.22 if max_value else 1],
+        ),
+        yaxis=dict(
+            autorange='reversed',
+            title='',
+            tickfont=dict(size=11, color=PLOT_TEXT),
+        ),
+        margin=dict(l=160, r=64, t=50, b=38),
+        height=max(320, 25 * len(queue) + 90),
+        showlegend=False,
+    )
+    return fig
+
+
 def candidate_landscape(top_df: pd.DataFrame, exp_df: pd.DataFrame) -> go.Figure:
     """Top candidates by price move, expected lift, and risk status."""
     key_cols = ['brand_final', 'size_oz_rounded', 'STORE']

@@ -14,7 +14,7 @@ from src.simulation import load_cells, load_experiment_candidates, n_per_arm, MA
 from src.optimization import (
     make_price_grid, evaluate_curve, optimize_all_cells, MARGIN_FLOOR_RATIO,
 )
-from src.plots import profit_price_curve, top_recommendations_bar
+from src.plots import candidate_queue_bar, profit_price_curve
 from src.scenario import Scenario, BASELINE, scenario_warnings
 from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header,
@@ -146,7 +146,7 @@ hide_ceiling = st.sidebar.checkbox(
     value=False,
     help='98.5% of combinations want the model maximum — toggle on to see only interior optima.',
 )
-top_n = st.sidebar.slider('Top N to chart', min_value=5, max_value=50, value=15)
+top_n = st.sidebar.slider('Top N to chart', min_value=5, max_value=50, value=10)
 
 # ---- Apply filters ----
 mask = (cells['brand_final'].isin(brands) &
@@ -164,7 +164,8 @@ section_header(
 if len(view) > 0:
     top = view.sort_values('profit_lift_abs', ascending=False).head(top_n)
     st.plotly_chart(
-        top_recommendations_bar(top, title=f'Top {len(top)} candidates by expected weekly profit lift'),
+        candidate_queue_bar(top, title=f'Top {len(top)} test priorities'),
+        use_container_width=True,
     )
 
 # ---- Table ----
