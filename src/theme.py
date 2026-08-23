@@ -42,10 +42,10 @@ PALETTE = {
 
 GITHUB_URL = 'https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine'
 AUTHOR_NAME = 'Li Shen'
-AUTHOR_AFFILIATION = 'Pricing Analytics & Healthcare Product Strategy'
+AUTHOR_AFFILIATION = 'Applied Economist'
 
 SIDEBAR_SECTIONS = [
-    ('Product', [
+    ('Decision Workflow', [
         ('app.py', 'Overview'),
         ('pages/3_Optimize.py', 'Cockpit'),
         ('pages/2_Simulate.py', 'Simulator'),
