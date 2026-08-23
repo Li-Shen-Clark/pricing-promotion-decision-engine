@@ -203,14 +203,3 @@ with st.expander('Technical audit trail', expanded=False):
         `{(REPORTS / "case_study.md").relative_to(PROJECT_ROOT)}`.
         """
     )
-
-with st.expander('Next domain: healthcare pricing and access', expanded=False):
-    st.markdown(
-        """
-| Stage | Focus |
-|---|---|
-| **Current product** | Retail pricing decisions: rank price/promo tests from scanner data. |
-| **Next domain** | Healthcare pricing, reimbursement, payer constraints, patient affordability, and value evidence. |
-| **PM trajectory** | Data-heavy product management for high-stakes decision workflows. |
-"""
-    )
