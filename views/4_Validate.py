@@ -117,33 +117,36 @@ cand = _load()
 n_under = int(cand['underpowered'].sum())
 n_ready = len(cand) - n_under
 
-section_header('Validation snapshot')
+section_header(
+    'Default shortlist check',
+    caption='This snapshot uses the default top-10 plan. Manual sizing changes are evaluated in the calculator below.',
+)
 v1, v2, v3, v4 = st.columns(4)
 v1.metric('Candidates reviewed', f'{len(cand)}')
-v2.metric('Ready under current plan', f'{n_ready}')
-v3.metric('Need longer test', f'{n_under}')
+v2.metric('Ready in default plan', f'{n_ready}')
+v3.metric('Need sizing review', f'{n_under}')
 v4.metric('Randomization unit', 'Store')
 
 exposure_status = (
-    status_pill('Extend test before rollout', 'warn')
-    if n_under else status_pill('Current plan clears power check', 'ok')
+    status_pill('Default plan has exposure gaps', 'warn')
+    if n_under else status_pill('Default plan clears power check', 'ok')
 )
 st.markdown(
     f"""
     <div class="pe-val-panel">
       <div class="pe-val-head">
         <div>
-          <div class="pe-val-title">Validation decision</div>
+          <div class="pe-val-title">Default plan readout</div>
           <div class="pe-val-copy">
-            The shortlist is ready for experiment planning, but most candidates need more exposure
-            before the result should be trusted as a launch decision.
+            The top-10 shortlist starts from a default plan. Use the calculator below to see whether
+            a revised setup, such as more weeks or more stores per group, meets the sizing check.
           </div>
         </div>
         <div>{exposure_status}</div>
       </div>
       <div class="pe-val-grid">
-        {_val_card('Ready under current plan', f'{n_ready} candidates', 'Planned store-weeks meet the power check.')}
-        {_val_card('Need longer test', f'{n_under} candidates', 'Add duration, add stores, or only act on a larger observed effect.')}
+        {_val_card('Ready in default plan', f'{n_ready} candidates', 'Default store-weeks meet the power check.')}
+        {_val_card('Need sizing review', f'{n_under} candidates', 'May clear after adding weeks, adding stores, or targeting a larger detectable effect.')}
         {_val_card('Median required exposure', f"{cand['n_storeweeks_per_arm_at_50pct_MDE_80pct_power'].median():.1f} store-weeks", 'Per group at 50% MDE and 80% power.')}
       </div>
     </div>
