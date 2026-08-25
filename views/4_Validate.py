@@ -1,5 +1,6 @@
 """Page 5 — Validate: candidate test plan + sample size widget."""
 from __future__ import annotations
+from html import escape
 import sys
 from pathlib import Path
 
@@ -12,7 +13,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.simulation import load_experiment_candidates, n_per_arm, read_markdown, REPORTS, MAIN_COEFS
 from src.plots import sample_size_curve
 from src.theme import (
-    apply_page_theme, page_intro, sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header, status_pill,
 )
 
 apply_page_theme()
@@ -24,19 +25,77 @@ sidebar_brand(
 
 page_intro(
     icon='',
-    kicker='Step 03 · How do I confirm it works in real stores?',
-    title='Validate · Plan an A/B test',
+    kicker='Experiment validation',
+    title='Size the test before rollout.',
     tagline=(
-        'Every candidate needs a controlled A/B test before deployment. '
-        'The randomization unit is the store, matching how prices are '
-        'actually set in the chain.'
+        'Turn a shortlisted price action into a test plan with enough evidence '
+        'to trust the result.'
     ),
     chips=[
-        'Top-10 test plan',
-        'Store-level randomization',
-        'Checks the test is long enough',
+        'Top-10 shortlist',
+        'Store randomization',
+        'Power check',
     ],
 )
+
+st.markdown(
+    """
+    <style>
+      .pe-val-panel {
+          border: 1px solid var(--border); border-radius: 8px;
+          background: var(--surface-card); padding: 1rem 1.1rem;
+          margin: 0.4rem 0 1.1rem 0;
+      }
+      .pe-val-head {
+          display: flex; justify-content: space-between; gap: 1rem;
+          align-items: flex-start; margin-bottom: 0.9rem;
+      }
+      .pe-val-title {
+          font-size: 1.12rem; font-weight: 650; color: var(--text);
+          line-height: 1.35;
+      }
+      .pe-val-copy {
+          font-size: 0.94rem; color: var(--text-muted); line-height: 1.5;
+          margin-top: 0.2rem;
+      }
+      .pe-val-grid {
+          display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.7rem;
+      }
+      .pe-val-card {
+          border: 1px solid var(--border); border-radius: 8px;
+          background: var(--surface-2); padding: 0.85rem 0.95rem;
+          min-height: 5.6rem;
+      }
+      .pe-val-card .label {
+          font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;
+      }
+      .pe-val-card .value {
+          font-size: 1.32rem; color: var(--text); font-weight: 700;
+          line-height: 1.2; margin-top: 0.25rem;
+      }
+      .pe-val-card .detail {
+          font-size: 0.86rem; color: var(--text-muted); line-height: 1.45;
+          margin-top: 0.35rem;
+      }
+      @media (max-width: 760px) {
+          .pe-val-head { flex-direction: column; }
+          .pe-val-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def _val_card(label: str, value: str, detail: str) -> str:
+    return (
+        '<div class="pe-val-card">'
+        f'<div class="label">{escape(label)}</div>'
+        f'<div class="value">{escape(value)}</div>'
+        f'<div class="detail">{escape(detail)}</div>'
+        '</div>'
+    )
 
 with st.expander('How to read this page', expanded=False):
     st.markdown(
@@ -55,25 +114,47 @@ def _load() -> pd.DataFrame:
 
 cand = _load()
 n_under = int(cand['underpowered'].sum())
+n_ready = len(cand) - n_under
 
 section_header('Validation snapshot')
-v1, v2, v3 = st.columns(3)
+v1, v2, v3, v4 = st.columns(4)
 v1.metric('Candidates reviewed', f'{len(cand)}')
-v2.metric('Too short to detect', f'{n_under}')
-v3.metric('Randomization unit', 'Store')
+v2.metric('Ready under current plan', f'{n_ready}')
+v3.metric('Need resize', f'{n_under}')
+v4.metric('Randomization unit', 'Store')
+
+resize_status = (
+    status_pill('Resize before rollout', 'warn')
+    if n_under else status_pill('Current plan clears power check', 'ok')
+)
+st.markdown(
+    f"""
+    <div class="pe-val-panel">
+      <div class="pe-val-head">
+        <div>
+          <div class="pe-val-title">Validation decision</div>
+          <div class="pe-val-copy">
+            The shortlist is ready for experiment planning, but most candidates need more exposure
+            before the result should be trusted as a launch decision.
+          </div>
+        </div>
+        <div>{resize_status}</div>
+      </div>
+      <div class="pe-val-grid">
+        {_val_card('Ready under current plan', f'{n_ready} candidates', 'Planned store-weeks meet the power check.')}
+        {_val_card('Need resize', f'{n_under} candidates', 'Add duration, add stores, or only act on a larger observed effect.')}
+        {_val_card('Median required exposure', f"{cand['n_storeweeks_per_arm_at_50pct_MDE_80pct_power'].median():.1f} store-weeks", 'Per group at 50% MDE and 80% power.')}
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---- Top-10 test plan table ----
 section_header(
     'Test plan · Top-10 portfolio candidates',
     caption='Default plan for the shortlisted candidates. Open the table when you want row-level detail.',
 )
-
-if n_under:
-    st.warning(
-        f'**{n_under} of {len(cand)} candidates are too short to detect.** '
-        'The planned test duration is shorter than the model says is needed to '
-        'reliably catch the expected lift.'
-    )
 
 with st.expander('Open top-10 test-plan table', expanded=False):
     val_show_technical = st.toggle('Show technical columns', value=False, key='val_tech',
