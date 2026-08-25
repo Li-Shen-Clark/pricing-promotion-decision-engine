@@ -1,6 +1,7 @@
 """Page 5 — Validate: candidate test plan + sample size widget."""
 from __future__ import annotations
 from html import escape
+from math import ceil, isinf
 import sys
 from pathlib import Path
 
@@ -102,7 +103,7 @@ with st.expander('How to read this page', expanded=False):
         """
 - The table uses the default top-10 candidate set from Optimize.
 - The key question is whether the planned test is long enough to detect the expected lift.
-- The calculator below lets you resize a test for a different noise level or target effect.
+- The calculator below lets you adjust test size for a different noise level or target effect.
 """
     )
 
@@ -120,11 +121,11 @@ section_header('Validation snapshot')
 v1, v2, v3, v4 = st.columns(4)
 v1.metric('Candidates reviewed', f'{len(cand)}')
 v2.metric('Ready under current plan', f'{n_ready}')
-v3.metric('Need resize', f'{n_under}')
+v3.metric('Need longer test', f'{n_under}')
 v4.metric('Randomization unit', 'Store')
 
-resize_status = (
-    status_pill('Resize before rollout', 'warn')
+exposure_status = (
+    status_pill('Extend test before rollout', 'warn')
     if n_under else status_pill('Current plan clears power check', 'ok')
 )
 st.markdown(
@@ -138,11 +139,11 @@ st.markdown(
             before the result should be trusted as a launch decision.
           </div>
         </div>
-        <div>{resize_status}</div>
+        <div>{exposure_status}</div>
       </div>
       <div class="pe-val-grid">
         {_val_card('Ready under current plan', f'{n_ready} candidates', 'Planned store-weeks meet the power check.')}
-        {_val_card('Need resize', f'{n_under} candidates', 'Add duration, add stores, or only act on a larger observed effect.')}
+        {_val_card('Need longer test', f'{n_under} candidates', 'Add duration, add stores, or only act on a larger observed effect.')}
         {_val_card('Median required exposure', f"{cand['n_storeweeks_per_arm_at_50pct_MDE_80pct_power'].median():.1f} store-weeks", 'Per group at 50% MDE and 80% power.')}
       </div>
     </div>
@@ -171,7 +172,7 @@ with st.expander('Open top-10 test-plan table', expanded=False):
         'risk_flag':                                         'Risk',
         'recommended_test_type':                             'Test type',
         'planned_duration_weeks':                            'Planned weeks',
-        'underpowered':                                      'Too short to detect?',
+        'underpowered':                                      'Needs longer test?',
     }
     technical_cols = {
         'promo_status':                                      'Promo',
@@ -194,9 +195,8 @@ with st.expander('Open top-10 test-plan table', expanded=False):
 
 # ---- Sample size widget ----
 section_header(
-    'Sample size calculator',
-    caption='Defaults are drawn from the median candidate above. Change the inputs to size '
-            'the test for a different candidate or a more conservative target.',
+    'Test sizing calculator',
+    caption='Adjust experiment size here: set the evidence threshold, then choose how many weeks and stores each test group gets.',
 )
 
 w1, w2, w3, w4 = st.columns(4)
@@ -222,12 +222,67 @@ power = w4.select_slider('Chance of catching a real lift',
                          help='Chance the test detects a real lift of at least the size above. (1−β)')
 
 n = n_per_arm(sigma, delta, alpha=alpha, power=power)
-r1, r2, r3 = st.columns(3)
+f1, f2 = st.columns(2)
+planned_weeks = f1.number_input(
+    'Planned test weeks',
+    min_value=1,
+    max_value=52,
+    value=int(round(cand['planned_duration_weeks'].median())),
+    step=1,
+    help='Change this when the experiment needs more time before rollout.',
+)
+stores_per_group = f2.number_input(
+    'Stores per group',
+    min_value=1,
+    max_value=500,
+    value=int(round(cand['planned_stores_per_arm'].median())),
+    step=1,
+    help='Change this when the experiment needs more matched stores in each arm.',
+)
+
+planned_storeweeks = planned_weeks * stores_per_group
+storeweek_gap = n - planned_storeweeks
+needed_weeks = n / stores_per_group if stores_per_group else float('inf')
+needed_stores = ceil(n / planned_weeks) if planned_weeks and not isinf(n) else float('inf')
+plan_clears = storeweek_gap <= 0
+plan_status = (
+    status_pill('Plan meets sizing check', 'ok')
+    if plan_clears else status_pill('Increase weeks or stores', 'warn')
+)
+
+st.markdown(
+    f"""
+    <div class="pe-val-panel">
+      <div class="pe-val-head">
+        <div>
+          <div class="pe-val-title">Current test footprint</div>
+          <div class="pe-val-copy">
+            Planned exposure is weeks × stores per group. If it is below the required store-weeks,
+            extend the test or add stores before treating the result as rollout evidence.
+          </div>
+        </div>
+        <div>{plan_status}</div>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+r1, r2, r3, r4 = st.columns(4)
 r1.metric('Required store-weeks per group', f'{n:,.0f}')
-r2.metric('Total store-weeks (both groups)', f'{2*n:,.0f}')
-weeks_at_5_stores = n / 5 if n != float('inf') else float('inf')
-r3.metric('Weeks needed (5 stores per group)',
-          '∞' if weeks_at_5_stores == float('inf') else f'{weeks_at_5_stores:,.1f}')
+r2.metric('Planned store-weeks per group', f'{planned_storeweeks:,.0f}')
+r3.metric(
+    'Gap to required exposure',
+    'Clears' if plan_clears else f'{storeweek_gap:,.0f}',
+    delta='Ready' if plan_clears else 'Add weeks or stores',
+    delta_color='normal' if plan_clears else 'inverse',
+)
+r4.metric(
+    'Needed at current setup',
+    '∞' if isinf(needed_weeks) else f'{needed_weeks:,.1f} weeks',
+    delta='or ∞ stores/group' if isinf(needed_stores) else f'or {needed_stores:,.0f} stores/group',
+    delta_color='off',
+)
 
 with st.expander('Open sample size curve', expanded=False):
     st.plotly_chart(
