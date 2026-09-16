@@ -37,7 +37,7 @@ All models share the same regression sample (rows where the same-brand index is 
 | M2_with_same_brand | -1.786*** (0.021) | +0.723*** (0.018) | +0.231*** (0.018) | +0.423*** (0.004) | 0.7484 |
 
 Stars: * |t|>1.65, ** |t|>1.96, *** |t|>2.58. Cluster-robust SE in parentheses (clustered at brand-size-store).
-- saved /Volumes/外接硬盘/webAPP/pricing/data/processed/cannibalization_model_coefficients.csv
+- saved `data/processed/cannibalization_model_coefficients.csv`
 
 ## 4. Top-brand sub-samples (M3)
 Re-fit M2 separately for the top brands by row count to check whether β_same is driven by one or two large brands.
@@ -72,5 +72,5 @@ Re-fit M2 separately for the top brands by row count to check whether β_same is
 **Limited first-order impact**: β_same is positive and significant but small in magnitude — top-10 adjustment is 2.5% (median, max 4.0%). Document the diagnostic; the MVP optimizer is fit-for-purpose without joint optimization.
 
 ## 7. Artifacts
-- /Volumes/外接硬盘/webAPP/pricing/data/processed/cannibalization_diagnostics.parquet  (2,585,593 rows)
-- /Volumes/外接硬盘/webAPP/pricing/reports/figures/cannibalization_coefficients.png
+- `data/processed/cannibalization_diagnostics.parquet`  (2,585,593 rows; generated locally, not committed)
+- `reports/figures/cannibalization_coefficients.png`
