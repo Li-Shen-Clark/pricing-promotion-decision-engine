@@ -17,7 +17,7 @@ from src.optimization import (
 from src.plots import candidate_queue_bar, profit_price_curve
 from src.scenario import Scenario, BASELINE, scenario_warnings
 from src.theme import (
-    apply_page_theme, page_intro, sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header, format_money,
 )
 
 apply_page_theme()
@@ -199,8 +199,8 @@ with st.expander('Open candidate table', expanded=False):
                     .rename(columns=display_cols)[list(display_cols.values())]
     st.dataframe(view_disp.style.format({
         'Size (oz)':                       '{:.2f}',
-        'Current price':                   '${:.2f}',
-        'Test price':                      '${:.2f}',
+        'Current price':                   lambda value: format_money(value),
+        'Test price':                      lambda value: format_money(value),
         'Expected lift ($/wk)':            '${:.0f}',
         'Observed profit ($/wk)':          '${:.0f}',
         'Expected profit ($/wk)':          '${:.0f}',
@@ -226,9 +226,9 @@ else:
 
     col1, col2 = st.columns([1, 2])
     with col1:
-        st.metric('Current price',          f"${row['mean_p']:.2f}")
-        st.metric('Candidate price',        f"${row['opt_price']:.2f}",
-                  delta=f"${row['opt_price'] - row['mean_p']:+.2f}")
+        st.metric('Current price',          format_money(row['mean_p']))
+        st.metric('Candidate price',        format_money(row['opt_price']),
+                  delta=format_money(row['opt_price'] - row['mean_p'], signed=True))
         st.metric('Promo recommendation',   'on' if row['opt_promo'] else 'off')
         st.metric('Δ profit ($/wk, model)', f"${row['profit_lift_abs']:+.0f}")
         st.metric('Δ profit (%)',           f"{row['profit_lift_pct']:+.0f}%")
@@ -326,12 +326,12 @@ else:
             st.caption('Which constraints did the optimizer hit on this row?')
             diags = [
                 ('Upper price ceiling',    'Yes — at historical max' if row['opt_hits_upper'] else 'No'),
-                ('Margin floor',           f'Yes — at ${margin_floor_price:.2f}' if at_margin_floor else 'No'),
+                ('Margin floor',           f'Yes — at {format_money(margin_floor_price)}' if at_margin_floor else 'No'),
                 ('Inventory cap',          ('Yes — binding' if inv_binding
                                             else 'No' if inv_active
                                             else 'Not active')),
-                ('Outside historical band', ('Yes (above ' + f'${row["p_max"]:.2f})' if above_history
-                                              else 'Yes (below ' + f'${row["p_min"]:.2f})' if below_history
+                ('Outside historical band', ('Yes (above ' + format_money(row['p_max']) + ')' if above_history
+                                              else 'Yes (below ' + format_money(row['p_min']) + ')' if below_history
                                               else 'No')),
                 ('Competitor prices',      'Held fixed' if not comp_shocked
                                             else f'Shocked {scenario.competitor_price_shock:+.0%}'),
@@ -346,7 +346,7 @@ else:
                 st.markdown(
                     f'- **Active scenario** — none (default scenario view)\n'
                     f'- **Default-scenario rank** — #{baseline_rank} of {len(baseline_cells):,}\n'
-                    f'- **Candidate price** — ${row["opt_price"]:.2f}\n'
+                    f'- **Candidate price** — {format_money(row["opt_price"])}\n'
                     f'- **Expected lift** — ${row["profit_lift_abs"]:+.0f} / wk\n'
                     f'- _Move a sidebar slider to stress-test the choice._'
                 )
@@ -360,8 +360,8 @@ else:
                 st.markdown(
                     f'- **Rank shift** — #{baseline_rank} → #{active_rank} '
                     f'({rank_arrow} {abs(rank_delta) if rank_delta else 0})\n'
-                    f'- **Candidate price** — ${baseline_price:.2f} → ${row["opt_price"]:.2f} '
-                    f'(${price_delta:+.2f})\n'
+                    f'- **Candidate price** — {format_money(baseline_price)} → {format_money(row["opt_price"])} '
+                    f'({format_money(price_delta, signed=True)})\n'
                     f'- **Expected lift** — ${baseline_lift:+.0f} → ${row["profit_lift_abs"]:+.0f} / wk '
                     f'(${lift_delta:+.0f})\n'
                     f'- **Still recommended?** — '
@@ -375,10 +375,10 @@ else:
             st.markdown(
                 f'- **Primary metric** — Weekly profit per store\n'
                 f'- **Randomization unit** — Store (or store cluster)\n'
-                f'- **Treatment** — Test price ${row["opt_price"]:.2f}'
+                f'- **Treatment** — Test price {format_money(row["opt_price"])}'
                 + (' + promo on' if row['opt_promo'] else '') + '\n'
-                f'- **Control** — Current price ${row["mean_p"]:.2f}\n'
-                f'- **Guardrails** — ≥40% units drop, margin floor ${margin_floor_price:.2f}, stockout watch\n'
+                f'- **Control** — Current price {format_money(row["mean_p"])}\n'
+                f'- **Guardrails** — ≥40% units drop, margin floor {format_money(margin_floor_price)}, stockout watch\n'
                 f'- **Required sample size** — ~{sample_size_n:,.0f} store-weeks per group '
                 f'_(50% MDE @ 80% power · {sample_source})_\n'
                 f'- _Open the **Validate** page for the full sizing calculator and the test plan markdown._'

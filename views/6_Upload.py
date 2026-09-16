@@ -181,7 +181,7 @@ st.info(
     '**This page does not optimize each uploaded product separately.** It scores '
     'one portfolio-wide price-and-promo action — for example, "raise every price '
     'by 5%" — using the demo model. Per-product candidate prices are produced '
-    'on the **Optimize** page, but only for the demo cereal panel.'
+    'on the **Cockpit** page, but only for the demo cereal panel.'
 )
 a1, a2 = st.columns([2, 1])
 price_change_pct = a1.slider(

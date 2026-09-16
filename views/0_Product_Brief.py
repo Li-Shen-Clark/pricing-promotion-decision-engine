@@ -10,7 +10,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.theme import (
     apply_page_theme, page_intro, insight_row, Insight,
-    sidebar_brand, section_header,
+    sidebar_brand, section_header, safe_page_link,
 )
 
 apply_page_theme()
@@ -66,21 +66,21 @@ insight_row([
 section_header('Reviewer path')
 r1, r2, r3, r4 = st.columns(4)
 with r1:
-    st.markdown('**1. Evidence**')
+    st.markdown('**1. Model Evidence**')
     st.caption('Can we trust the price-response signal enough to use it?')
-    st.page_link('views/1_Evidence.py', label='Open Evidence')
+    safe_page_link('views/1_Evidence.py', 'Open Model Evidence')
 with r2:
-    st.markdown('**2. Optimize**')
+    st.markdown('**2. Cockpit**')
     st.caption('Which actions rise to the top of the test queue?')
-    st.page_link('views/3_Optimize.py', label='Open Optimize')
+    safe_page_link('views/3_Optimize.py', 'Open Cockpit')
 with r3:
     st.markdown('**3. Validate**')
     st.caption('How much test evidence is needed before rollout?')
-    st.page_link('views/4_Validate.py', label='Open Validate')
+    safe_page_link('views/4_Validate.py', 'Open Validate')
 with r4:
-    st.markdown('**4. Boundaries**')
+    st.markdown('**4. Trust & Boundaries**')
     st.caption('What should the product refuse to claim?')
-    st.page_link('views/5_Boundaries.py', label='Open Boundaries')
+    safe_page_link('views/5_Boundaries.py', 'Open Trust & Boundaries')
 
 section_header('Product decisions')
 scope_tab, metrics_tab, roadmap_tab = st.tabs(['MVP Scope', 'Success Metrics', 'Roadmap'])
@@ -90,7 +90,7 @@ with scope_tab:
         """
 | Decision | In this MVP | Why |
 |---|---|---|
-| **User workflow** | Evidence -> Simulate / Optimize -> Validate -> Boundaries | Mirrors how a team should move from analysis to a test decision. |
+| **User workflow** | Model Evidence -> Simulator / Cockpit -> Validation -> Trust & Boundaries | Mirrors how a team should move from analysis to a test decision. |
 | **Recommendation type** | Ranked test candidates | Avoids pretending the model can safely auto-deploy prices. |
 | **Model choice** | Interpretable fixed-effects demand model | Easier for business reviewers to audit than a black-box forecast. |
 | **Validation** | Store-level A/B test sizing | Keeps every action tied to a launch decision rule. |

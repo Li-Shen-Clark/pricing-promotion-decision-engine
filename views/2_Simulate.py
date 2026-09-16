@@ -20,6 +20,7 @@ from src.scenario import (
 )
 from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header, status_pill,
+    format_money,
 )
 
 apply_page_theme()
@@ -103,12 +104,11 @@ st.markdown(
 
 
 def _money(value: float, digits: int = 0) -> str:
-    return f"${value:,.{digits}f}"
+    return format_money(value, digits)
 
 
 def _signed_money(value: float, digits: int = 0) -> str:
-    sign = '+' if value >= 0 else '-'
-    return f"{sign}${abs(value):,.{digits}f}"
+    return format_money(value, digits, signed=True)
 
 
 def _signed_number(value: float, digits: int = 1) -> str:
@@ -353,6 +353,13 @@ st.markdown(
     + '</div>',
     unsafe_allow_html=True,
 )
+if scenario.is_baseline:
+    st.caption(
+        'Baseline note: the simulator recomputes outcomes from the fitted demand curve '
+        'at the displayed price step, so predicted profit can differ slightly from the '
+        'observed weekly baseline. Treat small gaps as model-fit/rounding noise, not as '
+        'a data error.'
+    )
 
 # ---- Scenario warnings ----
 sc_flags = scenario_warnings(scenario, baseline_q=row['mean_q'])

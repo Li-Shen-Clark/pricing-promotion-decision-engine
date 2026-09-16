@@ -8,6 +8,7 @@ the top; downstream renders use ``page_intro``,
 """
 from __future__ import annotations
 from dataclasses import dataclass
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Iterable, Optional
 
 import streamlit as st
@@ -311,6 +312,25 @@ def _escape(text: str) -> str:
                 .replace('>', '&gt;'))
 
 
+def format_money(value: float, digits: int = 2, *, signed: bool = False) -> str:
+    """Format currency with standard display rounding across Streamlit views."""
+    quant = Decimal('1') if digits == 0 else Decimal('1').scaleb(-digits)
+    amount = Decimal(str(value)).quantize(quant, rounding=ROUND_HALF_UP)
+    if signed:
+        sign = '+' if amount >= 0 else '-'
+        amount = abs(amount)
+        return f'{sign}${amount:,.{digits}f}'
+    return f'${amount:,.{digits}f}'
+
+
+def safe_page_link(path: str, label: str) -> None:
+    """Render a page link, with a harmless fallback for standalone page tests."""
+    try:
+        st.page_link(path, label=label)
+    except KeyError:
+        st.markdown(f'<div class="pe-nav">{_escape(label)}</div>', unsafe_allow_html=True)
+
+
 def page_intro(*, kicker: str, title: str, tagline: str,
                chips: Optional[Iterable[str]] = None,
                icon: Optional[str] = None) -> None:
@@ -430,13 +450,7 @@ def sidebar_brand(*, name: str, tag: str,
                 unsafe_allow_html=True,
             )
             for path, label in pages:
-                try:
-                    st.page_link(path, label=label)
-                except KeyError:
-                    st.markdown(
-                        f'<div class="pe-nav">{_escape(label)}</div>',
-                        unsafe_allow_html=True,
-                    )
+                safe_page_link(path, label)
         st.markdown(
             f"""
             <div class="pe-sidebar-footer">

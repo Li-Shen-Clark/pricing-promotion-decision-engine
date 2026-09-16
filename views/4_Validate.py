@@ -15,6 +15,7 @@ from src.simulation import load_experiment_candidates, n_per_arm, read_markdown,
 from src.plots import sample_size_curve
 from src.theme import (
     apply_page_theme, page_intro, sidebar_brand, section_header, status_pill,
+    format_money,
 )
 
 apply_page_theme()
@@ -101,7 +102,7 @@ def _val_card(label: str, value: str, detail: str) -> str:
 with st.expander('How to read this page', expanded=False):
     st.markdown(
         """
-- The table uses the default top-10 candidate set from Optimize.
+- The table uses the default top-10 candidate set from Cockpit.
 - The key question is whether the planned test is long enough to detect the expected lift.
 - The calculator below lets you adjust test size for a different noise level or target effect.
 """
@@ -128,7 +129,7 @@ v3.metric('Need sizing review', f'{n_under}')
 v4.metric('Randomization unit', 'Store')
 
 exposure_status = (
-    status_pill('Default plan has exposure gaps', 'warn')
+    status_pill('Default plan needs sizing review', 'note')
     if n_under else status_pill('Default plan clears power check', 'ok')
 )
 st.markdown(
@@ -188,8 +189,8 @@ with st.expander('Open top-10 test-plan table', expanded=False):
     view = cand.rename(columns=display_cols)[list(display_cols.values())]
     st.dataframe(view.style.format({
         'Size (oz)':                            '{:.2f}',
-        'Current price':                        '${:.2f}',
-        'Test price':                           '${:.2f}',
+        'Current price':                        lambda value: format_money(value),
+        'Test price':                           lambda value: format_money(value),
         'Observed profit ($/wk)':               '${:.0f}',
         'Expected lift ($/wk)':                 '${:+.0f}',
         'Weekly profit noise ($)':              '${:.0f}',
@@ -199,7 +200,7 @@ with st.expander('Open top-10 test-plan table', expanded=False):
 # ---- Sample size widget ----
 section_header(
     'Test sizing calculator',
-    caption='Adjust experiment size here: set the evidence threshold, then choose how many weeks and stores each test group gets.',
+    caption='Defaults start with an 8-week footprint sized to clear the median requirement. Lower stores, raise power, or shrink the detectable lift to see when the plan breaks.',
 )
 
 w1, w2, w3, w4 = st.columns(4)
@@ -225,12 +226,14 @@ power = w4.select_slider('Chance of catching a real lift',
                          help='Chance the test detects a real lift of at least the size above. (1−β)')
 
 n = n_per_arm(sigma, delta, alpha=alpha, power=power)
+default_weeks = int(round(cand['planned_duration_weeks'].median()))
+default_stores = min(500, max(1, ceil(n / default_weeks))) if not isinf(n) else 1
 f1, f2 = st.columns(2)
 planned_weeks = f1.number_input(
     'Planned test weeks',
     min_value=1,
     max_value=52,
-    value=int(round(cand['planned_duration_weeks'].median())),
+    value=default_weeks,
     step=1,
     help='Change this when the experiment needs more time before rollout.',
 )
@@ -238,7 +241,7 @@ stores_per_group = f2.number_input(
     'Stores per group',
     min_value=1,
     max_value=500,
-    value=int(round(cand['planned_stores_per_arm'].median())),
+    value=default_stores,
     step=1,
     help='Change this when the experiment needs more matched stores in each arm.',
 )
@@ -291,6 +294,7 @@ with st.expander('Open sample size curve', expanded=False):
     st.plotly_chart(
         sample_size_curve(sigma=float(sigma),
                           baseline_profit=float(round(cand['baseline_profit'].median(), 0))),
+        config={'displayModeBar': False},
     )
 
 # ---- A/B test plan markdown ----

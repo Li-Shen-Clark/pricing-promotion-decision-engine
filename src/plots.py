@@ -11,6 +11,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from .simulation import n_per_arm
+from .theme import format_money
 
 PROJECT_BLUE = '#3a78b8'
 PROJECT_GRAY = '#888'
@@ -113,14 +114,14 @@ def candidate_queue_bar(df: pd.DataFrame, value_col: str = 'profit_lift_abs',
             queue['brand_final'],
             queue['size_oz_rounded'],
             queue['STORE'],
-            queue['mean_p'],
-            queue['opt_price'],
+            queue['mean_p'].map(format_money),
+            queue['opt_price'].map(format_money),
             queue['opt_hits_upper'],
         ], axis=-1),
         hovertemplate=(
             '<b>%{customdata[0]} %{customdata[1]:.0f}oz · Store %{customdata[2]}</b><br>'
             'Expected lift: $%{x:.0f}/wk<br>'
-            'Current -> test: $%{customdata[3]:.2f} -> $%{customdata[4]:.2f}<br>'
+            'Current -> test: %{customdata[3]} -> %{customdata[4]}<br>'
             'At price ceiling: %{customdata[5]}<extra></extra>'
         ),
     ))
@@ -181,8 +182,8 @@ def candidate_landscape(top_df: pd.DataFrame, exp_df: pd.DataFrame) -> go.Figure
                 sub['brand_final'],
                 sub['size_oz_rounded'],
                 sub['STORE'],
-                sub['mean_p'],
-                sub['opt_price'],
+                sub['mean_p'].map(format_money),
+                sub['opt_price'].map(format_money),
                 sub['underpowered'],
                 sub['recommended_test_type'],
             ], axis=-1),
@@ -190,7 +191,7 @@ def candidate_landscape(top_df: pd.DataFrame, exp_df: pd.DataFrame) -> go.Figure
                 '<b>%{customdata[0]} %{customdata[1]:.0f}oz · Store %{customdata[2]}</b><br>'
                 'Price move: %{x:.1f}%<br>'
                 'Expected lift: $%{y:.0f}/wk<br>'
-                'Current -> test: $%{customdata[3]:.2f} -> $%{customdata[4]:.2f}<br>'
+                'Current -> test: %{customdata[3]} -> %{customdata[4]}<br>'
                 'Needs longer test: %{customdata[5]}<br>'
                 'Test type: %{customdata[6]}<extra></extra>'
             ),

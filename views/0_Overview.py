@@ -17,7 +17,8 @@ from src.plots import (
     top_recommendations_bar,
 )
 from src.theme import (
-    apply_page_theme, page_intro, sidebar_brand, section_header,
+    apply_page_theme, page_intro, sidebar_brand, section_header, format_money,
+    safe_page_link,
 )
 
 apply_page_theme()
@@ -65,12 +66,16 @@ section_header(
 )
 visual_left, visual_right = st.columns([1.8, 1])
 with visual_left:
-    st.plotly_chart(candidate_landscape(top_df, exp_df), use_container_width=True)
+    st.plotly_chart(
+        candidate_landscape(top_df, exp_df),
+        use_container_width=True,
+        config={'displayModeBar': False},
+    )
 
 with visual_right:
     m1, m2 = st.columns(2)
-    m1.metric('Current price', f"${best['mean_p']:.2f}")
-    m2.metric('Test price', f"${best['opt_price']:.2f}")
+    m1.metric('Current price', format_money(best['mean_p']))
+    m2.metric('Test price', format_money(best['opt_price']))
     m3, m4 = st.columns(2)
     m3.metric('Expected lift', f"${best['profit_lift_abs']:.0f}/wk")
     m4.metric(
@@ -89,9 +94,9 @@ with visual_right:
 - **Next step:** {test_type.replace('_', ' ')}
 """
     )
-    st.page_link('views/3_Optimize.py', label='Open Cockpit')
-    st.page_link('views/4_Validate.py', label='Validate')
-    st.page_link('views/0_Product_Brief.py', label='Brief')
+    safe_page_link('views/3_Optimize.py', 'Open Cockpit')
+    safe_page_link('views/4_Validate.py', 'Validate')
+    safe_page_link('views/0_Product_Brief.py', 'Brief')
 
 # ---- Model evidence (collapsed) ----
 with st.expander('Why we trust the ranking', expanded=False):
@@ -102,8 +107,8 @@ with st.expander('Why we trust the ranking', expanded=False):
         'first-stage F ≫ 10. Decision rule says **Robust OLS**.\n'
         '- **98.5% of cells point to the upper price band** — read this as '
         'test-prioritization signal, not as a deployment instruction.\n\n'
-        'Full evidence on the **Evidence** page; what the model can\'t claim '
-        'on **Boundaries**.'
+        'Full evidence on the **Model Evidence** page; what the model can\'t claim '
+        'on **Trust & Boundaries**.'
     )
 
 # ---- Pipeline snapshot ----
@@ -161,8 +166,8 @@ with st.expander('Open top-10 candidate table', expanded=False):
     top_view = top_df.rename(columns=display_cols)[list(display_cols.values())]
     st.dataframe(top_view.style.format({
         'Size (oz)':                       '{:.2f}',
-        'Current price ($)':               '{:.2f}',
-        'Test price ($)':                  '{:.2f}',
+        'Current price ($)':               lambda value: format_money(value),
+        'Test price ($)':                  lambda value: format_money(value),
         'Expected lift ($/wk)':            '${:.0f}',
         'Observed units/wk':               '{:.1f}',
         'Test units/wk':                   '{:.1f}',
