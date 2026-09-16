@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
+from .formatting import format_money
 from .simulation import n_per_arm
-from .theme import format_money
 
 PROJECT_BLUE = '#3a78b8'
 PROJECT_GRAY = '#888'

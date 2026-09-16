@@ -8,12 +8,13 @@ the top; downstream renders use ``page_intro``,
 """
 from __future__ import annotations
 from dataclasses import dataclass
-from decimal import Decimal, ROUND_HALF_UP
 from typing import Iterable, Optional
 
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.io as pio
+
+from .formatting import format_money
 
 
 # ---------------------------------------------------------------------------
@@ -310,17 +311,6 @@ def _escape(text: str) -> str:
     return (text.replace('&', '&amp;')
                 .replace('<', '&lt;')
                 .replace('>', '&gt;'))
-
-
-def format_money(value: float, digits: int = 2, *, signed: bool = False) -> str:
-    """Format currency with standard display rounding across Streamlit views."""
-    quant = Decimal('1') if digits == 0 else Decimal('1').scaleb(-digits)
-    amount = Decimal(str(value)).quantize(quant, rounding=ROUND_HALF_UP)
-    if signed:
-        sign = '+' if amount >= 0 else '-'
-        amount = abs(amount)
-        return f'{sign}${amount:,.{digits}f}'
-    return f'${amount:,.{digits}f}'
 
 
 def safe_page_link(path: str, label: str) -> None:
