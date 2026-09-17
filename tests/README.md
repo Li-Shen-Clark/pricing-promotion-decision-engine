@@ -1,5 +1,11 @@
 # Tests
 
+Install the development dependencies before running the suite in a fresh environment:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 ```bash
 pytest                    # full suite (~3 s)
 pytest -m "not real_data" # cheap unit tests only (~0.5 s; no parquet I/O)
