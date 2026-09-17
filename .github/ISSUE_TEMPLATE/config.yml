@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Open the live demo
+    url: https://pricing-promotion-decision-engine.streamlit.app/
+    about: Reproduce the workflow in the deployed application before filing feedback.

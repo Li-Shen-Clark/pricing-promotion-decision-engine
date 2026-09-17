@@ -148,3 +148,16 @@ The five small runtime files stay in regular git history, so the deploy slug pul
 - **No background jobs.** Notebook 07 runs locally only — its outputs are checked into the slug as static artifacts.
 
 These are intentional MVP scope cuts, not bugs. They are listed in [`views/5_Boundaries.py`](../views/5_Boundaries.py) for the user-facing version.
+
+---
+
+## 7. Post-deploy checks
+
+Two GitHub Actions workflows provide the release safety net:
+
+- **CI** (`.github/workflows/ci.yml`) runs the syntax check and the full test suite on pushes to `main`, pull requests, and manual dispatches.
+- **Production monitor** (`.github/workflows/production-monitor.yml`) opens an anonymous Streamlit session every six hours. It retries transient failures, opens or updates one deduplicated GitHub issue when the app is unavailable, and closes that incident after recovery. It can also be run manually from the Actions tab.
+
+The six-hour cadence checks real availability without continuously keeping the free-tier demo awake. GitHub may delay scheduled workflows during busy periods, and scheduled workflows in public repositories can be disabled after prolonged repository inactivity; the manual dispatch remains available for release checks.
+
+The shared sidebar links to a structured GitHub Issue form at `.github/ISSUE_TEMPLATE/feedback.yml`. The form explicitly asks users not to submit confidential, personal, or proprietary data.

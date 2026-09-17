@@ -1,0 +1,64 @@
+name: Product feedback
+description: Share what worked, what was unclear, or what would make the pricing workflow more useful.
+title: '[Feedback]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying the Pricing & Promotion Decision Engine. Please do not include confidential, personal, or proprietary data.
+
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: What were you trying to do?
+      options:
+        - Review the ranked candidate queue
+        - Simulate a price or promotion change
+        - Design an A/B validation test
+        - Upload and score sample data
+        - Review the model evidence or limitations
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: experience
+    attributes:
+      label: What happened?
+      description: Tell us what worked, where you became uncertain, or where the workflow stopped you.
+      placeholder: I expected ... but instead ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: clarity
+    attributes:
+      label: How clear was the recommended next step?
+      options:
+        - Very clear
+        - Mostly clear
+        - Somewhat unclear
+        - Very unclear
+        - I did not reach a recommendation
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: What would make this more useful?
+      placeholder: A comparison, export, explanation, additional constraint, or other improvement...
+
+  - type: input
+    id: context
+    attributes:
+      label: Relevant page or candidate (optional)
+      placeholder: e.g. Cockpit, Simulator, Kellogg's 15oz · Store 102
+
+  - type: checkboxes
+    id: data-safety
+    attributes:
+      label: Data safety
+      options:
+        - label: I have not included confidential, personal, or proprietary data.
+          required: true

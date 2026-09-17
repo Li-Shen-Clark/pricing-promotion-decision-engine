@@ -43,6 +43,7 @@ PALETTE = {
 }
 
 GITHUB_URL = 'https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine'
+FEEDBACK_URL = f'{GITHUB_URL}/issues/new?template=feedback.yml'
 AUTHOR_NAME = 'Li Shen'
 AUTHOR_AFFILIATION = 'Applied Economist · Pricing & Decision Science'
 
@@ -275,6 +276,14 @@ def _css() -> str:
       section[data-testid="stSidebar"] .pe-sidebar-footer a:hover {{
           text-decoration: underline;
       }}
+      section[data-testid="stSidebar"] .pe-feedback-link {{
+          display: inline-block;
+          margin-top: 0.65rem;
+          padding: 0.36rem 0.62rem;
+          border: 1px solid var(--brand);
+          border-radius: 6px;
+          background: var(--surface-card);
+      }}
 
       /* Make Streamlit's native alerts feel less shouty when we still use them */
       [data-testid="stAlert"] {{ border-radius: 8px; }}
@@ -450,6 +459,11 @@ def sidebar_brand(*, name: str, tag: str,
               <div style="margin-top:0.45rem;">
                 <a href="{GITHUB_URL}" target="_blank" rel="noopener noreferrer">
                   GitHub repository ↗
+                </a>
+              </div>
+              <div>
+                <a class="pe-feedback-link" href="{FEEDBACK_URL}" target="_blank" rel="noopener noreferrer">
+                  Share product feedback ↗
                 </a>
               </div>
             </div>

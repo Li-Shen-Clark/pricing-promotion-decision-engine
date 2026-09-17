@@ -3,6 +3,10 @@
 > **Live demo →** https://pricing-promotion-decision-engine.streamlit.app/  
 > **Stack:** Python · Streamlit · `linearmodels` · `scipy` · `pandas` · `matplotlib` · `plotly`
 
+[![CI](https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine/actions/workflows/ci.yml)
+[![Production monitor](https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine/actions/workflows/production-monitor.yml/badge.svg)](https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine/actions/workflows/production-monitor.yml)
+[Share product feedback](https://github.com/Li-Shen-Clark/pricing-promotion-decision-engine/issues/new?template=feedback.yml)
+
 A deployed decision-support web app that turns 4.65M weekly retail scanner observations into a **ranked list of price and promotion changes worth A/B testing**. Demand model is IV-tested within 3% of OLS; every recommendation is paired with a powered, store-level test plan and a constraint diagnostic. Built on the Dominick's Finer Foods cereal panel and framed as a product-management case study for pricing decision tools.
 
 ![Pricing Engine — what the model says, how robust it is, and how it would be tested](reports/figures/readme_hero.png)
@@ -257,4 +261,4 @@ streamlit run app.py
 1. Extend the framework into a healthcare pricing and access decision engine.
 2. Add payer constraints, reimbursement logic, patient affordability, and value-evidence inputs.
 3. Model competitor reaction and stockpiling / inventory pull-forward as later pricing extensions.
-4. Add launch-readiness artifacts: product requirements, adoption metrics, and user feedback notes.
+4. Run the first user-feedback cycle and turn the monitoring/feedback signals into adoption metrics and a focused v1.1 backlog.

@@ -1,0 +1,103 @@
+name: Production monitor
+
+on:
+  schedule:
+    # Four checks per day without continuously keeping the free demo awake.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: production-monitor
+  cancel-in-progress: false
+
+jobs:
+  availability:
+    name: Check deployed app
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      APP_URL: https://pricing-promotion-decision-engine.streamlit.app/
+      ISSUE_TITLE: '[monitor] Production app unavailable'
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check anonymous app session
+        id: health
+        shell: bash
+        run: |
+          cookie_jar="$(mktemp)"
+          response_body="$(mktemp)"
+          trap 'rm -f "$cookie_jar" "$response_body"' EXIT
+
+          if curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --cookie "$cookie_jar" \
+            --cookie-jar "$cookie_jar" \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            --max-redirs 10 \
+            --max-time 60 \
+            --user-agent 'pricing-engine-production-monitor/1.0' \
+            --output "$response_body" \
+            "$APP_URL" \
+            && grep -qi 'streamlit' "$response_body"; then
+            echo 'status=healthy' >> "$GITHUB_OUTPUT"
+          else
+            echo 'status=unhealthy' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Close an existing incident after recovery
+        if: steps.health.outputs.status == 'healthy'
+        shell: bash
+        run: |
+          issue_number="$(
+            gh issue list \
+              --repo "$GITHUB_REPOSITORY" \
+              --state open \
+              --search '"[monitor] Production app unavailable" in:title' \
+              --json number,title \
+              --jq '.[] | select(.title == "[monitor] Production app unavailable") | .number' \
+              | head -n 1
+          )"
+
+          if [[ -n "$issue_number" ]]; then
+            gh issue close "$issue_number" \
+              --repo "$GITHUB_REPOSITORY" \
+              --comment "Recovered at $(date -u +'%Y-%m-%d %H:%M UTC'). [Workflow run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)."
+          fi
+
+      - name: Open or update an incident on failure
+        if: steps.health.outputs.status == 'unhealthy'
+        shell: bash
+        run: |
+          issue_number="$(
+            gh issue list \
+              --repo "$GITHUB_REPOSITORY" \
+              --state open \
+              --search '"[monitor] Production app unavailable" in:title' \
+              --json number,title \
+              --jq '.[] | select(.title == "[monitor] Production app unavailable") | .number' \
+              | head -n 1
+          )"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          message="The scheduled availability check could not complete an anonymous Streamlit session for $APP_URL at $(date -u +'%Y-%m-%d %H:%M UTC'). [Inspect the workflow run]($run_url)."
+
+          if [[ -n "$issue_number" ]]; then
+            gh issue comment "$issue_number" --repo "$GITHUB_REPOSITORY" --body "$message"
+          else
+            gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$ISSUE_TITLE" \
+              --body "$message"
+          fi
+
+          echo 'Production availability check failed.' >&2
+          exit 1
