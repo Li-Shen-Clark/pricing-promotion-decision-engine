@@ -117,6 +117,9 @@ def test_promo_not_in_zero_one_dropped():
 def test_promo_string_truthy_coerces():
     """The validator should accept common bool-like strings ('yes', 'true', '1')."""
     df = pd.DataFrame([_good_row(promo='yes'), _good_row(promo='no'), _good_row(promo='true')])
+    # pandas 3.x infers a dedicated string dtype by default; make that behavior
+    # explicit so the test protects both pandas 2.x and 3.x environments.
+    df['promo'] = df['promo'].astype('string')
     rep = validate(df)
     assert rep.ok is True
     assert rep.n_rows_out == 3

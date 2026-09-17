@@ -114,10 +114,13 @@ def _coerce_types(df: pd.DataFrame) -> pd.DataFrame:
         if dtype is float:
             df[col] = pd.to_numeric(df[col], errors='coerce')
         elif dtype is int:
-            if df[col].dtype == object:
-                df[col] = (df[col].astype(str).str.strip().str.lower()
-                                  .map(_BOOL_MAP))
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+            # Normalize bool-like text regardless of whether pandas inferred
+            # ``object`` (pandas 2.x) or the dedicated string dtype (3.x).
+            # Numeric values remain valid through the fallback conversion.
+            normalized = df[col].astype('string').str.strip().str.lower()
+            bool_like = normalized.map(_BOOL_MAP)
+            numeric = pd.to_numeric(df[col], errors='coerce')
+            df[col] = bool_like.where(bool_like.notna(), numeric)
         else:  # str
             df[col] = df[col].astype(str).str.strip()
     for col, dtype in OPTIONAL_COLUMNS.items():
